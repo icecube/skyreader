@@ -1,5 +1,13 @@
 """Public init."""
 
+from . import scan_result  # noqa: F401
+from .scan_result import SkyScanResult  # noqa: F401
+
+__all__ = [
+    "scan_result",
+    "SkyScanResult",
+]
+
 # version is a human-readable version number.
 
 # version_info is a four-tuple for programmatic comparison. The first
