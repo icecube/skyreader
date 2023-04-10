@@ -1,9 +1,10 @@
 """Public init."""
 
-from . import result  # noqa: F401
-from .scan_result import SkyScanResult  # noqa: F401
+from . import plot, result  # noqa: F401
+from .result import SkyScanResult  # noqa: F401
 
 __all__ = [
+    "plot",
     "result",
     "SkyScanResult",
 ]
