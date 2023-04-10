@@ -74,11 +74,6 @@ jobs:
         run: |
           pytest -vvv tests/unit
 
-      - name: Dump logs
-        if: always()
-        run: |
-          cat pytest.logs
-
   release:
     # only run on main/master/default
     if: format('refs/heads/{0}', github.event.repository.default_branch) == github.ref
