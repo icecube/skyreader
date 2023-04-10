@@ -8,3 +8,5 @@ def test_skyreader_imports() -> None:
     """Test importing from 'skyreader'."""
     assert hasattr(skyreader, "result")
     assert hasattr(skyreader, "SkyScanResult")
+    assert hasattr(skyreader, "scripts")
+    assert hasattr(skyreader, "plot")
