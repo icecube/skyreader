@@ -1,10 +1,10 @@
 """Public init."""
 
-from . import scan_result  # noqa: F401
+from . import result  # noqa: F401
 from .scan_result import SkyScanResult  # noqa: F401
 
 __all__ = [
-    "scan_result",
+    "result",
     "SkyScanResult",
 ]
 
