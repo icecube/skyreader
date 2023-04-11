@@ -98,4 +98,4 @@ jobs:
         git_committer_email: ${{ env.BOT_EMAIL }}
         github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         repository_username: __token__
-        repository_password: ${{ secrets.PYPI_TOKEN }}
+        repository_password: ${{ secrets.WIPAC_PYPI_TOKEN }}
