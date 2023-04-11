@@ -7,6 +7,10 @@ concurrency:
   # don't cancel on main/master/default
   cancel-in-progress: ${{ format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}
 
+env:
+  BOT_NAME: wipacdevbot
+  BOT_EMAIL: developers@icecube.wisc.edu
+
 jobs:
 
   flake8:
@@ -42,6 +46,8 @@ jobs:
         uses: WIPACrepo/wipac-dev-py-setup-action@v1.14
         with:
           base-keywords: IceCube
+          git_committer_name: ${{ env.BOT_NAME }}
+          git_committer_email: ${{ env.BOT_EMAIL }}
 
   py-versions:
     runs-on: ubuntu-latest
@@ -88,6 +94,8 @@ jobs:
     - name: Python Semantic Release
       uses: python-semantic-release/python-semantic-release@master
       with:
+        git_committer_name: ${{ env.BOT_NAME }}
+        git_committer_email: ${{ env.BOT_EMAIL }}
         github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         repository_username: __token__
         repository_password: ${{ secrets.PYPI_TOKEN }}
