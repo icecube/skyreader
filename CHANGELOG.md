@@ -1,0 +1,9 @@
+# Changelog
+
+<!--next-version-placeholder-->
+
+## v0.0.1 (2023-04-13)
+### Other
+* <bot> update requirements-tests.txt ([`98d2751`](https://github.com/icecube/skyreader/commit/98d2751442b8a82d9e2bb57712d30275620bfcd9))
+* Package Infrastructure ([#3](https://github.com/icecube/skyreader/issues/3)) ([`d249bd9`](https://github.com/icecube/skyreader/commit/d249bd9abc20843c0d819abd6625ca3888f3d1e4))
+* Initial commit ([`f928361`](https://github.com/icecube/skyreader/commit/f928361e5f8d0fec325f5848b5c1d41c04388ef5))
