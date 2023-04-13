@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.0.2 (2023-04-13)
+### Other
+* <bot> update setup.cfg ([`2a6ab5c`](https://github.com/icecube/skyreader/commit/2a6ab5c2ac89b9ef3ad828d62ef932e75e0d3970))
+
 ## v0.0.1 (2023-04-13)
 ### Other
 * <bot> update requirements-tests.txt ([`98d2751`](https://github.com/icecube/skyreader/commit/98d2751442b8a82d9e2bb57712d30275620bfcd9))
