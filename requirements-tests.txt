@@ -14,7 +14,7 @@ idna==3.4
     # via requests
 iniconfig==2.0.0
     # via pytest
-packaging==23.0
+packaging==23.1
     # via pytest
 pluggy==1.0.0
     # via pytest
