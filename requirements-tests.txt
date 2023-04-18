@@ -5,7 +5,9 @@
 #    pip-compile --extra=tests --output-file=requirements-tests.txt
 #
 astropy==5.2.2
-    # via healpy
+    # via
+    #   healpy
+    #   icecube-skyreader (setup.py)
 certifi==2022.12.7
     # via requests
 charset-normalizer==3.1.0
@@ -27,7 +29,11 @@ iniconfig==2.0.0
 kiwisolver==1.4.4
     # via matplotlib
 matplotlib==3.7.1
-    # via healpy
+    # via
+    #   healpy
+    #   icecube-skyreader (setup.py)
+meander==0.0.3
+    # via icecube-skyreader (setup.py)
 numpy==1.24.2
     # via
     #   astropy
@@ -35,6 +41,7 @@ numpy==1.24.2
     #   healpy
     #   icecube-skyreader (setup.py)
     #   matplotlib
+    #   pandas
     #   pyerfa
     #   scipy
 packaging==23.1
@@ -42,6 +49,8 @@ packaging==23.1
     #   astropy
     #   matplotlib
     #   pytest
+pandas==2.0.0
+    # via icecube-skyreader (setup.py)
 pillow==9.5.0
     # via matplotlib
 pluggy==1.0.0
@@ -57,7 +66,11 @@ pytest==7.3.1
 pytest-mock==3.10.0
     # via icecube-skyreader (setup.py)
 python-dateutil==2.8.2
-    # via matplotlib
+    # via
+    #   matplotlib
+    #   pandas
+pytz==2023.3
+    # via pandas
 pyyaml==6.0
     # via astropy
 requests==2.28.2
@@ -70,6 +83,8 @@ tomli==2.0.1
     # via pytest
 typing-extensions==4.5.0
     # via wipac-dev-tools
+tzdata==2023.3
+    # via pandas
 urllib3==1.26.15
     # via requests
 wipac-dev-tools==1.6.15
