@@ -4,7 +4,7 @@
 # fmt: off
 # pylint: skip-file
 # mypy: ignore-errors
-
+# flake8: noqa
 
 import io
 import itertools as it
