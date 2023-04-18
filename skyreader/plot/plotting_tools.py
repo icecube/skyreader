@@ -1,6 +1,7 @@
 """Plotting tools."""
 
 # fmt: off
+# flake8: noqa
 
 import astropy.io.fits as pyfits  # type: ignore[import]
 import healpy  # type: ignore[import]
