@@ -1,11 +1,12 @@
 """Public init."""
 
-from . import plot, result  # noqa: F401
+from . import plot  # noqa: F401
+from .event_metadata import EventMetadata  # noqa: F401
 from .result import SkyScanResult  # noqa: F401
 
 __all__ = [
+    "EventMetadata",
     "plot",
-    "result",
     "SkyScanResult",
 ]
 
