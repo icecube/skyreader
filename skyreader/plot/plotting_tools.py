@@ -3,19 +3,25 @@
 # fmt: off
 # flake8: noqa
 
-import astropy.io.fits as pyfits  # type: ignore[import]
 import healpy  # type: ignore[import]
-import matplotlib  # type: ignore[import]
-import matplotlib.patheffects as path_effects  # type: ignore[import]
 import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib.axes import Axes  # type: ignore[import]
-from matplotlib.projections import projection_registry  # type: ignore[import]
-from matplotlib.projections.geo import MollweideAxes  # type: ignore[import]
-from matplotlib.ticker import FixedLocator, Formatter  # type: ignore[import]
-from matplotlib.transforms import Affine2D  # type: ignore[import]
 
-matplotlib.use('agg')
+from .. import config
+
+try:  # plotting packages
+    import astropy.io.fits as pyfits  # type: ignore[import]
+    import matplotlib  # type: ignore[import]
+    import matplotlib.patheffects as path_effects  # type: ignore[import]
+    from matplotlib import pyplot as plt
+    from matplotlib.axes import Axes  # type: ignore[import]
+    from matplotlib.projections import projection_registry  # type: ignore[import]
+    from matplotlib.projections.geo import MollweideAxes  # type: ignore[import]
+    from matplotlib.ticker import FixedLocator, Formatter  # type: ignore[import]
+    from matplotlib.transforms import Affine2D  # type: ignore[import]
+    matplotlib.use('agg')
+except (ImportError, ModuleNotFoundError) as e:
+    raise RuntimeError(config.PLOT_EXTRA_NOT_INSTALLED_ERROR_MSG) from e
+
 
 def format_fits_header(event_id_tuple, mjd, ra, dec, uncertainty):
     """Prepare some of the relevant event information for a fits file

@@ -16,20 +16,25 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
 
 import healpy
-import matplotlib
-import meander
 import numpy as np
 import pandas as pd
-from astropy.io import ascii
-from matplotlib import pyplot as plt
-from matplotlib import text
 
+from . import config as cfg
 from .event_metadata import EventMetadata
+
+try:  # plotting packages
+    # TODO - remove these when plotting logic is moved to 'plot' sub-package
+    import matplotlib
+    import meander
+    from astropy.io import ascii
+    from matplotlib import pyplot as plt
+    from matplotlib import text
+except (ImportError, ModuleNotFoundError) as e:
+    cfg.LOGGER.warning(cfg.PLOT_EXTRA_NOT_INSTALLED_ERROR_MSG)
+
 
 ###############################################################################
 # DATA TYPES
-
-PixelTuple = Tuple[int, float, float, float]
 
 
 class PyDictNSidePixels(TypedDict):
