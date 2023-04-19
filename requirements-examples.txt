@@ -5,9 +5,7 @@
 #    pip-compile --extra=examples --output-file=requirements-examples.txt
 #
 astropy==5.2.2
-    # via
-    #   healpy
-    #   icecube-skyreader (setup.py)
+    # via healpy
 cachetools==5.3.0
     # via wipac-rest-tools
 certifi==2022.12.7
@@ -31,11 +29,7 @@ idna==3.4
 kiwisolver==1.4.4
     # via matplotlib
 matplotlib==3.7.1
-    # via
-    #   healpy
-    #   icecube-skyreader (setup.py)
-meander==0.0.3
-    # via icecube-skyreader (setup.py)
+    # via healpy
 numpy==1.24.2
     # via
     #   astropy
