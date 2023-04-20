@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.1 (2023-04-20)
+### Other
+* <bot> update setup.cfg ([`caf64f3`](https://github.com/icecube/skyreader/commit/caf64f3ed82a65d46fdc2875986c02250871150e))
+
 ## v1.0.0 (2023-04-20)
 ### Breaking
 * Import Git History From Scanner & Trim [major] ([`188b1fc`](https://github.com/icecube/skyreader/commit/188b1fc6f0f0e648c877157c3f681ba2426185f5))
