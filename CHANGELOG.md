@@ -2,6 +2,35 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.0 (2023-04-20)
+### Breaking
+* Import Git History From Scanner & Trim [major] ([`188b1fc`](https://github.com/icecube/skyreader/commit/188b1fc6f0f0e648c877157c3f681ba2426185f5))
+
+### Other
+* Add scanner's files ([`cce323d`](https://github.com/icecube/skyreader/commit/cce323d2d9ac56476e4b75b0c1a61c5937adac4c))
+* Remove original files ([`638f09d`](https://github.com/icecube/skyreader/commit/638f09d0611ae7ba4bbb9ce844d5ffae07d08f6b))
+* Add `--real-event` & `--simulated-event` (required, mutex) ([#122](https://github.com/icecube/skyreader/issues/122)) ([`ca809c6`](https://github.com/icecube/skyreader/commit/ca809c677deca5e7413d97156fd1d1598720d23c))
+* Additional SkyDriver Updates ([#119](https://github.com/icecube/skyreader/issues/119)) ([`a47765e`](https://github.com/icecube/skyreader/commit/a47765e1db2b4a2ba6175762f76fc7460e4b43eb))
+* Plotting functions in ScanResult ([#82](https://github.com/icecube/skyreader/issues/82)) ([`4e38109`](https://github.com/icecube/skyreader/commit/4e38109a6b1f2fb0dea1b5056dd080506cd783e1))
+* Flip bounding box calculation of +/- dec error for Equatorial scan ([#176](https://github.com/icecube/skyreader/issues/176)) ([`3ea1c1b`](https://github.com/icecube/skyreader/commit/3ea1c1bcf733f97c7e7087f80ee2b5b46d2c6ec9))
+* Shift ra to be near pi and fix printouts. see #96. ([`ef9177c`](https://github.com/icecube/skyreader/commit/ef9177c0464bd46d7aac51c96638e313b4571cdf))
+* Fix area calculation. ([`356fd5d`](https://github.com/icecube/skyreader/commit/356fd5d63353b407de29810c72b8054dfd692aad))
+* Add `--real-event` & `--simulated-event` (required, mutex) ([#122](https://github.com/icecube/skyreader/issues/122)) ([`7a7cd42`](https://github.com/icecube/skyreader/commit/7a7cd42e3fc12d001c38a35358f4a05940249f68))
+* Additional SkyDriver Updates ([#119](https://github.com/icecube/skyreader/issues/119)) ([`1937690`](https://github.com/icecube/skyreader/commit/19376903100a5e0755cab486e05d3d082a1dc6d0))
+* Updates for SkyDriver ([#109](https://github.com/icecube/skyreader/issues/109)) ([`b720272`](https://github.com/icecube/skyreader/commit/b7202727de710c84189bf15f1f4ae07607829c55))
+* Fix contour saving bug ([`0d5df63`](https://github.com/icecube/skyreader/commit/0d5df63fa19cf8a08ac8a7f6b095a941a4a479b1))
+* Update a few settings to optimize contours and speed ([#99](https://github.com/icecube/skyreader/issues/99)) ([`35550b6`](https://github.com/icecube/skyreader/commit/35550b6cc9b692ca7edf97740eacd6ae1e275afa))
+* Improve cartview bounds ([`bbf7d1c`](https://github.com/icecube/skyreader/commit/bbf7d1c3922f6525b1e70dd5df817933e14ff01f))
+* Separate icetray-dependent util functions ([#100](https://github.com/icecube/skyreader/issues/100)) ([`5cf336c`](https://github.com/icecube/skyreader/commit/5cf336cd36e088c35de1e886c54f6412909cc3fe))
+* Revert formatter change in 35ce392 ([`63a8856`](https://github.com/icecube/skyreader/commit/63a8856bf9816bfd96e239fd428ad520ec96caf1))
+* Fix ci ([#98](https://github.com/icecube/skyreader/issues/98)) ([`7f09de4`](https://github.com/icecube/skyreader/commit/7f09de48985692e940f49ed67829ecd7c7f00b19))
+* Fix the contour bound calculation when ra is close to 0/2pi. ([#96](https://github.com/icecube/skyreader/issues/96)) ([`7c38e32`](https://github.com/icecube/skyreader/commit/7c38e321a1ad67aea7c6b1e33ce5644c45ccf030))
+* Plotting functions in ScanResult ([#82](https://github.com/icecube/skyreader/issues/82)) ([`1e18b69`](https://github.com/icecube/skyreader/commit/1e18b6979654055713a3458c6fd402a556609c69))
+* A more generalized handling of metadata ([#90](https://github.com/icecube/skyreader/issues/90)) ([`7c53fa1`](https://github.com/icecube/skyreader/commit/7c53fa152a230c29dfc806b73e50b324b879a441))
+* Preserve useful metadata in the nside array ([#88](https://github.com/icecube/skyreader/issues/88)) ([`28fd254`](https://github.com/icecube/skyreader/commit/28fd254007874889f014c205c67b912cd212e3ef))
+* Production Readiness ([#68](https://github.com/icecube/skyreader/issues/68)) ([`75a5833`](https://github.com/icecube/skyreader/commit/75a5833f07c8ce5985e6710452b9771f6569fb70))
+* Performance & Configuration Upgrades ([#59](https://github.com/icecube/skyreader/issues/59)) ([`1aee7a5`](https://github.com/icecube/skyreader/commit/1aee7a5b5978f32dc8cbcacb6baee3accff89dff))
+
 ## v0.1.1 (2023-04-18)
 ### Other
 * <bot> update setup.cfg ([`1a5fc82`](https://github.com/icecube/skyreader/commit/1a5fc82a91f5774800a62aed20e4987805f714bc))
