@@ -1,6 +1,7 @@
 """Plotting tools."""
 
 # fmt: off
+# flake8: noqa
 
 import astropy.io.fits as pyfits  # type: ignore[import]
 import healpy  # type: ignore[import]
@@ -17,12 +18,12 @@ from matplotlib.transforms import Affine2D  # type: ignore[import]
 matplotlib.use('agg')
 
 def format_fits_header(event_id_tuple, mjd, ra, dec, uncertainty):
-    '''Prepare some of the relevant event information for 
-    a fits file header'''
+    """Prepare some of the relevant event information for a fits file
+    header."""
     run_id, event_id, event_type = event_id_tuple
 
     header = [
-        ('RUNID', run_id), 
+        ('RUNID', run_id),
         ('EVENTID', event_id),
         ('SENDER', 'IceCube Collaboration'),
         ('EventMJD', mjd),
@@ -63,7 +64,7 @@ def hp_ticklabels(zoom=False, lonra=None, latra=None, rot=None, bounds=None):
         min_lon = np.round(lon_offset/2.)*2. - 2
         max_lon = lon_offset+lonra[1]-lonra[0] + 2
         lons = np.arange(min_lon, max_lon, 2)
-        
+
         min_lat = np.round(lat_offset/2.)*2. - 2
         max_lat = lat_offset+latra[1]-latra[0] + 2
         lats = np.arange(min_lat, max_lat, 2)
@@ -109,7 +110,7 @@ def hp_ticklabels(zoom=False, lonra=None, latra=None, rot=None, bounds=None):
 def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec,
         cmap_min=0., cmap_max=250.):
     """"Plots the 4FGL catalog in a color that contrasts with the background
-    healpix map"""
+    healpix map."""
     hdu = pyfits.open('/cvmfs/icecube.opensciencegrid.org/users/steinrob/reference_catalogues/Fermi_4FGL_v18.fit')
     fgl = hdu[1]
     pe = [path_effects.Stroke(linewidth=0.5, foreground=cmap(0.0)),

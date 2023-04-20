@@ -1,4 +1,4 @@
-"""Tools for functions/data related to icecube events."""
+"""Tools for functions/data related to IceCube events."""
 
 import dataclasses as dc
 

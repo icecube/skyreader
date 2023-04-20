@@ -3,8 +3,9 @@
 # fmt: off
 # pylint: skip-file
 # mypy: ignore-errors
+# flake8: noqa
 
-import dataclasses as dc
+
 import io
 import itertools as it
 import json
@@ -23,13 +24,10 @@ from astropy.io import ascii
 from matplotlib import pyplot as plt
 from matplotlib import text
 
-from .event_tools import EventMetadata
-from .pixel_classes import NSidesDict, RecoPixelFinal
+from .event_metadata import EventMetadata
 
 ###############################################################################
 # DATA TYPES
-
-PixelTuple = Tuple[int, float, float, float]
 
 
 class PyDictNSidePixels(TypedDict):
@@ -348,53 +346,6 @@ class SkyScanResult:
         if output_dir is not None:
             filename = output_dir / Path(filename)
         return filename
-
-    """
-    nsides-dict input
-    """
-
-    @classmethod
-    def from_nsides_dict(
-        cls,
-        nsides_dict: NSidesDict,
-        event_metadata: Optional[EventMetadata] = None
-    ) -> "SkyScanResult":
-        """Factory method for nsides_dict."""
-        logger = logging.getLogger(__name__)
-
-        event_metadata_dict = {}
-        if event_metadata:
-            event_metadata_dict = dc.asdict(event_metadata)
-
-        result = dict()
-        for nside, pixel_dict in nsides_dict.items():
-            _dtype = np.dtype(cls.PIXEL_TYPE, metadata=dict(nside=nside, **event_metadata_dict))
-            nside_pixel_values = np.zeros(len(pixel_dict), dtype=_dtype)
-            logger.debug(f"nside {nside} has {len(pixel_dict)} pixels / {12 * nside**2} total.")
-
-            for i, (pixel_id, pixfin) in enumerate(sorted(pixel_dict.items())):
-                nside_pixel_values[i] = cls._pixelreco_to_tuple(pixfin, nside, pixel_id)
-
-            result[cls.format_nside(nside)] = nside_pixel_values
-
-        return cls(result)
-
-    @staticmethod
-    def _pixelreco_to_tuple(pixfin: RecoPixelFinal, nside: int, pixel_id: int) -> PixelTuple:
-        if (
-            not isinstance(pixfin, RecoPixelFinal)
-            or nside != pixfin.nside
-            or pixel_id != pixfin.pixel_id
-        ):
-            msg = f"Invalid {RecoPixelFinal} for {(nside,pixel_id)}: {pixfin}"
-            logging.error(msg)
-            raise ValueError(msg)
-        return (
-            pixfin.pixel_id,  # index
-            pixfin.llh,  # llh
-            pixfin.reco_losses_inside,  # E_in
-            pixfin.reco_losses_total,  # E_tot
-        )
 
     """
     NPZ input / output
