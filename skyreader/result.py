@@ -541,7 +541,7 @@ class SkyScanResult:
                     log_func=None,
                     upload_func=None,
                     final_channels=None):
-        from .plotting_tools import DecFormatter, RaFormatter
+        from .plot.plotting_tools import DecFormatter, RaFormatter
 
         if log_func is None:
             def log_func(x):
@@ -798,7 +798,7 @@ class SkyScanResult:
                            plot_4fgl=False,
                            final_channels=None):
         """Uses healpy to plot a map."""
-        from .plotting_tools import format_fits_header, hp_ticklabels, plot_catalog
+        from .plot.plotting_tools import format_fits_header, hp_ticklabels, plot_catalog
 
         if log_func is None:
             def log_func(x):
