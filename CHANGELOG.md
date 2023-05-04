@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.2 (2023-05-04)
+### Other
+* <bot> update requirements.txt ([`80f9203`](https://github.com/icecube/skyreader/commit/80f920397b36fd3e74134da331fce4c35a0d8474))
+* <bot> update requirements-tests.txt ([`261f4b0`](https://github.com/icecube/skyreader/commit/261f4b0a62e730f5ca03f94e5e3ddcdf2984a1ff))
+* <bot> update requirements-examples.txt ([`2eb6e46`](https://github.com/icecube/skyreader/commit/2eb6e46877279e769fceda9f47458bbeb2d2518e))
+* Resolve imports in `result.py` ([#6](https://github.com/icecube/skyreader/issues/6)) ([`b1203e6`](https://github.com/icecube/skyreader/commit/b1203e66aca26a90e56e06919921078c2127a957))
+
 ## v1.0.1 (2023-04-20)
 ### Other
 * <bot> update setup.cfg ([`caf64f3`](https://github.com/icecube/skyreader/commit/caf64f3ed82a65d46fdc2875986c02250871150e))
