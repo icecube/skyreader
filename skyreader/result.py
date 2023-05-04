@@ -22,9 +22,11 @@ import numpy as np
 import pandas as pd
 from astropy.io import ascii
 from matplotlib import pyplot as plt
-from matplotlib import text
+from matplotlib import text, patheffects
 
 from .event_metadata import EventMetadata
+
+from .plot.plotting_tools import format_fits_header, hp_ticklabels, plot_catalog, DecFormatter, RaFormatter
 
 ###############################################################################
 # DATA TYPES
@@ -541,7 +543,6 @@ class SkyScanResult:
                     log_func=None,
                     upload_func=None,
                     final_channels=None):
-        from .plotting_tools import DecFormatter, RaFormatter
 
         if log_func is None:
             def log_func(x):
@@ -755,8 +756,6 @@ class SkyScanResult:
         # show the grid
         ax.grid(True, color='k', alpha=0.5)
 
-        from matplotlib import patheffects
-
         # Otherwise, add the path effects.
         effects = [patheffects.withStroke(linewidth=1.1, foreground='w')]
         for artist in ax.findobj(text.Text):
@@ -798,7 +797,6 @@ class SkyScanResult:
                            plot_4fgl=False,
                            final_channels=None):
         """Uses healpy to plot a map."""
-        from .plotting_tools import format_fits_header, hp_ticklabels, plot_catalog
 
         if log_func is None:
             def log_func(x):
