@@ -12,12 +12,13 @@ def main() -> None:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("filename", help="filename")
+    parser.add_argument("--bounding-box", action="store_true", default=False)
     args = parser.parse_args()
 
     result = SkyScanResult.read_npz(args.filename)
 
     result.create_plot(dosave=True)
-    result.create_plot_zoomed(dosave=True, plot_bounding_box=True)
+    result.create_plot_zoomed(dosave=True, plot_bounding_box=args.bounding_box)
 
 
 if __name__ == "__main__":
