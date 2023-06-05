@@ -52,6 +52,8 @@ CANNOT_BE_ZERO_FIELDS = [
 ]
 
 
+
+
 ###############################################################################
 # DATA TYPES
 
@@ -151,7 +153,7 @@ class SkyScanResult:
         o_val: float,
         field: str,
         equal_nan: bool,
-        rtol_per_field: Optional[Dict[str, float]] = None,
+        rtol_per_field: Dict[str, float],
     ) -> Tuple[float, bool]:
         """Get the diff float-value and test truth-value for the 2 pixel
         datapoints."""
@@ -185,7 +187,7 @@ class SkyScanResult:
         ore_pix: np.ndarray,
         equal_nan: bool,
         do_disqualify_zero_energy_pixels: bool,  # TODO: remove?
-        rtol_per_field: Optional[Dict[str, float]] = None,
+        rtol_per_field: Dict[str, float],
     ) -> Tuple[List[float], List[bool]]:
         """Get the diff float-values and test truth-values for the 2 pixel-
         data.
@@ -269,6 +271,9 @@ class SkyScanResult:
         Optionally, pass a `Path` for `dump_json_diff` to get a json
         file containing every diff at the pixel-data level.
         """
+        if not rtol_per_field:
+            rtol_per_field = DEFAULT_RTOL_PER_FIELD
+
         close: Dict[str, bool] = {}  # one bool for each nside value
         diffs: Dict[str, list] = {}  # (~4x size of self.results) w/ per-pixel info
 
