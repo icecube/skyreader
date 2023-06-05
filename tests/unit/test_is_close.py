@@ -92,6 +92,7 @@ def test_011__fail(fail_index: int, fail_field: str, request: Any) -> None:
             return 1.0
         if field == fail_field:
             return fail_scale
+        return 1.0
 
     alpha_pydict: PyDictResult = {
         "nside-8": {
