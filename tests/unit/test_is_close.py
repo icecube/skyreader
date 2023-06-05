@@ -81,7 +81,7 @@ def test_010(request: Any) -> None:
 
 
 @pytest.mark.parametrize("fail_field", ["llh", "E_in", "E_tot"])
-def test_011__error(fail_field: str, request: Any) -> None:
+def test_011__fail(fail_field: str, request: Any) -> None:
     """Compare two simple instances."""
     rtol_per_field = dict(llh=0.5, E_in=0.5, E_tot=0.5)
 
