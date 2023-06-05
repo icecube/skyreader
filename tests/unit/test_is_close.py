@@ -5,6 +5,29 @@ from skyreader import SkyScanResult
 from skyreader.result import PyDictResult
 
 
+def test_000() -> None:
+    """Compare same instances."""
+    # rtol_per_field = dict(llh=0.5, E_in=0.5, E_tot=0.5)
+
+    alpha_pydict: PyDictResult = {
+        "nside-8": {
+            "columns": ["index", "llh", "E_in", "E_tot"],
+            "metadata": {"nside": 8},
+            "data": [
+                [0, 496.5, 4643.5, 4736.5],
+            ],
+        },
+    }
+    alpha = SkyScanResult.deserialize(alpha_pydict)
+
+    assert alpha.is_close(
+        alpha,
+        equal_nan=True,
+        dump_json_diff=None,
+        do_disqualify_zero_energy_pixels=False,
+    )
+
+
 def test_001() -> None:
     """Compare two simple instances."""
     rtol_per_field = dict(llh=0.5, E_in=0.5, E_tot=0.5)
