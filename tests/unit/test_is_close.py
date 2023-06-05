@@ -54,12 +54,12 @@ def test_010(request: Any) -> None:
             "metadata": {"nside": 8},
             "data": [
                 [
-                    i[0],
-                    i[1] * (1 + rtol_per_field["llh"]),
-                    i[2] * (1 + rtol_per_field["E_in"]),
-                    i[3] * (1 + rtol_per_field["E_tot"]),
+                    r[0],
+                    r[1] * (1 + rtol_per_field["llh"]),
+                    r[2] * (1 + rtol_per_field["E_in"]),
+                    r[3] * (1 + rtol_per_field["E_tot"]),
                 ]
-                for i in alpha_pydict["nside-8"]["data"]
+                for r in alpha_pydict["nside-8"]["data"]
             ],
         },
     }
@@ -193,12 +193,12 @@ def test_020(request: Any) -> None:
             "metadata": {"nside": 8},
             "data": [
                 [
-                    i[0],
-                    i[1] * (1 + rtol_per_field["llh"]),
-                    i[2] * (1 + rtol_per_field["E_in"]),
-                    i[3] * (1 + rtol_per_field["E_tot"]),
+                    r[0],
+                    r[1] * (1 + rtol_per_field["llh"]),
+                    r[2] * (1 + rtol_per_field["E_in"]),
+                    r[3] * (1 + rtol_per_field["E_tot"]),
                 ]
-                for i in alpha_pydict["nside-8"]["data"]
+                for r in alpha_pydict["nside-8"]["data"]
             ],
         },
         "nside-64": {
@@ -206,12 +206,12 @@ def test_020(request: Any) -> None:
             "metadata": {"nside": 64},
             "data": [
                 [
-                    i[0],
-                    i[1] * (1 + rtol_per_field["llh"]),
-                    i[2] * (1 + rtol_per_field["E_in"]),
-                    i[3] * (1 + rtol_per_field["E_tot"]),
+                    r[0],
+                    r[1] * (1 + rtol_per_field["llh"]),
+                    r[2] * (1 + rtol_per_field["E_in"]),
+                    r[3] * (1 + rtol_per_field["E_tot"]),
                 ]
-                for i in alpha_pydict["nside-64"]["data"]
+                for r in alpha_pydict["nside-64"]["data"]
             ],
         },
     }
@@ -254,12 +254,12 @@ def test_100(request: Any) -> None:
             "metadata": {"nside": 8},
             "data": [
                 [
-                    i[0],
+                    r[0],
                     np.nan,
-                    i[2] * (1 + rtol_per_field["E_in"]),
-                    i[3] * (1 + rtol_per_field["E_tot"]),
+                    r[2] * (1 + rtol_per_field["E_in"]),
+                    r[3] * (1 + rtol_per_field["E_tot"]),
                 ]
-                for i in alpha_pydict["nside-8"]["data"]
+                for r in alpha_pydict["nside-8"]["data"]
             ],
         },
     }
