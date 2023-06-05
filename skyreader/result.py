@@ -52,8 +52,6 @@ CANNOT_BE_ZERO_FIELDS = [
 ]
 
 
-
-
 ###############################################################################
 # DATA TYPES
 
@@ -68,7 +66,7 @@ PyDictResult = Dict[str, PyDictNSidePixels]
 
 
 ###############################################################################
-# EXCPETIONS
+# EXCEPTIONS
 
 
 class InvalidPixelValueError(Exception):
@@ -268,8 +266,26 @@ class SkyScanResult:
         """Checks if two results are close by requiring strict equality on
         pixel indices and close condition on numeric results.
 
-        Optionally, pass a `Path` for `dump_json_diff` to get a json
-        file containing every diff at the pixel-data level.
+        Args:
+            `other`
+                the instance to compare
+            `equal_nan`
+                whether to let `nan == nan` be True
+                (default: `True`)
+            `dump_json_diff`
+                get a json file containing every comparison at the pixel-data level
+                (default: `None`)
+            `do_disqualify_zero_energy_pixels`
+                If `do_disqualify_zero_energy_pixels=True` and there's an
+                invalid datapoint value in either array, all "require close"
+                datapoints are considered (vacuously) close enough. # TODO: remove?
+                (default: `False`)
+            `rtol_per_field`
+                a mapping of each field to a rtol value
+                (default: `DEFAULT_RTOL_PER_FIELD`)
+
+        Returns:
+            bool: True if `other` and `self` are close
         """
         if not rtol_per_field:
             rtol_per_field = DEFAULT_RTOL_PER_FIELD
