@@ -21,12 +21,18 @@ import meander
 import numpy as np
 import pandas as pd
 from astropy.io import ascii
+from matplotlib import patheffects
 from matplotlib import pyplot as plt
-from matplotlib import text, patheffects
+from matplotlib import text
 
 from .event_metadata import EventMetadata
-
-from .plot.plotting_tools import format_fits_header, hp_ticklabels, plot_catalog, DecFormatter, RaFormatter
+from .plot.plotting_tools import (
+    DecFormatter,
+    RaFormatter,
+    format_fits_header,
+    hp_ticklabels,
+    plot_catalog,
+)
 
 ###############################################################################
 # DATA TYPES
@@ -103,7 +109,7 @@ class SkyScanResult:
         self.logger.debug(f"Metadata for this result: {[self.result[_].dtype.metadata for _ in self.result]}")
 
         # bookkeeping for comparing values
-        self.require_close = {  # w/ rtol values
+        rtol_per_field = {  # w/ rtol values
             # any field not here is assumed to require '==' for comparison
             "llh": 1e-4,
             "E_in": 1e-2,
@@ -133,11 +139,16 @@ class SkyScanResult:
         )
 
     def is_close_datapoint(
-        self, s_val: float, o_val: float, field: str, equal_nan: bool
+        self,
+        s_val: float,
+        o_val: float,
+        field: str,
+        equal_nan: bool,
+        rtol_per_field: Optional[Dict[str, float]] = None,
     ) -> Tuple[float, bool]:
         """Get the diff float-value and test truth-value for the 2 pixel
         datapoints."""
-        if field not in self.require_close:
+        if field not in rtol_per_field:
             raise ValueError(
                 f"Datapoint field ({field}) cannot be compared by "
                 f"'is_close_datapoint()', must use '=='"
@@ -155,7 +166,7 @@ class SkyScanResult:
                     s_val,
                     o_val,
                     equal_nan=equal_nan,
-                    rtol=self.require_close[field],
+                    rtol=rtol_per_field[field],
                     atol=self.ATOL,
                 )
             ),
@@ -167,6 +178,7 @@ class SkyScanResult:
         ore_pix: np.ndarray,
         equal_nan: bool,
         do_disqualify_zero_energy_pixels: bool,  # TODO: remove?
+        rtol_per_field: Optional[Dict[str, float]] = None,
     ) -> Tuple[List[float], List[bool]]:
         """Get the diff float-values and test truth-values for the 2 pixel-
         data.
@@ -194,10 +206,10 @@ class SkyScanResult:
             s_val, o_val = float(s_val), float(o_val)
 
             # CASE 1: a disqualified-pixel "require close" datapoint
-            if field in self.require_close and is_pixel_disqualified:
+            if field in rtol_per_field and is_pixel_disqualified:
                 diff, test = float("nan"), True  # vacuously true
             # CASE 2: a "require close" datapoint (not disqualified-pixel)
-            elif field in self.require_close:
+            elif field in rtol_per_field:
                 try:
                     diff, test = self.is_close_datapoint(s_val, o_val, field, equal_nan)
                 except InvalidPixelValueError:
@@ -242,6 +254,7 @@ class SkyScanResult:
         equal_nan: bool = True,
         dump_json_diff: Optional[Path] = None,
         do_disqualify_zero_energy_pixels: bool = False,  # TODO: remove?
+        rtol_per_field: Optional[Dict[str, float]] = None,
     ) -> bool:
         """Checks if two results are close by requiring strict equality on
         pixel indices and close condition on numeric results.
@@ -287,13 +300,13 @@ class SkyScanResult:
                 field: all(
                     d[3][self.PIXEL_TYPE.names.index(field)] for d in nside_diffs
                 )
-                for field in set(self.PIXEL_TYPE.names) - set(self.require_close)
+                for field in set(self.PIXEL_TYPE.names) - set(rtol_per_field)
             }
             nside_close = {
                 field: all(
                     d[3][self.PIXEL_TYPE.names.index(field)] for d in nside_diffs
                 )
-                for field in self.require_close
+                for field in rtol_per_field
             }
             close[nside] = all(nside_equal.values()) and all(nside_close.values())
 
