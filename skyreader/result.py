@@ -35,6 +35,24 @@ from .plot.plotting_tools import (
 )
 
 ###############################################################################
+# CONSTANTS
+
+
+# bookkeeping for comparing values
+DEFAULT_RTOL_PER_FIELD = {  # w/ rtol values
+    # any field not here is assumed to require '==' for comparison
+    "llh": 1e-4,
+    "E_in": 1e-2,
+    "E_tot": 1e-2,
+}
+CANNOT_BE_ZERO_FIELDS = [
+    # if field's val is 0, then all the pixel's numerical datapoints are "isclose"
+    "E_in",
+    "E_tot",
+]
+
+
+###############################################################################
 # DATA TYPES
 
 
@@ -108,18 +126,7 @@ class SkyScanResult:
 
         self.logger.debug(f"Metadata for this result: {[self.result[_].dtype.metadata for _ in self.result]}")
 
-        # bookkeeping for comparing values
-        rtol_per_field = {  # w/ rtol values
-            # any field not here is assumed to require '==' for comparison
-            "llh": 1e-4,
-            "E_in": 1e-2,
-            "E_tot": 1e-2,
-        }
-        self.cannot_be_zero_fields = [
-            # if field's val is 0, then all the pixel's numerical datapoints are "isclose"
-            "E_in",
-            "E_tot",
-        ]
+
 
     """
     Comparison operators and methods
@@ -153,7 +160,7 @@ class SkyScanResult:
                 f"Datapoint field ({field}) cannot be compared by "
                 f"'is_close_datapoint()', must use '=='"
             )
-        if field in self.cannot_be_zero_fields and (s_val == 0.0 or o_val == 0.0):
+        if field in CANNOT_BE_ZERO_FIELDS and (s_val == 0.0 or o_val == 0.0):
             raise InvalidPixelValueError(f"field={field}, values={(s_val, o_val)}")
         try:
             rdiff = (abs(s_val - o_val) - self.ATOL) / abs(o_val)  # used by np.isclose
@@ -199,7 +206,7 @@ class SkyScanResult:
             is_pixel_disqualified = any(
                 sre_pix[self.PIXEL_TYPE.names.index(f)] == 0.0
                 or ore_pix[self.PIXEL_TYPE.names.index(f)] == 0.0
-                for f in self.cannot_be_zero_fields
+                for f in CANNOT_BE_ZERO_FIELDS
             )
 
         for s_val, o_val, field in zip(sre_pix, ore_pix, self.PIXEL_TYPE.names):
