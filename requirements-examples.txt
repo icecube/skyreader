@@ -4,13 +4,13 @@
 #
 #    pip-compile --extra=examples --output-file=requirements-examples.txt
 #
-astropy==5.2.2
+astropy==5.3
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
-cachetools==5.3.0
+cachetools==5.3.1
     # via wipac-rest-tools
-certifi==2022.12.7
+certifi==2023.5.7
     # via requests
 cffi==1.15.1
     # via cryptography
@@ -18,11 +18,11 @@ charset-normalizer==3.1.0
     # via requests
 contourpy==1.0.7
     # via matplotlib
-cryptography==40.0.2
+cryptography==41.0.1
     # via pyjwt
 cycler==0.11.0
     # via matplotlib
-fonttools==4.39.3
+fonttools==4.39.4
     # via matplotlib
 healpy==1.16.2
     # via icecube-skyreader (setup.py)
@@ -50,7 +50,7 @@ packaging==23.1
     # via
     #   astropy
     #   matplotlib
-pandas==2.0.1
+pandas==2.0.2
     # via icecube-skyreader (setup.py)
 pillow==9.5.0
     # via matplotlib
@@ -58,7 +58,7 @@ pycparser==2.21
     # via cffi
 pyerfa==2.0.0.3
     # via astropy
-pyjwt[crypto]==2.5.0
+pyjwt[crypto]==2.7.0
     # via wipac-rest-tools
 pyparsing==3.0.9
     # via matplotlib
@@ -74,7 +74,7 @@ pyyaml==6.0
     # via astropy
 qrcode==7.4.2
     # via wipac-rest-tools
-requests==2.30.0
+requests==2.31.0
     # via
     #   requests-futures
     #   wipac-dev-tools
@@ -85,11 +85,9 @@ scipy==1.10.1
     # via healpy
 six==1.16.0
     # via python-dateutil
-tornado==6.3.1
+tornado==6.3.2
     # via wipac-rest-tools
-types-cryptography==3.3.23.2
-    # via pyjwt
-typing-extensions==4.5.0
+typing-extensions==4.6.3
     # via
     #   qrcode
     #   wipac-dev-tools
@@ -97,9 +95,9 @@ tzdata==2023.3
     # via pandas
 urllib3==2.0.2
     # via requests
-wipac-dev-tools==1.6.15
+wipac-dev-tools==1.6.16
     # via
     #   icecube-skyreader (setup.py)
     #   wipac-rest-tools
-wipac-rest-tools==1.4.18
+wipac-rest-tools==1.4.20
     # via icecube-skyreader (setup.py)
