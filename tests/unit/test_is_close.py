@@ -2,13 +2,14 @@
 
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 from skyreader import SkyScanResult
 from skyreader.result import PyDictResult
 
 
-def test_000(request) -> None:
+def test_000(request: Any) -> None:
     """Compare same instances."""
     # rtol_per_field = dict(llh=0.5, E_in=0.5, E_tot=0.5)
 
@@ -31,7 +32,7 @@ def test_000(request) -> None:
     )
 
 
-def test_010(request) -> None:
+def test_010(request: Any) -> None:
     """Compare two simple instances."""
     rtol_per_field = dict(llh=0.5, E_in=0.5, E_tot=0.5)
 
@@ -80,11 +81,9 @@ def test_010(request) -> None:
 
 
 @pytest.mark.parametrize("fail_field", ["llh", "E_in", "E_tot"])
-def test_011__error(fail_field: str, request) -> None:
+def test_011__error(fail_field: str, request: Any) -> None:
     """Compare two simple instances."""
     rtol_per_field = dict(llh=0.5, E_in=0.5, E_tot=0.5)
-    increase = dict(llh=1.0, E_in=1.0, E_tot=1.0)  # >1 should fail
-    increase[fail_field] = 2.0
 
     alpha_pydict: PyDictResult = {
         "nside-8": {
@@ -97,31 +96,55 @@ def test_011__error(fail_field: str, request) -> None:
     }
     alpha = SkyScanResult.deserialize(alpha_pydict)
 
-    beta_pydict: PyDictResult = {
+    # figure how to scale values to fail against smaller values
+
+    scale = dict(llh=1.0, E_in=1.0, E_tot=1.0)  # > 1/rtol should fail
+    scale[fail_field] = (1 / rtol_per_field[fail_field]) * 1.1
+    smaller_pydict: PyDictResult = {
         "nside-8": {
             "columns": ["index", "llh", "E_in", "E_tot"],
             "metadata": {"nside": 8},
             "data": [
                 [
                     i[0],
-                    i[1] * (1 + increase["llh"] * rtol_per_field["llh"]),
-                    i[2] * (1 + increase["E_in"] * rtol_per_field["E_in"]),
-                    i[3] * (1 + increase["E_tot"] * rtol_per_field["E_tot"]),
+                    i[1] * (1 + scale["llh"] * rtol_per_field["llh"]),
+                    i[2] * (1 + scale["E_in"] * rtol_per_field["E_in"]),
+                    i[3] * (1 + scale["E_tot"] * rtol_per_field["E_tot"]),
                 ]
                 for i in alpha_pydict["nside-8"]["data"]
             ],
         },
     }
-    beta = SkyScanResult.deserialize(beta_pydict)
-
+    smaller = SkyScanResult.deserialize(smaller_pydict)
     assert not alpha.is_close(
-        beta,
+        smaller,
         equal_nan=True,
         dump_json_diff=Path(request.node.name + ".json"),
         do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
-    assert not beta.is_close(
+
+    # figure how to scale values to fail against bigger values
+
+    scale = dict(llh=1.0, E_in=1.0, E_tot=1.0)  # >1 should fail
+    scale[fail_field] = 2.0
+    bigger_pydict: PyDictResult = {
+        "nside-8": {
+            "columns": ["index", "llh", "E_in", "E_tot"],
+            "metadata": {"nside": 8},
+            "data": [
+                [
+                    i[0],
+                    i[1] * (1 + scale["llh"] * rtol_per_field["llh"]),
+                    i[2] * (1 + scale["E_in"] * rtol_per_field["E_in"]),
+                    i[3] * (1 + scale["E_tot"] * rtol_per_field["E_tot"]),
+                ]
+                for i in alpha_pydict["nside-8"]["data"]
+            ],
+        },
+    }
+    bigger = SkyScanResult.deserialize(bigger_pydict)
+    assert not bigger.is_close(
         alpha,
         equal_nan=True,
         dump_json_diff=Path(request.node.name + ".json"),
@@ -130,7 +153,7 @@ def test_011__error(fail_field: str, request) -> None:
     )
 
 
-def test_020(request) -> None:
+def test_020(request: Any) -> None:
     """Compare two multi-nside instances."""
     rtol_per_field = dict(llh=0.5, E_in=0.5, E_tot=0.5)
 
