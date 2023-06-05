@@ -83,7 +83,7 @@ jobs:
       - name: dump comparison json files
         if: always()
         run: |
-          cat *.json
+          more *.json | cat
 
   release:
     # only run on main/master/default
