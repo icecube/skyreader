@@ -218,7 +218,7 @@ class SkyScanResult:
             # CASE 2: a "require close" datapoint (not disqualified-pixel)
             elif field in rtol_per_field:
                 try:
-                    diff, test = self.is_close_datapoint(s_val, o_val, field, equal_nan)
+                    diff, test = self.is_close_datapoint(s_val, o_val, field, equal_nan, rtol_per_field)
                 except InvalidPixelValueError:
                     diff, test = float("nan"), True
             # CASE 3: a "require equal" datapoint
@@ -308,7 +308,7 @@ class SkyScanResult:
                 fillvalue=np.full((len(self.PIXEL_TYPE.names),), np.nan),  # 1 vector
             ):
                 diff_vals, test_vals = self.diff_pixel_data(
-                    sre_pix, ore_pix, equal_nan, do_disqualify_zero_energy_pixels
+                    sre_pix, ore_pix, equal_nan, do_disqualify_zero_energy_pixels, rtol_per_field
                 )
                 pix_diff = [
                     tuple(sre_pix.tolist()),
