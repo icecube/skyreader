@@ -81,10 +81,17 @@ def test_010(request: Any) -> None:
     )
 
 
+@pytest.mark.parametrize("fail_index", [0, 1])
 @pytest.mark.parametrize("fail_field", ["llh", "E_in", "E_tot"])
-def test_011__fail(fail_field: str, request: Any) -> None:
+def test_011__fail(fail_index: int, fail_field: str, request: Any) -> None:
     """Compare two simple instances."""
     rtol_per_field = dict(llh=0.5, E_in=0.5, E_tot=0.5)
+
+    def scale(field: str, index: int, fail_scale: float) -> float:
+        if index != fail_index:
+            return 1.0
+        if field == fail_field:
+            return fail_scale
 
     alpha_pydict: PyDictResult = {
         "nside-8": {
@@ -92,6 +99,7 @@ def test_011__fail(fail_field: str, request: Any) -> None:
             "metadata": {"nside": 8},
             "data": [
                 [0, 496.5, 4643.5, 4736.5],
+                [1, 586.5, 6845.5, 7546.5],
             ],
         },
     }
@@ -99,20 +107,20 @@ def test_011__fail(fail_field: str, request: Any) -> None:
 
     # figure how to scale values to fail for alpha vs. BIGGER (not symmetrical)
 
-    scale = dict(llh=1.0, E_in=1.0, E_tot=1.0)  # > 1/rtol should fail
-    scale[fail_field] = (1 / rtol_per_field[fail_field]) * 1.1
+    fail_scale = (1 / rtol_per_field[fail_field]) * 1.1  # > 1/rtol should fail
     bigger_pydict: PyDictResult = {
         "nside-8": {
             "columns": ["index", "llh", "E_in", "E_tot"],
             "metadata": {"nside": 8},
             "data": [
                 [
-                    i[0],
-                    i[1] * (1 + scale["llh"] * rtol_per_field["llh"]),
-                    i[2] * (1 + scale["E_in"] * rtol_per_field["E_in"]),
-                    i[3] * (1 + scale["E_tot"] * rtol_per_field["E_tot"]),
+                    r[0],
+                    r[1] * (1 + scale("llh", i, fail_scale) * rtol_per_field["llh"]),
+                    r[2] * (1 + scale("E_in", i, fail_scale) * rtol_per_field["E_in"]),
+                    r[3]
+                    * (1 + scale("E_tot", i, fail_scale) * rtol_per_field["E_tot"]),
                 ]
-                for i in alpha_pydict["nside-8"]["data"]
+                for i, r in enumerate(alpha_pydict["nside-8"]["data"])
             ],
         },
     }
@@ -127,20 +135,20 @@ def test_011__fail(fail_field: str, request: Any) -> None:
 
     # figure how to scale values to fail for BIGGER vs. alpha (not symmetrical)
 
-    scale = dict(llh=1.0, E_in=1.0, E_tot=1.0)  # >1 should fail
-    scale[fail_field] = 2.0
+    fail_scale = 2.0  # >1 should fail
     bigger_pydict = {
         "nside-8": {
             "columns": ["index", "llh", "E_in", "E_tot"],
             "metadata": {"nside": 8},
             "data": [
                 [
-                    i[0],
-                    i[1] * (1 + scale["llh"] * rtol_per_field["llh"]),
-                    i[2] * (1 + scale["E_in"] * rtol_per_field["E_in"]),
-                    i[3] * (1 + scale["E_tot"] * rtol_per_field["E_tot"]),
+                    r[0],
+                    r[1] * (1 + scale("llh", i, fail_scale) * rtol_per_field["llh"]),
+                    r[2] * (1 + scale("E_in", i, fail_scale) * rtol_per_field["E_in"]),
+                    r[3]
+                    * (1 + scale("E_tot", i, fail_scale) * rtol_per_field["E_tot"]),
                 ]
-                for i in alpha_pydict["nside-8"]["data"]
+                for i, r in enumerate(alpha_pydict["nside-8"]["data"])
             ],
         },
     }
