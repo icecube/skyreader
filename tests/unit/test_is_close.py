@@ -96,11 +96,11 @@ def test_011__error(fail_field: str, request: Any) -> None:
     }
     alpha = SkyScanResult.deserialize(alpha_pydict)
 
-    # figure how to scale values to fail against smaller values
+    # figure how to scale values to fail for alpha vs. BIGGER (not symmetrical)
 
     scale = dict(llh=1.0, E_in=1.0, E_tot=1.0)  # > 1/rtol should fail
     scale[fail_field] = (1 / rtol_per_field[fail_field]) * 1.1
-    smaller_pydict: PyDictResult = {
+    bigger_pydict: PyDictResult = {
         "nside-8": {
             "columns": ["index", "llh", "E_in", "E_tot"],
             "metadata": {"nside": 8},
@@ -115,20 +115,20 @@ def test_011__error(fail_field: str, request: Any) -> None:
             ],
         },
     }
-    smaller = SkyScanResult.deserialize(smaller_pydict)
+    bigger = SkyScanResult.deserialize(bigger_pydict)
     assert not alpha.is_close(
-        smaller,
+        bigger,
         equal_nan=True,
         dump_json_diff=Path(request.node.name + ".json"),
         do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
 
-    # figure how to scale values to fail against bigger values
+    # figure how to scale values to fail for BIGGER vs. alpha (not symmetrical)
 
     scale = dict(llh=1.0, E_in=1.0, E_tot=1.0)  # >1 should fail
     scale[fail_field] = 2.0
-    bigger_pydict: PyDictResult = {
+    bigger_pydict = {
         "nside-8": {
             "columns": ["index", "llh", "E_in", "E_tot"],
             "metadata": {"nside": 8},
