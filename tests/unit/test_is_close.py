@@ -4,6 +4,7 @@
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pytest
 from skyreader import SkyScanResult
 from skyreader.result import PyDictResult
@@ -218,6 +219,68 @@ def test_020(request: Any) -> None:
     assert beta.is_close(
         alpha,
         equal_nan=True,
+        dump_json_diff=Path(request.node.name + ".json"),
+        do_disqualify_zero_energy_pixels=False,
+        rtol_per_field=rtol_per_field,
+    )
+
+
+def test_100(request: Any) -> None:
+    """Compare two simple instances with nans."""
+    rtol_per_field = dict(llh=0.5, E_in=0.5, E_tot=0.5)
+
+    alpha_pydict: PyDictResult = {
+        "nside-8": {
+            "columns": ["index", "llh", "E_in", "E_tot"],
+            "metadata": {"nside": 8},
+            "data": [
+                [0, np.nan, 4643.5, 4736.5],
+            ],
+        },
+    }
+    alpha = SkyScanResult.deserialize(alpha_pydict)
+
+    beta_pydict: PyDictResult = {
+        "nside-8": {
+            "columns": ["index", "llh", "E_in", "E_tot"],
+            "metadata": {"nside": 8},
+            "data": [
+                [
+                    i[0],
+                    np.nan,
+                    i[2] * (1 + rtol_per_field["E_in"]),
+                    i[3] * (1 + rtol_per_field["E_tot"]),
+                ]
+                for i in alpha_pydict["nside-8"]["data"]
+            ],
+        },
+    }
+    beta = SkyScanResult.deserialize(beta_pydict)
+
+    assert alpha.is_close(
+        beta,
+        equal_nan=True,
+        dump_json_diff=Path(request.node.name + ".json"),
+        do_disqualify_zero_energy_pixels=False,
+        rtol_per_field=rtol_per_field,
+    )
+    assert beta.is_close(
+        alpha,
+        equal_nan=True,
+        dump_json_diff=Path(request.node.name + ".json"),
+        do_disqualify_zero_energy_pixels=False,
+        rtol_per_field=rtol_per_field,
+    )
+    assert not alpha.is_close(
+        beta,
+        equal_nan=False,
+        dump_json_diff=Path(request.node.name + ".json"),
+        do_disqualify_zero_energy_pixels=False,
+        rtol_per_field=rtol_per_field,
+    )
+    assert not beta.is_close(
+        alpha,
+        equal_nan=False,
         dump_json_diff=Path(request.node.name + ".json"),
         do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
