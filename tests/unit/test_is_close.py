@@ -1,12 +1,14 @@
 """Test `is_close()`."""
 
 
+from pathlib import Path
+
 import pytest
 from skyreader import SkyScanResult
 from skyreader.result import PyDictResult
 
 
-def test_000() -> None:
+def test_000(request) -> None:
     """Compare same instances."""
     # rtol_per_field = dict(llh=0.5, E_in=0.5, E_tot=0.5)
 
@@ -24,12 +26,12 @@ def test_000() -> None:
     assert alpha.is_close(
         alpha,
         equal_nan=True,
-        dump_json_diff=None,
+        dump_json_diff=Path(request.node.name + ".json"),
         do_disqualify_zero_energy_pixels=False,
     )
 
 
-def test_010() -> None:
+def test_010(request) -> None:
     """Compare two simple instances."""
     rtol_per_field = dict(llh=0.5, E_in=0.5, E_tot=0.5)
 
@@ -64,21 +66,21 @@ def test_010() -> None:
     assert alpha.is_close(
         beta,
         equal_nan=True,
-        dump_json_diff=None,
+        dump_json_diff=Path(request.node.name + ".json"),
         do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
     assert beta.is_close(
         alpha,
         equal_nan=True,
-        dump_json_diff=None,
+        dump_json_diff=Path(request.node.name + ".json"),
         do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
 
 
 @pytest.mark.parametrize("fail_field", ["llh", "E_in", "E_tot"])
-def test_011__error(fail_field: str) -> None:
+def test_011__error(fail_field: str, request) -> None:
     """Compare two simple instances."""
     rtol_per_field = dict(llh=0.5, E_in=0.5, E_tot=0.5)
     increase = dict(llh=1.0, E_in=1.0, E_tot=1.0)  # >1 should fail
@@ -115,20 +117,20 @@ def test_011__error(fail_field: str) -> None:
     assert not alpha.is_close(
         beta,
         equal_nan=True,
-        dump_json_diff=None,
+        dump_json_diff=Path(request.node.name + ".json"),
         do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
     assert not beta.is_close(
         alpha,
         equal_nan=True,
-        dump_json_diff=None,
+        dump_json_diff=Path(request.node.name + ".json"),
         do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
 
 
-def test_020() -> None:
+def test_020(request) -> None:
     """Compare two multi-nside instances."""
     rtol_per_field = dict(llh=0.5, E_in=0.5, E_tot=0.5)
 
@@ -186,14 +188,14 @@ def test_020() -> None:
     assert alpha.is_close(
         beta,
         equal_nan=True,
-        dump_json_diff=None,
+        dump_json_diff=Path(request.node.name + ".json"),
         do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
     assert beta.is_close(
         alpha,
         equal_nan=True,
-        dump_json_diff=None,
+        dump_json_diff=Path(request.node.name + ".json"),
         do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )

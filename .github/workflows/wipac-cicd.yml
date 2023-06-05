@@ -76,9 +76,14 @@ jobs:
           pip install --upgrade pip wheel setuptools
           pip install .[tests]
 
-      - name: Test
+      - name: test
         run: |
           pytest -vvv tests/unit
+
+      - name: dump comparison json files
+        if: always()
+        run: |
+          cat *.json
 
   release:
     # only run on main/master/default
