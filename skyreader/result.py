@@ -45,8 +45,8 @@ DEFAULT_RTOL_PER_FIELD = {  # w/ rtol values
     "E_in": 1e-2,
     "E_tot": 1e-2,
 }
-CANNOT_BE_ZERO_FIELDS = [
-    # if field's val is 0, then all the pixel's numerical datapoints are "isclose"
+ZERO_MAKES_FIELD_ALWAYS_ISCLOSE = [
+    # if a pixel field's val is 0, then that datapoint is "isclose" to any value
     "E_in",
     "E_tot",
 ]
@@ -65,12 +65,7 @@ class PyDictNSidePixels(TypedDict):
 PyDictResult = Dict[str, PyDictNSidePixels]
 
 
-###############################################################################
-# EXCEPTIONS
 
-
-class InvalidPixelValueError(Exception):
-    """Raised when a pixel-value is illegal."""
 
 
 ###############################################################################
@@ -160,8 +155,8 @@ class SkyScanResult:
                 f"Datapoint field ({field}) cannot be compared by "
                 f"'is_close_datapoint()', must use '=='"
             )
-        if field in CANNOT_BE_ZERO_FIELDS and (s_val == 0.0 or o_val == 0.0):
-            raise InvalidPixelValueError(f"field={field}, values={(s_val, o_val)}")
+        if field in ZERO_MAKES_FIELD_ALWAYS_ISCLOSE and (s_val == 0.0 or o_val == 0.0):
+            return float("nan"), True
         try:
             rdiff = (abs(s_val - o_val) - self.ATOL) / abs(o_val)  # used by np.isclose
         except ZeroDivisionError:
@@ -206,7 +201,7 @@ class SkyScanResult:
             is_pixel_disqualified = any(
                 sre_pix[self.PIXEL_TYPE.names.index(f)] == 0.0
                 or ore_pix[self.PIXEL_TYPE.names.index(f)] == 0.0
-                for f in CANNOT_BE_ZERO_FIELDS
+                for f in ZERO_MAKES_FIELD_ALWAYS_ISCLOSE
             )
 
         for s_val, o_val, field in zip(sre_pix, ore_pix, self.PIXEL_TYPE.names):
@@ -217,10 +212,7 @@ class SkyScanResult:
                 diff, test = float("nan"), True  # vacuously true
             # CASE 2: a "require close" datapoint (not disqualified-pixel)
             elif field in rtol_per_field:
-                try:
-                    diff, test = self.is_close_datapoint(s_val, o_val, field, equal_nan, rtol_per_field)
-                except InvalidPixelValueError:
-                    diff, test = float("nan"), True
+                diff, test = self.is_close_datapoint(s_val, o_val, field, equal_nan, rtol_per_field)
             # CASE 3: a "require equal" datapoint
             else:
                 diff, test = s_val - o_val, s_val == o_val
