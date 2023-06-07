@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.1.0 (2023-06-07)
+
+
+
 ## v1.0.2 (2023-05-04)
 ### Other
 * <bot> update requirements.txt ([`80f9203`](https://github.com/icecube/skyreader/commit/80f920397b36fd3e74134da331fce4c35a0d8474))
