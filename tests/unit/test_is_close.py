@@ -35,7 +35,6 @@ def test_000(json_diff: Path) -> None:
         alpha,
         equal_nan=True,
         dump_json_diff=json_diff,
-        do_disqualify_zero_energy_pixels=False,
     )
 
 
@@ -75,14 +74,12 @@ def test_010(json_diff: Path) -> None:
         beta,
         equal_nan=True,
         dump_json_diff=json_diff,
-        do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
     assert beta.is_close(
         alpha,
         equal_nan=True,
         dump_json_diff=json_diff,
-        do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
 
@@ -136,7 +133,6 @@ def test_011__fail(fail_index: int, fail_field: str, json_diff: Path) -> None:
         bigger,
         equal_nan=True,
         dump_json_diff=json_diff,
-        do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
 
@@ -164,7 +160,6 @@ def test_011__fail(fail_index: int, fail_field: str, json_diff: Path) -> None:
         alpha,
         equal_nan=True,
         dump_json_diff=json_diff,
-        do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
 
@@ -228,14 +223,12 @@ def test_020(json_diff: Path) -> None:
         beta,
         equal_nan=True,
         dump_json_diff=json_diff,
-        do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
     assert beta.is_close(
         alpha,
         equal_nan=True,
         dump_json_diff=json_diff,
-        do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
 
@@ -276,27 +269,23 @@ def test_100(json_diff: Path) -> None:
         beta,
         equal_nan=True,
         dump_json_diff=json_diff,
-        do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
     assert beta.is_close(
         alpha,
         equal_nan=True,
         dump_json_diff=json_diff,
-        do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
     assert not alpha.is_close(
         beta,
         equal_nan=False,
         dump_json_diff=json_diff,
-        do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
     assert not beta.is_close(
         alpha,
         equal_nan=False,
         dump_json_diff=json_diff,
-        do_disqualify_zero_energy_pixels=False,
         rtol_per_field=rtol_per_field,
     )
