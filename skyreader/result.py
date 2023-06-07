@@ -2,7 +2,6 @@
 
 # fmt: off
 # pylint: skip-file
-# mypy: ignore-errors
 # flake8: noqa
 
 
@@ -15,12 +14,12 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
 
-import healpy
-import matplotlib
-import meander
+import healpy  # type: ignore[import]
+import matplotlib  # type: ignore[import]
+import meander  # type: ignore[import]
 import numpy as np
-import pandas as pd
-from astropy.io import ascii
+import pandas as pd  # type: ignore[import]
+from astropy.io import ascii  # type: ignore[import]
 from matplotlib import patheffects
 from matplotlib import pyplot as plt
 from matplotlib import text
@@ -63,9 +62,6 @@ class PyDictNSidePixels(TypedDict):
 
 
 PyDictResult = Dict[str, PyDictNSidePixels]
-
-
-
 
 
 ###############################################################################
