@@ -542,7 +542,7 @@ class SkyScanResult:
                 self.result[nside],
                 columns=list(self.result[nside].dtype.names),
             )
-            pydict[nside] = {k:v for k,v in df.to_dict(orient='split') if k != 'index'}  # type: ignore[assignment]
+            pydict[nside] = {k:v for k,v in df.to_dict(orient='split').items() if k != 'index'}  # type: ignore[assignment]
             pydict[nside]['metadata'] = dict(self.result[nside].dtype.metadata)
         return pydict
 
