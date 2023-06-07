@@ -416,15 +416,22 @@ class SkyScanResult:
 
         try:
             metadata_dtype = np.dtype(
-                [(k, type(v)) if not isinstance(v, str) else (k, f"U{len(v)}")
-                 for k, v in next(iter(self.result.values())).dtype.metadata.items()],
-                )
-            h = np.array([tuple(self.result[k].dtype.metadata[mk] for mk in metadata_dtype.fields)
-                           for k in self.result],
-                         dtype=metadata_dtype)
+                [
+                    (k, type(v)) if not isinstance(v, str) else (k, f"U{len(v)}")
+                    for k, v in next(iter(self.result.values())).dtype.metadata.items()
+                ],
+            )
+            h = np.array(
+                [
+                    tuple(self.result[k].dtype.metadata[mk] for mk in metadata_dtype.fields)  # type: ignore[union-attr]
+                    for k in self.result
+                ],
+                dtype=metadata_dtype,
+            )
             np.savez(filename, header=h, **self.result)
         except (TypeError, AttributeError):
             np.savez(filename, **self.result)
+
         return Path(filename)
 
     """
@@ -529,14 +536,13 @@ class SkyScanResult:
             ...
         }
         """
-        pydict = {}
+        pydict: PyDictResult = {}
         for nside in self.result:
             df = pd.DataFrame(
                 self.result[nside],
                 columns=list(self.result[nside].dtype.names),
             )
-            pydict[nside] = df.to_dict(orient='split')
-            pydict[nside].pop('index')  # index is not necessary
+            pydict[nside] = {k:v for k,v in df.to_dict(orient='split') if k != 'index'}  # type: ignore[assignment]
             pydict[nside]['metadata'] = dict(self.result[nside].dtype.metadata)
         return pydict
 
