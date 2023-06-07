@@ -140,7 +140,7 @@ class SkyScanResult:
             for nside in self.result
         )
 
-    def is_close_datapoint(
+    def isclose_datapoint(
         self,
         s_val: float,
         o_val: float,
@@ -174,7 +174,7 @@ class SkyScanResult:
             ),
         )
 
-    def diff_pixel_data(
+    def isclose_pixel(
         self,
         sre_pix: np.ndarray,
         ore_pix: np.ndarray,
@@ -212,7 +212,7 @@ class SkyScanResult:
                 diff, test = float("nan"), True  # vacuously true
             # CASE 2: a "require close" datapoint (not disqualified-pixel)
             elif field in rtol_per_field:
-                diff, test = self.is_close_datapoint(s_val, o_val, field, equal_nan, rtol_per_field)
+                diff, test = self.isclose_datapoint(s_val, o_val, field, equal_nan, rtol_per_field)
             # CASE 3: a "require equal" datapoint
             else:
                 diff, test = s_val - o_val, s_val == o_val
@@ -262,7 +262,7 @@ class SkyScanResult:
             other.result.get(nside, []),  # empty-list -> fillvalue
             fillvalue=np.full((len(self.PIXEL_TYPE.names),), np.nan),  # 1 vector
         ):
-            diff_vals, test_vals = self.diff_pixel_data(
+            diff_vals, test_vals = self.isclose_pixel(
                 sre_pix, ore_pix, equal_nan, do_disqualify_zero_energy_pixels, rtol_per_field
             )
             pix_diff = (
