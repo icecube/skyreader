@@ -247,6 +247,57 @@ class SkyScanResult:
             self.logger.warning("Metadata doesn't seem to exist and will not be used for plotting.")
             return EventMetadata(0, 0, '', 0, False)
 
+    def isclose_nside(self,
+        other: "SkyScanResult",
+        equal_nan: bool,
+        do_disqualify_zero_energy_pixels: bool,  # TODO: remove?
+        rtol_per_field: Dict[str, float],
+        nside: str,
+    ) -> Tuple[bool, List[Tuple[Tuple[Any, ...], Tuple[Any, ...], Tuple[float, ...], Tuple[bool, ...]]]]:
+        """Get whether the two nside's pixels are all "close"."""
+        # zip-iterate each pixel-data
+        nside_diffs = []
+        for sre_pix, ore_pix in it.zip_longest(
+            self.result.get(nside, []),  # empty-list -> fillvalue
+            other.result.get(nside, []),  # empty-list -> fillvalue
+            fillvalue=np.full((len(self.PIXEL_TYPE.names),), np.nan),  # 1 vector
+        ):
+            diff_vals, test_vals = self.diff_pixel_data(
+                sre_pix, ore_pix, equal_nan, do_disqualify_zero_energy_pixels, rtol_per_field
+            )
+            pix_diff = (
+                tuple(sre_pix.tolist()),
+                tuple(ore_pix.tolist()),
+                tuple(diff_vals),  # diff float-value
+                tuple(test_vals),  # test truth-value
+            )
+            for vals in pix_diff:
+                self.logger.debug(f"{nside}: {vals}")
+            nside_diffs.append(pix_diff)
+
+        # aggregate test-truth values
+        nside_equal = {
+            field: all(
+                d[3][self.PIXEL_TYPE.names.index(field)] for d in nside_diffs
+            )
+            for field in set(self.PIXEL_TYPE.names) - set(rtol_per_field)
+        }
+        nside_close = {
+            field: all(
+                d[3][self.PIXEL_TYPE.names.index(field)] for d in nside_diffs
+            )
+            for field in rtol_per_field
+        }
+
+        # log results (test-truth values)
+        if not all(nside_equal.values()):
+            self.logger.info(f"Mismatched pixel indices for nside={nside}")
+        if not all(nside_close.values()):
+            self.logger.info(f"Mismatched numerical results for nside={nside}")
+            self.logger.debug(f"{nside_close}")
+
+        return all(nside_equal.values()) and all(nside_close.values()), nside_diffs
+
     def is_close(
         self,
         other: "SkyScanResult",
@@ -288,54 +339,11 @@ class SkyScanResult:
         # now check individual nside-iterations
         for nside in sorted(self.result.keys() & other.result.keys(), reverse=True):
             self.logger.info(f"Comparing for nside={nside}")
-
             # Q: why aren't we using np.array_equal and np.allclose?
             # A: we want detailed pixel-level diffs w/out repeating detailed code
-
-            # zip-iterate each pixel-data
-            nside_diffs = []
-            for sre_pix, ore_pix in it.zip_longest(
-                self.result.get(nside, []),  # empty-list -> fillvalue
-                other.result.get(nside, []),  # empty-list -> fillvalue
-                fillvalue=np.full((len(self.PIXEL_TYPE.names),), np.nan),  # 1 vector
-            ):
-                diff_vals, test_vals = self.diff_pixel_data(
-                    sre_pix, ore_pix, equal_nan, do_disqualify_zero_energy_pixels, rtol_per_field
-                )
-                pix_diff = [
-                    tuple(sre_pix.tolist()),
-                    tuple(ore_pix.tolist()),
-                    tuple(diff_vals),  # diff float-value
-                    tuple(test_vals),  # test truth-value
-                ]
-                for vals in pix_diff:
-                    self.logger.debug(f"{nside}: {vals}")
-                nside_diffs.append(pix_diff)
-
-            if dump_json_diff:  # can be a lot of data, so only save it if we're dumping
-                diffs[nside] = nside_diffs
-
-            # aggregate test-truth values
-            nside_equal = {
-                field: all(
-                    d[3][self.PIXEL_TYPE.names.index(field)] for d in nside_diffs
-                )
-                for field in set(self.PIXEL_TYPE.names) - set(rtol_per_field)
-            }
-            nside_close = {
-                field: all(
-                    d[3][self.PIXEL_TYPE.names.index(field)] for d in nside_diffs
-                )
-                for field in rtol_per_field
-            }
-            close[nside] = all(nside_equal.values()) and all(nside_close.values())
-
-            # log results (test-truth values)
-            if not all(nside_equal.values()):
-                self.logger.info(f"Mismatched pixel indices for nside={nside}")
-            if not all(nside_close.values()):
-                self.logger.info(f"Mismatched numerical results for nside={nside}")
-                self.logger.debug(f"{nside_close}")
+            close[nside], diffs[nside] = self.isclose_nside(
+                other, equal_nan, do_disqualify_zero_energy_pixels, rtol_per_field, nside
+            )
 
         # finish up
         self.logger.info(f"Comparison result: {close}")
