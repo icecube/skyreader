@@ -4,11 +4,11 @@
 #
 #    pip-compile --output-file=requirements.txt
 #
-astropy==5.2.2
+astropy==5.3
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
-certifi==2022.12.7
+certifi==2023.5.7
     # via requests
 charset-normalizer==3.1.0
     # via requests
@@ -16,7 +16,7 @@ contourpy==1.0.7
     # via matplotlib
 cycler==0.11.0
     # via matplotlib
-fonttools==4.39.3
+fonttools==4.39.4
     # via matplotlib
 healpy==1.16.2
     # via icecube-skyreader (setup.py)
@@ -44,7 +44,7 @@ packaging==23.1
     # via
     #   astropy
     #   matplotlib
-pandas==2.0.1
+pandas==2.0.2
     # via icecube-skyreader (setup.py)
 pillow==9.5.0
     # via matplotlib
@@ -60,17 +60,17 @@ pytz==2023.3
     # via pandas
 pyyaml==6.0
     # via astropy
-requests==2.30.0
+requests==2.31.0
     # via wipac-dev-tools
 scipy==1.10.1
     # via healpy
 six==1.16.0
     # via python-dateutil
-typing-extensions==4.5.0
+typing-extensions==4.6.3
     # via wipac-dev-tools
 tzdata==2023.3
     # via pandas
-urllib3==2.0.2
+urllib3==2.0.3
     # via requests
-wipac-dev-tools==1.6.15
+wipac-dev-tools==1.6.16
     # via icecube-skyreader (setup.py)

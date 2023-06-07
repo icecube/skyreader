@@ -2,7 +2,6 @@
 
 # fmt: off
 # pylint: skip-file
-# mypy: ignore-errors
 # flake8: noqa
 
 
@@ -15,18 +14,42 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
 
-import healpy
-import matplotlib
-import meander
+import healpy  # type: ignore[import]
+import matplotlib  # type: ignore[import]
+import meander  # type: ignore[import]
 import numpy as np
-import pandas as pd
-from astropy.io import ascii
+import pandas as pd  # type: ignore[import]
+from astropy.io import ascii  # type: ignore[import]
+from matplotlib import patheffects
 from matplotlib import pyplot as plt
-from matplotlib import text, patheffects
+from matplotlib import text
 
 from .event_metadata import EventMetadata
+from .plot.plotting_tools import (
+    DecFormatter,
+    RaFormatter,
+    format_fits_header,
+    hp_ticklabels,
+    plot_catalog,
+)
 
-from .plot.plotting_tools import format_fits_header, hp_ticklabels, plot_catalog, DecFormatter, RaFormatter
+###############################################################################
+# CONSTANTS
+
+
+# bookkeeping for comparing values
+DEFAULT_RTOL_PER_FIELD = {  # w/ rtol values
+    # any field not here is assumed to require '==' for comparison
+    "llh": 1e-4,
+    "E_in": 1e-2,
+    "E_tot": 1e-2,
+}
+ZERO_MAKES_FIELD_ALWAYS_ISCLOSE = [
+    # if a pixel field's val is 0, then that datapoint is "isclose" to any value
+    "E_in",
+    "E_tot",
+]
+
 
 ###############################################################################
 # DATA TYPES
@@ -39,14 +62,6 @@ class PyDictNSidePixels(TypedDict):
 
 
 PyDictResult = Dict[str, PyDictNSidePixels]
-
-
-###############################################################################
-# EXCPETIONS
-
-
-class InvalidPixelValueError(Exception):
-    """Raised when a pixel-value is illegal."""
 
 
 ###############################################################################
@@ -77,6 +92,7 @@ class SkyScanResult:
     PIXEL_TYPE = np.dtype(
         [("index", int), ("llh", float), ("E_in", float), ("E_tot", float)]
     )
+    PIXEL_FIELDS: Tuple[str, ...] = PIXEL_TYPE.names  # type: ignore[assignment]
     ATOL = 1.0e-8  # 1.0e-8 is the default used by np.isclose()
 
     def __init__(self, result: Dict[str, np.ndarray]):
@@ -102,18 +118,7 @@ class SkyScanResult:
 
         self.logger.debug(f"Metadata for this result: {[self.result[_].dtype.metadata for _ in self.result]}")
 
-        # bookkeeping for comparing values
-        self.require_close = {  # w/ rtol values
-            # any field not here is assumed to require '==' for comparison
-            "llh": 1e-4,
-            "E_in": 1e-2,
-            "E_tot": 1e-2,
-        }
-        self.cannot_be_zero_fields = [
-            # if field's val is 0, then all the pixel's numerical datapoints are "isclose"
-            "E_in",
-            "E_tot",
-        ]
+
 
     """
     Comparison operators and methods
@@ -132,18 +137,23 @@ class SkyScanResult:
             for nside in self.result
         )
 
-    def is_close_datapoint(
-        self, s_val: float, o_val: float, field: str, equal_nan: bool
+    def isclose_datapoint(
+        self,
+        s_val: float,
+        o_val: float,
+        field: str,
+        equal_nan: bool,
+        rtol_per_field: Dict[str, float],
     ) -> Tuple[float, bool]:
         """Get the diff float-value and test truth-value for the 2 pixel
         datapoints."""
-        if field not in self.require_close:
+        if field not in rtol_per_field:
             raise ValueError(
                 f"Datapoint field ({field}) cannot be compared by "
                 f"'is_close_datapoint()', must use '=='"
             )
-        if field in self.cannot_be_zero_fields and (s_val == 0.0 or o_val == 0.0):
-            raise InvalidPixelValueError(f"field={field}, values={(s_val, o_val)}")
+        if field in ZERO_MAKES_FIELD_ALWAYS_ISCLOSE and (s_val == 0.0 or o_val == 0.0):
+            return float("nan"), True
         try:
             rdiff = (abs(s_val - o_val) - self.ATOL) / abs(o_val)  # used by np.isclose
         except ZeroDivisionError:
@@ -155,18 +165,19 @@ class SkyScanResult:
                     s_val,
                     o_val,
                     equal_nan=equal_nan,
-                    rtol=self.require_close[field],
+                    rtol=rtol_per_field[field],
                     atol=self.ATOL,
                 )
             ),
         )
 
-    def diff_pixel_data(
+    def isclose_pixel(
         self,
         sre_pix: np.ndarray,
         ore_pix: np.ndarray,
         equal_nan: bool,
         do_disqualify_zero_energy_pixels: bool,  # TODO: remove?
+        rtol_per_field: Dict[str, float],
     ) -> Tuple[List[float], List[bool]]:
         """Get the diff float-values and test truth-values for the 2 pixel-
         data.
@@ -185,23 +196,20 @@ class SkyScanResult:
         is_pixel_disqualified = False  # TODO: remove?
         if do_disqualify_zero_energy_pixels:  # TODO: remove?
             is_pixel_disqualified = any(
-                sre_pix[self.PIXEL_TYPE.names.index(f)] == 0.0
-                or ore_pix[self.PIXEL_TYPE.names.index(f)] == 0.0
-                for f in self.cannot_be_zero_fields
+                sre_pix[self.PIXEL_FIELDS.index(f)] == 0.0
+                or ore_pix[self.PIXEL_FIELDS.index(f)] == 0.0
+                for f in ZERO_MAKES_FIELD_ALWAYS_ISCLOSE
             )
 
-        for s_val, o_val, field in zip(sre_pix, ore_pix, self.PIXEL_TYPE.names):
+        for s_val, o_val, field in zip(sre_pix, ore_pix, self.PIXEL_FIELDS):
             s_val, o_val = float(s_val), float(o_val)
 
             # CASE 1: a disqualified-pixel "require close" datapoint
-            if field in self.require_close and is_pixel_disqualified:
+            if field in rtol_per_field and is_pixel_disqualified:
                 diff, test = float("nan"), True  # vacuously true
             # CASE 2: a "require close" datapoint (not disqualified-pixel)
-            elif field in self.require_close:
-                try:
-                    diff, test = self.is_close_datapoint(s_val, o_val, field, equal_nan)
-                except InvalidPixelValueError:
-                    diff, test = float("nan"), True
+            elif field in rtol_per_field:
+                diff, test = self.isclose_datapoint(s_val, o_val, field, equal_nan, rtol_per_field)
             # CASE 3: a "require equal" datapoint
             else:
                 diff, test = s_val - o_val, s_val == o_val
@@ -236,73 +244,99 @@ class SkyScanResult:
             self.logger.warning("Metadata doesn't seem to exist and will not be used for plotting.")
             return EventMetadata(0, 0, '', 0, False)
 
+    def isclose_nside(self,
+        other: "SkyScanResult",
+        equal_nan: bool,
+        do_disqualify_zero_energy_pixels: bool,  # TODO: remove?
+        rtol_per_field: Dict[str, float],
+        nside: str,
+    ) -> Tuple[bool, List[Tuple[Tuple[Any, ...], Tuple[Any, ...], Tuple[float, ...], Tuple[bool, ...]]]]:
+        """Get whether the two nside's pixels are all "close"."""
+        # zip-iterate each pixel-data
+        nside_diffs = []
+        for sre_pix, ore_pix in it.zip_longest(
+            self.result.get(nside, []),  # empty-list -> fillvalue
+            other.result.get(nside, []),  # empty-list -> fillvalue
+            fillvalue=np.full((len(self.PIXEL_FIELDS),), np.nan),  # 1 vector
+        ):
+            diff_vals, test_vals = self.isclose_pixel(
+                sre_pix, ore_pix, equal_nan, do_disqualify_zero_energy_pixels, rtol_per_field
+            )
+            pix_diff = (
+                tuple(sre_pix.tolist()),
+                tuple(ore_pix.tolist()),
+                tuple(diff_vals),  # diff float-value
+                tuple(test_vals),  # test truth-value
+            )
+            for vals in pix_diff:
+                self.logger.debug(f"{nside}: {vals}")
+            nside_diffs.append(pix_diff)
+
+        # aggregate test-truth values
+        nside_equal = {
+            field: all(d[3][self.PIXEL_FIELDS.index(field)] for d in nside_diffs)
+            for field in set(self.PIXEL_FIELDS) - set(rtol_per_field)
+        }
+        nside_close = {
+            field: all(d[3][self.PIXEL_FIELDS.index(field)] for d in nside_diffs)
+            for field in rtol_per_field
+        }
+
+        # log results (test-truth values)
+        if not all(nside_equal.values()):
+            self.logger.info(f"Mismatched pixel indices for nside={nside}")
+        if not all(nside_close.values()):
+            self.logger.info(f"Mismatched numerical results for nside={nside}")
+            self.logger.debug(f"{nside_close}")
+
+        return all(nside_equal.values()) and all(nside_close.values()), nside_diffs
+
     def is_close(
         self,
         other: "SkyScanResult",
         equal_nan: bool = True,
         dump_json_diff: Optional[Path] = None,
         do_disqualify_zero_energy_pixels: bool = False,  # TODO: remove?
+        rtol_per_field: Optional[Dict[str, float]] = None,
     ) -> bool:
         """Checks if two results are close by requiring strict equality on
         pixel indices and close condition on numeric results.
 
-        Optionally, pass a `Path` for `dump_json_diff` to get a json
-        file containing every diff at the pixel-data level.
+        Args:
+            `other`
+                the instance to compare
+            `equal_nan`
+                whether to let `nan == nan` be True
+                (default: `True`)
+            `dump_json_diff`
+                get a json file containing every comparison at the pixel-data level
+                (default: `None`)
+            `do_disqualify_zero_energy_pixels`
+                If `do_disqualify_zero_energy_pixels=True` and there's an
+                invalid datapoint value in either array, all "require close"
+                datapoints are considered (vacuously) close enough. # TODO: remove?
+                (default: `False`)
+            `rtol_per_field`
+                a mapping of each field to a rtol value
+                (default: `DEFAULT_RTOL_PER_FIELD`)
+
+        Returns:
+            bool: True if `other` and `self` are close
         """
+        if not rtol_per_field:
+            rtol_per_field = DEFAULT_RTOL_PER_FIELD
+
         close: Dict[str, bool] = {}  # one bool for each nside value
         diffs: Dict[str, list] = {}  # (~4x size of self.results) w/ per-pixel info
 
         # now check individual nside-iterations
         for nside in sorted(self.result.keys() & other.result.keys(), reverse=True):
             self.logger.info(f"Comparing for nside={nside}")
-
             # Q: why aren't we using np.array_equal and np.allclose?
             # A: we want detailed pixel-level diffs w/out repeating detailed code
-
-            # zip-iterate each pixel-data
-            nside_diffs = []
-            for sre_pix, ore_pix in it.zip_longest(
-                self.result.get(nside, []),  # empty-list -> fillvalue
-                other.result.get(nside, []),  # empty-list -> fillvalue
-                fillvalue=np.full((len(self.PIXEL_TYPE.names),), np.nan),  # 1 vector
-            ):
-                diff_vals, test_vals = self.diff_pixel_data(
-                    sre_pix, ore_pix, equal_nan, do_disqualify_zero_energy_pixels
-                )
-                pix_diff = [
-                    tuple(sre_pix.tolist()),
-                    tuple(ore_pix.tolist()),
-                    tuple(diff_vals),  # diff float-value
-                    tuple(test_vals),  # test truth-value
-                ]
-                for vals in pix_diff:
-                    self.logger.debug(f"{nside}: {vals}")
-                nside_diffs.append(pix_diff)
-
-            if dump_json_diff:  # can be a lot of data, so only save it if we're dumping
-                diffs[nside] = nside_diffs
-
-            # aggregate test-truth values
-            nside_equal = {
-                field: all(
-                    d[3][self.PIXEL_TYPE.names.index(field)] for d in nside_diffs
-                )
-                for field in set(self.PIXEL_TYPE.names) - set(self.require_close)
-            }
-            nside_close = {
-                field: all(
-                    d[3][self.PIXEL_TYPE.names.index(field)] for d in nside_diffs
-                )
-                for field in self.require_close
-            }
-            close[nside] = all(nside_equal.values()) and all(nside_close.values())
-
-            # log results (test-truth values)
-            if not all(nside_equal.values()):
-                self.logger.info(f"Mismatched pixel indices for nside={nside}")
-            if not all(nside_close.values()):
-                self.logger.info(f"Mismatched numerical results for nside={nside}")
-                self.logger.debug(f"{nside_close}")
+            close[nside], diffs[nside] = self.isclose_nside(
+                other, equal_nan, do_disqualify_zero_energy_pixels, rtol_per_field, nside
+            )
 
         # finish up
         self.logger.info(f"Comparison result: {close}")
@@ -365,7 +399,10 @@ class SkyScanResult:
             h = npz["header"]
             for v in h:
                 key = cls.format_nside(v['nside'])
-                _dtype = np.dtype(npz[key].dtype, metadata={k:value for k, value in zip(h.dtype.fields.keys(), v)})
+                _dtype = np.dtype(
+                    npz[key].dtype,
+                    metadata={k:value for k, value in zip(h.dtype.fields.keys(), v)},  # type: ignore[call-overload]
+                )
                 result[key] = np.array(list(npz[key]), dtype=_dtype)
         return cls(result=result)
 
@@ -379,15 +416,22 @@ class SkyScanResult:
 
         try:
             metadata_dtype = np.dtype(
-                [(k, type(v)) if not isinstance(v, str) else (k, f"U{len(v)}")
-                 for k, v in next(iter(self.result.values())).dtype.metadata.items()],
-                )
-            h = np.array([tuple(self.result[k].dtype.metadata[mk] for mk in metadata_dtype.fields)
-                           for k in self.result],
-                         dtype=metadata_dtype)
+                [
+                    (k, type(v)) if not isinstance(v, str) else (k, f"U{len(v)}")
+                    for k, v in next(iter(self.result.values())).dtype.metadata.items()
+                ],
+            )
+            h = np.array(
+                [
+                    tuple(self.result[k].dtype.metadata[mk] for mk in metadata_dtype.fields)  # type: ignore[union-attr]
+                    for k in self.result
+                ],
+                dtype=metadata_dtype,
+            )
             np.savez(filename, header=h, **self.result)
         except (TypeError, AttributeError):
             np.savez(filename, **self.result)
+
         return Path(filename)
 
     """
@@ -428,10 +472,10 @@ class SkyScanResult:
                 raise ValueError(f"PyDictResult entry has extra/missing keys: {pydict_nside_pixels.keys()}")
 
             # check 'columns'
-            if pydict_nside_pixels['columns'] != list(cls.PIXEL_TYPE.names):  # type: ignore[arg-type]
+            if pydict_nside_pixels['columns'] != list(cls.PIXEL_FIELDS):
                 raise ValueError(
                     f"PyDictResult entry has invalid 'columns' entry "
-                    f"({pydict_nside_pixels['columns']}) should be {list(cls.PIXEL_TYPE.names)}"  # type: ignore[arg-type]
+                    f"({pydict_nside_pixels['columns']}) should be {list(cls.PIXEL_FIELDS)}"
                 )
 
             # check 'metadata'
@@ -445,7 +489,10 @@ class SkyScanResult:
                 raise ValueError("PyDictResult entry has missing key 'nside'") from e
 
             # read/convert
-            _dtype = np.dtype(cls.PIXEL_TYPE, metadata=pydict_nside_pixels['metadata'])
+            _dtype = np.dtype(
+                cls.PIXEL_TYPE,
+                metadata=pydict_nside_pixels['metadata'],  # type: ignore[call-overload]
+            )
             result_nside_pixels = np.zeros(len(pydict_nside_pixels['data']), dtype=_dtype)
             for i, pix_4list in enumerate(sorted(pydict_nside_pixels['data'], key=lambda x: x[0])):
                 result_nside_pixels[i] = tuple(pix_4list)
@@ -489,14 +536,13 @@ class SkyScanResult:
             ...
         }
         """
-        pydict = {}
+        pydict: PyDictResult = {}
         for nside in self.result:
             df = pd.DataFrame(
                 self.result[nside],
                 columns=list(self.result[nside].dtype.names),
             )
-            pydict[nside] = df.to_dict(orient='split')
-            pydict[nside].pop('index')  # index is not necessary
+            pydict[nside] = {k:v for k,v in df.to_dict(orient='split').items() if k != 'index'}  # type: ignore[assignment]
             pydict[nside]['metadata'] = dict(self.result[nside].dtype.metadata)
         return pydict
 
