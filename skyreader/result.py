@@ -92,6 +92,7 @@ class SkyScanResult:
     PIXEL_TYPE = np.dtype(
         [("index", int), ("llh", float), ("E_in", float), ("E_tot", float)]
     )
+    PIXEL_FIELDS: Tuple[str, ...] = PIXEL_TYPE.names  # type: ignore[assignment]
     ATOL = 1.0e-8  # 1.0e-8 is the default used by np.isclose()
 
     def __init__(self, result: Dict[str, np.ndarray]):
@@ -195,12 +196,12 @@ class SkyScanResult:
         is_pixel_disqualified = False  # TODO: remove?
         if do_disqualify_zero_energy_pixels:  # TODO: remove?
             is_pixel_disqualified = any(
-                sre_pix[self.PIXEL_TYPE.names.index(f)] == 0.0
-                or ore_pix[self.PIXEL_TYPE.names.index(f)] == 0.0
+                sre_pix[self.PIXEL_FIELDS.index(f)] == 0.0
+                or ore_pix[self.PIXEL_FIELDS.index(f)] == 0.0
                 for f in ZERO_MAKES_FIELD_ALWAYS_ISCLOSE
             )
 
-        for s_val, o_val, field in zip(sre_pix, ore_pix, self.PIXEL_TYPE.names):
+        for s_val, o_val, field in zip(sre_pix, ore_pix, self.PIXEL_FIELDS):
             s_val, o_val = float(s_val), float(o_val)
 
             # CASE 1: a disqualified-pixel "require close" datapoint
@@ -256,7 +257,7 @@ class SkyScanResult:
         for sre_pix, ore_pix in it.zip_longest(
             self.result.get(nside, []),  # empty-list -> fillvalue
             other.result.get(nside, []),  # empty-list -> fillvalue
-            fillvalue=np.full((len(self.PIXEL_TYPE.names),), np.nan),  # 1 vector
+            fillvalue=np.full((len(self.PIXEL_FIELDS),), np.nan),  # 1 vector
         ):
             diff_vals, test_vals = self.isclose_pixel(
                 sre_pix, ore_pix, equal_nan, do_disqualify_zero_energy_pixels, rtol_per_field
@@ -273,15 +274,11 @@ class SkyScanResult:
 
         # aggregate test-truth values
         nside_equal = {
-            field: all(
-                d[3][self.PIXEL_TYPE.names.index(field)] for d in nside_diffs
-            )
-            for field in set(self.PIXEL_TYPE.names) - set(rtol_per_field)
+            field: all(d[3][self.PIXEL_FIELDS.index(field)] for d in nside_diffs)
+            for field in set(self.PIXEL_FIELDS) - set(rtol_per_field)
         }
         nside_close = {
-            field: all(
-                d[3][self.PIXEL_TYPE.names.index(field)] for d in nside_diffs
-            )
+            field: all(d[3][self.PIXEL_FIELDS.index(field)] for d in nside_diffs)
             for field in rtol_per_field
         }
 
@@ -402,7 +399,10 @@ class SkyScanResult:
             h = npz["header"]
             for v in h:
                 key = cls.format_nside(v['nside'])
-                _dtype = np.dtype(npz[key].dtype, metadata={k:value for k, value in zip(h.dtype.fields.keys(), v)})
+                _dtype = np.dtype(
+                    npz[key].dtype,
+                    metadata={k:value for k, value in zip(h.dtype.fields.keys(), v)},  # type: ignore[call-overload]
+                )
                 result[key] = np.array(list(npz[key]), dtype=_dtype)
         return cls(result=result)
 
@@ -465,10 +465,10 @@ class SkyScanResult:
                 raise ValueError(f"PyDictResult entry has extra/missing keys: {pydict_nside_pixels.keys()}")
 
             # check 'columns'
-            if pydict_nside_pixels['columns'] != list(cls.PIXEL_TYPE.names):  # type: ignore[arg-type]
+            if pydict_nside_pixels['columns'] != list(cls.PIXEL_FIELDS):
                 raise ValueError(
                     f"PyDictResult entry has invalid 'columns' entry "
-                    f"({pydict_nside_pixels['columns']}) should be {list(cls.PIXEL_TYPE.names)}"  # type: ignore[arg-type]
+                    f"({pydict_nside_pixels['columns']}) should be {list(cls.PIXEL_FIELDS)}"
                 )
 
             # check 'metadata'
@@ -482,7 +482,10 @@ class SkyScanResult:
                 raise ValueError("PyDictResult entry has missing key 'nside'") from e
 
             # read/convert
-            _dtype = np.dtype(cls.PIXEL_TYPE, metadata=pydict_nside_pixels['metadata'])
+            _dtype = np.dtype(
+                cls.PIXEL_TYPE,
+                metadata=pydict_nside_pixels['metadata'],  # type: ignore[call-overload]
+            )
             result_nside_pixels = np.zeros(len(pydict_nside_pixels['data']), dtype=_dtype)
             for i, pix_4list in enumerate(sorted(pydict_nside_pixels['data'], key=lambda x: x[0])):
                 result_nside_pixels[i] = tuple(pix_4list)
