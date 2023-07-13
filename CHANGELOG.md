@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.2 (2023-07-13)
+
+### Other
+
+* Empty Result Fix (No File) ([#12](https://github.com/icecube/skyreader/issues/12)) ([`0faec0d`](https://github.com/icecube/skyreader/commit/0faec0dd6c3c8fdcc43a03429ecddd98c5cd3de4))
+
 ## v1.2.1 (2023-07-13)
 
 ### Other
