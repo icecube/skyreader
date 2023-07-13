@@ -394,6 +394,12 @@ class SkyScanResult:
         filename = self.get_filename(event_metadata, '.npz', output_dir)
 
         try:
+            first = next(iter(self.result.values()))
+        except StopIteration: # no results yet
+            np.savez(filename, **self.result)
+            return Path(filename)
+
+        try:
             metadata_dtype = np.dtype(
                 [
                     (k, type(v)) if not isinstance(v, str) else (k, f"U{len(v)}")
