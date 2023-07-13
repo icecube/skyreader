@@ -390,20 +390,26 @@ class SkyScanResult:
         filename = self.get_filename(event_metadata, '.npz', output_dir)
 
         try:
+            first = next(iter(self.result.values()))
+        except StopIteration: # no results yet
+            np.savez(filename, **self.result)
+            return Path(filename)
+
+        try:
             metadata_dtype = np.dtype(
                 [
                     (k, type(v)) if not isinstance(v, str) else (k, f"U{len(v)}")
-                    for k, v in next(iter(self.result.values())).dtype.metadata.items()
+                    for k, v in first.dtype.metadata.items()
                 ],
             )
-            h = np.array(
+            header = np.array(
                 [
                     tuple(self.result[k].dtype.metadata[mk] for mk in metadata_dtype.fields)  # type: ignore[union-attr]
                     for k in self.result
                 ],
                 dtype=metadata_dtype,
             )
-            np.savez(filename, header=h, **self.result)
+            np.savez(filename, header=header, **self.result)
         except (TypeError, AttributeError):
             np.savez(filename, **self.result)
 
