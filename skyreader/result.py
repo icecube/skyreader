@@ -353,7 +353,11 @@ class SkyScanResult:
         if not extension.startswith('.'):
             extension = '.' + extension
 
-        filename = Path(f"{str(event_metadata)}_{self.get_nside_string()}{extension}")
+        if nside_string := self.get_nside_string():
+            filename = Path(f"{str(event_metadata)}_{nside_string}{extension}")
+        else:
+            raise ValueError("cannot create filename for an empty result")
+
         if output_dir is not None:
             filename = output_dir / Path(filename)
         return filename
