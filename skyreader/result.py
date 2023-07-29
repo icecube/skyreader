@@ -68,12 +68,13 @@ PyDictResult = Dict[str, PyDictNSidePixels]
 # MAIN CLASS
 
 class SkyScanResult:
-    """This class parses a nsides_dict and stores the relevant numeric result
+    """This class parses a scan result and stores the relevant numeric results
     of the scan. Ideally it should serve as the basic data structure for
     plotting / processing / transmission of the scan result.
 
-    nsides_dict is a dictionary keyed by 'nside' values for which a scan
-    result is available (e.g. 8, 64, 512), see `pixel_classes.NSidesDict`.
+    `result` is a dictionary keyed by 'nside: str' values for which a scan
+    result is available (e.g. 8, 64, 512).
+
     The scan result is a dictionary:
     - i (pixel index, integer) ->
         'frame', 'llh', 'recoLossesInside', 'recoLossesTotal'
@@ -88,13 +89,14 @@ class SkyScanResult:
 
     TODO: implement FITS output.
     """
-    METADATA_KEYS: Final[List[str]] = "run_id event_id mjd event_type nside".split()
 
     PIXEL_TYPE = np.dtype(
         [("index", int), ("llh", float), ("E_in", float), ("E_tot", float)]
     )
     PIXEL_FIELDS: Tuple[str, ...] = PIXEL_TYPE.names  # type: ignore[assignment]
     ATOL = 1.0e-8  # 1.0e-8 is the default used by np.isclose()
+
+    METADATA_FIELDS: Final[List[str]] = "run_id event_id mjd event_type nside".split()
 
     def __init__(self, result: Dict[str, np.ndarray]):
         self.logger = logging.getLogger(__name__)
@@ -204,7 +206,7 @@ class SkyScanResult:
 
     def has_metadata(self) -> bool:
         """Check that the minimum metadata is set."""
-        for mk in self.METADATA_KEYS:
+        for mk in self.METADATA_FIELDS:
             for k in self.result:
                 if self.result[k].dtype.metadata is None:
                     return False
