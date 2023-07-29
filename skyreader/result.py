@@ -12,7 +12,7 @@ import logging
 import pickle
 from functools import cached_property
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
+from typing import Any, Dict, Final, List, Optional, Tuple, TypedDict, Union
 
 import healpy  # type: ignore[import]
 import matplotlib  # type: ignore[import]
@@ -88,6 +88,7 @@ class SkyScanResult:
 
     TODO: implement FITS output.
     """
+    METADATA_KEYS: Final[List[str]] = "run_id event_id mjd event_type nside".split()
 
     PIXEL_TYPE = np.dtype(
         [("index", int), ("llh", float), ("E_in", float), ("E_tot", float)]
@@ -203,7 +204,7 @@ class SkyScanResult:
 
     def has_metadata(self) -> bool:
         """Check that the minimum metadata is set."""
-        for mk in "run_id event_id mjd event_type nside".split():
+        for mk in self.METADATA_KEYS:
             for k in self.result:
                 if self.result[k].dtype.metadata is None:
                     return False
@@ -523,12 +524,18 @@ class SkyScanResult:
         """
         pydict: PyDictResult = {}
         for nside in self.result:
+            nside_data: np.ndarray = self.result[nside]
             df = pd.DataFrame(
-                self.result[nside],
-                columns=list(self.result[nside].dtype.names),
+                nside_data,
+                columns=list(nside_data.dtype.names),
             )
             pydict[nside] = {k:v for k,v in df.to_dict(orient='split').items() if k != 'index'}  # type: ignore[assignment]
-            pydict[nside]['metadata'] = dict(self.result[nside].dtype.metadata)
+            pydict[nside]['metadata'] = dict()
+
+            for key in nside_data.dtype.metadata:
+                # dtype.metadata is a mappingproxy (dict-like) containing numpy-typed values
+                # convert numpy types to python bultins to be JSON-friendly
+                pydict[nside]['metadata'][key] = nside_data.dtype.metadata[key].item()
         return pydict
 
     """
@@ -952,7 +959,7 @@ class SkyScanResult:
             contour_labels = [r'50% (IC160427A syst.)', r'90% (IC160427A syst.)']
             contour_colors=['k', 'r']
         else:
-            # # Wilk's
+            # Wilks
             contour_levels = (np.array([1.39, 4.61, 11.83, 28.74])+min_value)[:3]
             contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
             contour_colors=['k', 'r', 'g', 'b'][:3]
@@ -1240,7 +1247,7 @@ class SkyScanResult:
         if systematics is True:
             title = "Millipede contour, assuming IC160427A systematics:"
         else:
-            title = "Millipede contour, assuming Wilk's Theorum:"
+            title = "Millipede contour, assuming Wilks' Theorem:"
 
         for i, ch in enumerate(final_channels):
             imgdata = io.BytesIO()
