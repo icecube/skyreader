@@ -12,13 +12,14 @@ jobs:
 
     strategy:
         matrix:
-            python-version: [ 3.10, 3.11, 3.12 ]
+            python-version: [ "3.10", "3.11", "3.12" ]
+#            input-file: 
 
     steps:
       - name: Checkout main repository
         uses: actions/checkout@v3
 
-      - name: Checkout test data
+      - name: Checkout test data from skymap_scanner
         uses: actions/checkout@v3
         with:
           repository: icecube/skymap_scanner
@@ -37,4 +38,4 @@ jobs:
 
       - name: Run Python script
         # working-directory: auxiliary-repo/path/to/directory  # Replace 'path/to/directory' with the path to the directory containing your Python script
-        run: examples/npz_to_json.py --input-file skymap_scanner/tests/data/results_npz/millipede_wilks/run00136662.evt000035405932.neutrino_1.npz --output-dir .
+        run: examples/npz_to_json.py --input-file skymap_scanner/tests/data/results_npz/millipede_wilks/run00136662.evt000035405932.neutrino_1.npz- --output-dir .
