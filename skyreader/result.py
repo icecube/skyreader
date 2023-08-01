@@ -204,9 +204,9 @@ class SkyScanResult:
 
         return diff_vals, test_vals
 
-    def has_metadata(self) -> bool:
+    def has_minimal_metadata(self) -> bool:
         """Check that the minimum metadata is set."""
-        for mk in self.METADATA_FIELDS:
+        for mk in self.MINIMAL_METADATA_FIELDS:
             for k in self.result:
                 if self.result[k].dtype.metadata is None:
                     return False
@@ -216,7 +216,7 @@ class SkyScanResult:
 
     def get_event_metadata(self) -> EventMetadata:
         """Get the EventMetadata portion of the result's metadata."""
-        if self.has_metadata():
+        if self.has_minimal_metadata():
             first_metadata = self.result[list(self.result.keys())[0]].dtype.metadata
             return EventMetadata(
                 first_metadata['run_id'],
