@@ -41,8 +41,9 @@ jobs:
         # working-directory: auxiliary-repo/path/to/directory  # Replace 'path/to/directory' with the path to the directory containing your Python script
         run: python examples/npz_to_json.py --input-file skymap_scanner/tests/data/results_npz/${{ matrix.input-file }}.npz --output-dir .
     
-      - name: Compare output
-        run: |
-            tree
-            outfile=$(ls -Art | tail -n 1)
-            diff $outfile skymap_scanner/tests/data/results_json/${{ matrix.input-file }}.json
+      # Wait for skymap_scanner PR#163
+      # - name: Compare output
+      #   run: |
+      #       tree
+      #       outfile=$(ls -Art | tail -n 1)
+      #       diff $outfile skymap_scanner/tests/data/results_json/${{ matrix.input-file }}.json
