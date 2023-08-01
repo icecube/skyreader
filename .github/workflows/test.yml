@@ -13,7 +13,7 @@ jobs:
     strategy:
         fail-fast: false # run all tests even if one fails
         matrix:
-            python-version: [ "3.9", "3.10", "3.11"]
+            python-version: [ "3.9", "3.10", "3.11"],
             input-file: [ "results_npz/millipede_wilks/run00136662.evt000035405932.neutrino_1.npz" ]
 
     steps:
