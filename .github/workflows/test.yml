@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+        fail-fast: false # run all tests even if one fails
         matrix:
             python-version: [ "3.9", "3.10", "3.11"]
 #            input-file: 
@@ -38,4 +39,4 @@ jobs:
 
       - name: Run Python script
         # working-directory: auxiliary-repo/path/to/directory  # Replace 'path/to/directory' with the path to the directory containing your Python script
-        run: examples/npz_to_json.py --input-file skymap_scanner/tests/data/results_npz/millipede_wilks/run00136662.evt000035405932.neutrino_1.npz- --output-dir .
+        run: python examples/npz_to_json.py --input-file skymap_scanner/tests/data/results_npz/millipede_wilks/run00136662.evt000035405932.neutrino_1.npz- --output-dir .
