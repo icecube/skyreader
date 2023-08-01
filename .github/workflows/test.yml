@@ -14,7 +14,7 @@ jobs:
         fail-fast: false # run all tests even if one fails
         matrix:
             python-version: [ "3.9", "3.10", "3.11"],
-            input-file: [ "results_npz/millipede_wilks/run00136662.evt000035405932.neutrino_1.npz" ]
+            input-file: [ "millipede_wilks/run00136662.evt000035405932.neutrino_1" ]
 
     steps:
       - name: Checkout main repository
@@ -37,6 +37,11 @@ jobs:
         run: |
           pip install .
 
-      - name: Run Python script
+      - name: Run conversion script
         # working-directory: auxiliary-repo/path/to/directory  # Replace 'path/to/directory' with the path to the directory containing your Python script
-        run: python examples/npz_to_json.py --input-file skymap_scanner/tests/data/${{ matrix.input-file }} --output-dir .
+        run: python examples/npz_to_json.py --input-file skymap_scanner/tests/data/results_npz/${{ matrix.input-file }}.npz --output-dir .
+    
+      - name: Compare output
+        run: |
+            outfile=$(ls -Art | tail -n 1)
+            diff $outfile skymap_scanner/tests/data/results_json/${{ matrix.input-file }}.json
