@@ -34,7 +34,7 @@ matplotlib==3.7.2
     #   icecube-skyreader (setup.py)
 meander==0.0.3
     # via icecube-skyreader (setup.py)
-numpy==1.25.1
+numpy==1.25.2
     # via
     #   astropy
     #   contourpy
