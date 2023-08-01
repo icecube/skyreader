@@ -43,5 +43,6 @@ jobs:
     
       - name: Compare output
         run: |
+            tree
             outfile=$(ls -Art | tail -n 1)
             diff $outfile skymap_scanner/tests/data/results_json/${{ matrix.input-file }}.json
