@@ -107,7 +107,7 @@ jobs:
       - name: pip install
         run: |
           pip install --upgrade pip wheel setuptools
-          pip install ..
+          pip install .
       - name: Run conversion script
         # working-directory: auxiliary-repo/path/to/directory  # Replace 'path/to/directory' with the path to the directory containing your Python script
         run: |
