@@ -95,7 +95,7 @@ jobs:
         input-file: [ "millipede_wilks/run00136662.evt000035405932.neutrino_1" ]
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.py3 }}
       - uses: actions/checkout@v3
@@ -107,10 +107,7 @@ jobs:
       - name: pip install
         run: |
           pip install --upgrade pip wheel setuptools
-          pip install .
-          - name: Install
-          run: |
-            pip install .
+          pip install ..
       - name: Run conversion script
         # working-directory: auxiliary-repo/path/to/directory  # Replace 'path/to/directory' with the path to the directory containing your Python script
         run: |
