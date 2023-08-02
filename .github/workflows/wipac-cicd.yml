@@ -95,7 +95,7 @@ jobs:
         input-file: [ "millipede_wilks/run00136662.evt000035405932.neutrino_1" ]
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.py3 }}
       - uses: actions/checkout@v3
