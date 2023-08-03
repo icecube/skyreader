@@ -18,7 +18,7 @@ cycler==0.11.0
     # via matplotlib
 exceptiongroup==1.1.2
     # via pytest
-fonttools==4.41.1
+fonttools==4.42.0
     # via matplotlib
 healpy==1.16.3
     # via icecube-skyreader (setup.py)
