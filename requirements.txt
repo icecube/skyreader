@@ -8,7 +8,7 @@ astropy==5.3.1
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
-certifi==2023.5.7
+certifi==2023.7.22
     # via requests
 charset-normalizer==3.2.0
     # via requests
@@ -16,7 +16,7 @@ contourpy==1.1.0
     # via matplotlib
 cycler==0.11.0
     # via matplotlib
-fonttools==4.41.0
+fonttools==4.41.1
     # via matplotlib
 healpy==1.16.3
     # via icecube-skyreader (setup.py)
@@ -30,7 +30,7 @@ matplotlib==3.7.2
     #   icecube-skyreader (setup.py)
 meander==0.0.3
     # via icecube-skyreader (setup.py)
-numpy==1.25.1
+numpy==1.25.2
     # via
     #   astropy
     #   contourpy
@@ -58,7 +58,7 @@ python-dateutil==2.8.2
     #   pandas
 pytz==2023.3
     # via pandas
-pyyaml==6.0
+pyyaml==6.0.1
     # via astropy
 requests==2.31.0
     # via wipac-dev-tools
@@ -70,7 +70,7 @@ typing-extensions==4.7.1
     # via wipac-dev-tools
 tzdata==2023.3
     # via pandas
-urllib3==2.0.3
+urllib3==2.0.4
     # via requests
 wipac-dev-tools==1.6.16
     # via icecube-skyreader (setup.py)

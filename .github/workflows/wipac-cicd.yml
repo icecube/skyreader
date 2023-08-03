@@ -84,6 +84,48 @@ jobs:
         if: always()
         run: |
           more *.json | cat
+    
+  functionality-tests:
+    needs: [py-versions]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py3: ${{ fromJSON(needs.py-versions.outputs.matrix) }}
+        input-file: [ "millipede_wilks/run00136662.evt000035405932.neutrino_1" ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.py3 }}
+      - uses: actions/checkout@v3
+        with:
+          repository: icecube/skymap_scanner
+          ref: main
+          path: skymap_scanner
+          sparse-checkout: tests/data
+      - name: pip install
+        run: |
+          pip install --upgrade pip wheel setuptools
+          pip install .
+      - name: Run conversion script
+        # working-directory: auxiliary-repo/path/to/directory  # Replace 'path/to/directory' with the path to the directory containing your Python script
+        run: |
+          python examples/npz_to_json.py --input-file skymap_scanner/tests/data/results_npz/${{ matrix.input-file }}.npz --output-dir .
+          cat $(ls -Art | tail -n 1) # cat outfile
+      
+        # Wait for skymap_scanner PR#163
+        # - name: Compare output
+        #   run: |
+        #       tree
+        #       outfile=$(ls -Art | tail -n 1)
+        #       diff $outfile skymap_scanner/tests/data/results_json/${{ matrix.input-file }}.json
+    
+        
+
+                  
+        
+
 
   release:
     # only run on main/master/default

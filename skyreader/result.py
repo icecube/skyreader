@@ -12,7 +12,7 @@ import logging
 import pickle
 from functools import cached_property
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
+from typing import Any, Dict, Final, List, Optional, Tuple, TypedDict, Union
 
 import healpy  # type: ignore[import]
 import matplotlib  # type: ignore[import]
@@ -68,12 +68,13 @@ PyDictResult = Dict[str, PyDictNSidePixels]
 # MAIN CLASS
 
 class SkyScanResult:
-    """This class parses a nsides_dict and stores the relevant numeric result
+    """This class parses a scan result and stores the relevant numeric results
     of the scan. Ideally it should serve as the basic data structure for
     plotting / processing / transmission of the scan result.
 
-    nsides_dict is a dictionary keyed by 'nside' values for which a scan
-    result is available (e.g. 8, 64, 512), see `pixel_classes.NSidesDict`.
+    `result` is a dictionary keyed by 'nside: str' values for which a scan
+    result is available (e.g. 8, 64, 512).
+
     The scan result is a dictionary:
     - i (pixel index, integer) ->
         'frame', 'llh', 'recoLossesInside', 'recoLossesTotal'
@@ -94,6 +95,8 @@ class SkyScanResult:
     )
     PIXEL_FIELDS: Tuple[str, ...] = PIXEL_TYPE.names  # type: ignore[assignment]
     ATOL = 1.0e-8  # 1.0e-8 is the default used by np.isclose()
+
+    MINIMAL_METADATA_FIELDS: Final[List[str]] = "run_id event_id mjd event_type nside".split()
 
     def __init__(self, result: Dict[str, np.ndarray]):
         self.logger = logging.getLogger(__name__)
@@ -201,9 +204,9 @@ class SkyScanResult:
 
         return diff_vals, test_vals
 
-    def has_metadata(self) -> bool:
+    def has_minimal_metadata(self) -> bool:
         """Check that the minimum metadata is set."""
-        for mk in "run_id event_id mjd event_type nside".split():
+        for mk in self.MINIMAL_METADATA_FIELDS:
             for k in self.result:
                 if self.result[k].dtype.metadata is None:
                     return False
@@ -213,7 +216,7 @@ class SkyScanResult:
 
     def get_event_metadata(self) -> EventMetadata:
         """Get the EventMetadata portion of the result's metadata."""
-        if self.has_metadata():
+        if self.has_minimal_metadata():
             first_metadata = self.result[list(self.result.keys())[0]].dtype.metadata
             return EventMetadata(
                 first_metadata['run_id'],
@@ -523,12 +526,18 @@ class SkyScanResult:
         """
         pydict: PyDictResult = {}
         for nside in self.result:
+            nside_data: np.ndarray = self.result[nside]
             df = pd.DataFrame(
-                self.result[nside],
-                columns=list(self.result[nside].dtype.names),
+                nside_data,
+                columns=list(nside_data.dtype.names),
             )
             pydict[nside] = {k:v for k,v in df.to_dict(orient='split').items() if k != 'index'}  # type: ignore[assignment]
-            pydict[nside]['metadata'] = dict(self.result[nside].dtype.metadata)
+            pydict[nside]['metadata'] = dict()
+
+            for key in nside_data.dtype.metadata:
+                # dtype.metadata is a mappingproxy (dict-like) containing numpy-typed values
+                # convert numpy types to python bultins to be JSON-friendly
+                pydict[nside]['metadata'][key] = nside_data.dtype.metadata[key].item()
         return pydict
 
     """
@@ -952,7 +961,7 @@ class SkyScanResult:
             contour_labels = [r'50% (IC160427A syst.)', r'90% (IC160427A syst.)']
             contour_colors=['k', 'r']
         else:
-            # # Wilk's
+            # Wilks
             contour_levels = (np.array([1.39, 4.61, 11.83, 28.74])+min_value)[:3]
             contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
             contour_colors=['k', 'r', 'g', 'b'][:3]
@@ -1240,7 +1249,7 @@ class SkyScanResult:
         if systematics is True:
             title = "Millipede contour, assuming IC160427A systematics:"
         else:
-            title = "Millipede contour, assuming Wilk's Theorum:"
+            title = "Millipede contour, assuming Wilks' Theorem:"
 
         for i, ch in enumerate(final_channels):
             imgdata = io.BytesIO()
