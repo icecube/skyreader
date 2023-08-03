@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.3 (2023-08-03)
+
+### Other
+
+* Pin `python-semantic-release/python-semantic-release@v7.34.6` ([#17](https://github.com/icecube/skyreader/issues/17)) ([`c2f6cc4`](https://github.com/icecube/skyreader/commit/c2f6cc4b6bc5c489030b0d0123dde156cc79682d))
+* <bot> update requirements.txt ([`8d5863f`](https://github.com/icecube/skyreader/commit/8d5863f4077404fc9e68b198199544fa3a36bb7c))
+* <bot> update requirements-tests.txt ([`76dded5`](https://github.com/icecube/skyreader/commit/76dded5feeccf05babdfead4b1ca54251bb0e731))
+* <bot> update requirements-examples.txt ([`cb4bd36`](https://github.com/icecube/skyreader/commit/cb4bd3625b092eaaa0aa8392b89fa666c6024657))
+* Fix serialization ([#16](https://github.com/icecube/skyreader/issues/16)) ([`5b756cc`](https://github.com/icecube/skyreader/commit/5b756cc271f958d6e1cf620f569a926af66c62d0))
+
 ## v1.2.2 (2023-07-13)
 
 ### Other
