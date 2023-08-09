@@ -537,7 +537,13 @@ class SkyScanResult:
             for key in nside_data.dtype.metadata:
                 # dtype.metadata is a mappingproxy (dict-like) containing numpy-typed values
                 # convert numpy types to python bultins to be JSON-friendly
-                pydict[nside]['metadata'][key] = nside_data.dtype.metadata[key].item()
+                val = nside_data.dtype.metadata[key]
+                if type(val).__module__ == np.__name__ :
+                    # check if this is a numpy type (see https://stackoverflow.com/q/12569452)
+                    pydict[nside]['metadata'][key] = nside_data.dtype.metadata[key].item()
+                else:
+                    # likely a python built-in
+                    pydict[nside]['metadata'][key] = val
         return pydict
 
     """
