@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.4 (2023-08-11)
+
+### Other
+
+* Check for numpy type when converting metadata ([#19](https://github.com/icecube/skyreader/issues/19)) ([`d960116`](https://github.com/icecube/skyreader/commit/d960116901da45272529e69aa7b3787a6e5d16d9))
+
 ## v1.2.3 (2023-08-03)
 
 ### Other
