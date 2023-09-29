@@ -4,7 +4,7 @@
 #
 #    pip-compile --extra=examples --output-file=requirements-examples.txt
 #
-astropy==5.3.1
+astropy==5.3.3
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
@@ -12,31 +12,31 @@ cachetools==5.3.1
     # via wipac-rest-tools
 certifi==2023.7.22
     # via requests
-cffi==1.15.1
+cffi==1.16.0
     # via cryptography
 charset-normalizer==3.2.0
     # via requests
-contourpy==1.1.0
+contourpy==1.1.1
     # via matplotlib
-cryptography==41.0.3
+cryptography==41.0.4
     # via pyjwt
-cycler==0.11.0
+cycler==0.12.0
     # via matplotlib
-fonttools==4.42.0
+fonttools==4.43.0
     # via matplotlib
-healpy==1.16.3
+healpy==1.16.5
     # via icecube-skyreader (setup.py)
 idna==3.4
     # via requests
-kiwisolver==1.4.4
+kiwisolver==1.4.5
     # via matplotlib
-matplotlib==3.7.2
+matplotlib==3.8.0
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
 meander==0.0.3
     # via icecube-skyreader (setup.py)
-numpy==1.25.2
+numpy==1.26.0
     # via
     #   astropy
     #   contourpy
@@ -50,9 +50,9 @@ packaging==23.1
     # via
     #   astropy
     #   matplotlib
-pandas==2.0.3
+pandas==2.1.1
     # via icecube-skyreader (setup.py)
-pillow==10.0.0
+pillow==10.0.1
     # via matplotlib
 pycparser==2.21
     # via cffi
@@ -60,7 +60,7 @@ pyerfa==2.0.0.3
     # via astropy
 pyjwt[crypto]==2.8.0
     # via wipac-rest-tools
-pyparsing==3.0.9
+pyparsing==3.1.1
     # via matplotlib
 pypng==0.20220715.0
     # via qrcode
@@ -68,7 +68,7 @@ python-dateutil==2.8.2
     # via
     #   matplotlib
     #   pandas
-pytz==2023.3
+pytz==2023.3.post1
     # via pandas
 pyyaml==6.0.1
     # via astropy
@@ -81,23 +81,25 @@ requests==2.31.0
     #   wipac-rest-tools
 requests-futures==1.0.1
     # via wipac-rest-tools
-scipy==1.11.1
+scipy==1.11.3
     # via healpy
 six==1.16.0
     # via python-dateutil
-tornado==6.3.2
+tornado==6.3.3
     # via wipac-rest-tools
-typing-extensions==4.7.1
+typing-extensions==4.8.0
     # via
     #   qrcode
     #   wipac-dev-tools
 tzdata==2023.3
     # via pandas
-urllib3==2.0.4
-    # via requests
+urllib3==2.0.5
+    # via
+    #   requests
+    #   wipac-rest-tools
 wipac-dev-tools==1.6.16
     # via
     #   icecube-skyreader (setup.py)
     #   wipac-rest-tools
-wipac-rest-tools==1.5.1
+wipac-rest-tools==1.5.3
     # via icecube-skyreader (setup.py)
