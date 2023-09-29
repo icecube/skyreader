@@ -817,8 +817,6 @@ class SkyScanResult:
 
         print("done.")
 
-        return imgdata
-
     def create_plot_zoomed(self,
                            dosave=False,
                            extra_ra=np.nan,
@@ -1125,14 +1123,6 @@ class SkyScanResult:
             try:
                 print("Dumping to", savename)
                 ascii.write(tab, savename, overwrite=True)
-                # deprecated logic for slack posting
-                # for i, ch in enumerate(final_channels):
-                # output = io.StringIO()
-                # if dosave:
-                #     ascii.write(tab, output, overwrite=True)
-                # output.seek(0)
-                # output.truncate(0)
-                # del output
             except OSError as err:
                 print("OS Error prevented contours from being written, maybe a memory issue.")
                 print(err)
@@ -1226,19 +1216,7 @@ class SkyScanResult:
 
         print("done.")
 
-        if systematics is True:
-            title = "Millipede contour, assuming IC160427A systematics:"
-        else:
-            title = "Millipede contour, assuming Wilks' Theorem:"
-
-        # deprecated logic for slack posting
-        #for i, ch in enumerate(final_channels):
-
-        imgdata = io.BytesIO()
-        fig.savefig(imgdata, format='png', dpi=600, transparent=True)
-        imgdata.seek(0)
         savename = plot_filename[:-4] + ".png"
         print(savename)
 
         plt.close()
-        return imgdata
