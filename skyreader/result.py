@@ -587,13 +587,8 @@ class SkyScanResult:
     def create_plot(self,
                     dosave=False,
                     dozoom=False,
-                    log_func=None,
                     upload_func=None,
                     final_channels=None):
-
-        if log_func is None:
-            def log_func(x):
-                print(x)
 
         if upload_func is None:
             def upload_func(file_buffer, name, title):
@@ -834,7 +829,6 @@ class SkyScanResult:
 
     def create_plot_zoomed(self,
                            dosave=False,
-                           log_func=None,
                            upload_func=None,
                            extra_ra=np.nan,
                            extra_dec=np.nan,
@@ -844,10 +838,6 @@ class SkyScanResult:
                            plot_4fgl=False,
                            final_channels=None):
         """Uses healpy to plot a map."""
-
-        if log_func is None:
-            def log_func(x):
-                print(x)
 
         if upload_func is None:
             def upload_func(file_buffer, name, title):
@@ -1096,7 +1086,7 @@ class SkyScanResult:
                               ra, ra_plus, np.abs(ra_minus)) + " \n" + \
                           "\t Dec = {0:.2f} + {1:.2f} - {2:.2f}".format(
                               dec, dec_plus, np.abs(dec_minus))
-            log_func(contain_txt)
+            print(contain_txt)
         if plot_bounding_box:
             bounding_ras = []; bounding_decs = []
             # lower bound
@@ -1161,8 +1151,9 @@ class SkyScanResult:
                     print(upload_func(output, savename, savename))
                     output.truncate(0)
                     del output
-            except OSError:
-                log_func("Memory Error prevented contours from being written")
+            except OSError as err:
+                print("OS Error prevented contours from being written, maybe a memory issue.")
+                print(err)
 
         uncertainty = [(ra_minus, ra_plus), (dec_minus, dec_plus)]
         fits_header = format_fits_header(
