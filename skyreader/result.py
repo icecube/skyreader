@@ -586,11 +586,8 @@ class SkyScanResult:
 
     def create_plot(self,
                     dosave=False,
-                    dozoom=False,
-                    final_channels=None):
+                    dozoom=False):
 
-        if final_channels is None:
-            final_channels=["#test_messaging"]
         y_inches = 3.85
         x_inches = 6
         dpi = 150 if not dozoom else 1200
@@ -829,12 +826,8 @@ class SkyScanResult:
                            extra_radius=np.nan,
                            systematics=False,
                            plot_bounding_box=False,
-                           plot_4fgl=False,
-                           final_channels=None):
+                           plot_4fgl=False):
         """Uses healpy to plot a map."""
-
-        if final_channels is None:
-            final_channels=["#test_messaging"]
 
         def bounding_box(ra, dec, theta, phi):
             shift = ra-180
@@ -1130,16 +1123,16 @@ class SkyScanResult:
             tab = {"ra (rad)": ras, "dec (rad)": decs}
             savename = unique_id + ".contour_" + val + ".txt"
             try:
-                ascii.write(tab, savename, overwrite=True)
                 print("Dumping to", savename)
-                for i, ch in enumerate(final_channels):
-                    output = io.StringIO()
-                    #output = str.encode(savename)
-                    if dosave:
-                        ascii.write(tab, output, overwrite=True)
-                    output.seek(0)
-                    output.truncate(0)
-                    del output
+                ascii.write(tab, savename, overwrite=True)
+                # deprecated logic for slack posting
+                # for i, ch in enumerate(final_channels):
+                # output = io.StringIO()
+                # if dosave:
+                #     ascii.write(tab, output, overwrite=True)
+                # output.seek(0)
+                # output.truncate(0)
+                # del output
             except OSError as err:
                 print("OS Error prevented contours from being written, maybe a memory issue.")
                 print(err)
@@ -1238,14 +1231,14 @@ class SkyScanResult:
         else:
             title = "Millipede contour, assuming Wilks' Theorem:"
 
-        for i, ch in enumerate(final_channels):
-            imgdata = io.BytesIO()
-            fig.savefig(imgdata, format='png', dpi=600, transparent=True)
-            imgdata.seek(0)
+        # deprecated logic for slack posting
+        #for i, ch in enumerate(final_channels):
 
-            savename = plot_filename[:-4] + ".png"
-            print(savename)
-            # config.slack_channel=ch
+        imgdata = io.BytesIO()
+        fig.savefig(imgdata, format='png', dpi=600, transparent=True)
+        imgdata.seek(0)
+        savename = plot_filename[:-4] + ".png"
+        print(savename)
 
         plt.close()
         return imgdata
