@@ -4,8 +4,6 @@
 # pylint: skip-file
 # flake8: noqa
 
-
-import io
 import itertools as it
 import json
 import logging
@@ -589,15 +587,20 @@ class SkyScanResult:
     plot_dpi_standard = 150
     plot_dpi_zoomed = 1200
 
+    def check_result(self):
+        """Check in legacy plotting code.
+        """
+        for k in self.result:
+            if "nside-" not in k:
+                raise RuntimeError("\"nside\" not in result file..")
+
     def create_plot(self, dozoom: bool = False) -> None:
 
         dpi = self.plot_dpi_standard if not dozoom else self.plot_dpi_zoomed
         xsize = self.plot_x_size_in * dpi
         ysize = xsize // 2
 
-        for k in self.result:
-            if "nside-" not in k:
-                raise RuntimeError("\"nside\" not in result file..")
+        self.check_result()
 
         event_metadata = self.get_event_metadata()
         unique_id = f'{str(event_metadata)}_{self.get_nside_string()}'
@@ -832,9 +835,7 @@ class SkyScanResult:
         lonra=[-10.,10.]
         latra=[-10.,10.]
 
-        for k in self.result:
-            if "nside-" not in k:
-                raise RuntimeError("\"nside\" not in result file..")
+        self.check_result()
 
         event_metadata = self.get_event_metadata()
         unique_id = f'{str(event_metadata)}_{self.get_nside_string()}'
