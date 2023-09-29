@@ -584,14 +584,16 @@ class SkyScanResult:
     Plotting routines
     """
 
-    def create_plot(self,
-                    dozoom=False):
+    plot_y_size_in = 3.85
+    plot_x_size_in = 6
+    plot_dpi_standard = 150
+    plot_dpi_zoomed = 1200
 
-        y_inches = 3.85
-        x_inches = 6
-        dpi = 150 if not dozoom else 1200
-        xsize = x_inches*dpi
-        ysize = xsize//2
+    def create_plot(self, dozoom: bool = False) -> None:
+
+        dpi = self.plot_dpi_standard if not dozoom else self.plot_dpi_zoomed
+        xsize = self.plot_x_size_in * dpi
+        ysize = xsize // 2
 
         lonra=[-10.,10.]
         latra=[-10.,10.]
@@ -605,7 +607,7 @@ class SkyScanResult:
         plot_title = f"Run: {event_metadata.run_id} Event {event_metadata.event_id}: Type: {event_metadata.event_type} MJD: {event_metadata.mjd}"
 
         plot_filename = f"{unique_id}.{'plot_zoomed_legacy.' if dozoom else ''}pdf"
-        print(f"TEST BRANCH: saving plot to {plot_filename}")
+        print(f"saving plot to {plot_filename}")
 
         nsides = self.nsides
         print(f"available nsides: {nsides}")
@@ -690,7 +692,7 @@ class SkyScanResult:
         cmap.set_bad(alpha=1., color=(1.,0.,0.)) # make NaNs bright red
 
         # prepare the figure canvas
-        fig = matplotlib.pyplot.figure(figsize=[x_inches,y_inches])
+        fig = matplotlib.pyplot.figure(figsize=[self.plot_x_size_in,self.plot_y_size_in])
         if dozoom:
             ax = fig.add_subplot(111) #,projection='cartesian')
         else:
@@ -828,11 +830,7 @@ class SkyScanResult:
             dec_minus = (np.pi/2-np.max(theta))*180./np.pi - dec
             return ra_plus, ra_minus, dec_plus, dec_minus
 
-        y_inches = 3.85
-        x_inches = 6.
-        dpi = 1200.
-        xsize = x_inches*dpi
-        ysize = xsize/2.
+        dpi = self.plot_dpi_zoomed
 
         lonra=[-10.,10.]
         latra=[-10.,10.]
