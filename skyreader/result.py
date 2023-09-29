@@ -587,12 +587,7 @@ class SkyScanResult:
     def create_plot(self,
                     dosave=False,
                     dozoom=False,
-                    upload_func=None,
                     final_channels=None):
-
-        if upload_func is None:
-            def upload_func(file_buffer, name, title):
-                pass
 
         if final_channels is None:
             final_channels=["#test_messaging"]
@@ -829,7 +824,6 @@ class SkyScanResult:
 
     def create_plot_zoomed(self,
                            dosave=False,
-                           upload_func=None,
                            extra_ra=np.nan,
                            extra_dec=np.nan,
                            extra_radius=np.nan,
@@ -838,10 +832,6 @@ class SkyScanResult:
                            plot_4fgl=False,
                            final_channels=None):
         """Uses healpy to plot a map."""
-
-        if upload_func is None:
-            def upload_func(file_buffer, name, title):
-                pass
 
         if final_channels is None:
             final_channels=["#test_messaging"]
@@ -1148,7 +1138,6 @@ class SkyScanResult:
                     if dosave:
                         ascii.write(tab, output, overwrite=True)
                     output.seek(0)
-                    print(upload_func(output, savename, savename))
                     output.truncate(0)
                     del output
             except OSError as err:
@@ -1257,7 +1246,6 @@ class SkyScanResult:
             savename = plot_filename[:-4] + ".png"
             print(savename)
             # config.slack_channel=ch
-            upload_func(imgdata, savename, title)
 
         plt.close()
         return imgdata
