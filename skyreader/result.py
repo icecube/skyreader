@@ -594,7 +594,7 @@ class SkyScanResult:
             if "nside-" not in k:
                 raise RuntimeError("\"nside\" not in result file..")
 
-    def create_plot(self, dozoom: bool = False) -> None:
+    def create_plot(self, dozoom: bool = False):
 
         dpi = self.plot_dpi_standard if not dozoom else self.plot_dpi_zoomed
         xsize = self.plot_x_size_in * dpi
