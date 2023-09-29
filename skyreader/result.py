@@ -595,9 +595,6 @@ class SkyScanResult:
         xsize = self.plot_x_size_in * dpi
         ysize = xsize // 2
 
-        lonra=[-10.,10.]
-        latra=[-10.,10.]
-
         for k in self.result:
             if "nside-" not in k:
                 raise RuntimeError("\"nside\" not in result file..")
