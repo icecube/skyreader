@@ -585,7 +585,6 @@ class SkyScanResult:
     """
 
     def create_plot(self,
-                    dosave=False,
                     dozoom=False):
 
         y_inches = 3.85
@@ -605,8 +604,8 @@ class SkyScanResult:
         unique_id = f'{str(event_metadata)}_{self.get_nside_string()}'
         plot_title = f"Run: {event_metadata.run_id} Event {event_metadata.event_id}: Type: {event_metadata.event_type} MJD: {event_metadata.mjd}"
 
-        plot_filename = f"{unique_id}.{'plot_zoomed.' if dozoom else ''}pdf"
-        print(f"saving plot to {plot_filename}")
+        plot_filename = f"{unique_id}.{'plot_zoomed_legacy.' if dozoom else ''}pdf"
+        print(f"TEST BRANCH: saving plot to {plot_filename}")
 
         nsides = self.nsides
         print(f"available nsides: {nsides}")
@@ -805,20 +804,13 @@ class SkyScanResult:
         # set the title
         fig.suptitle(plot_title)
 
-        if dosave:
-            print(f"saving: {plot_filename}...")
+        print(f"saving: {plot_filename}...")
 
-            fig.savefig(plot_filename, dpi=dpi, transparent=True)
-
-        # use io.BytesIO to save this into a memory buffer
-        imgdata = io.BytesIO()
-        fig.savefig(imgdata, format='png', dpi=dpi, transparent=True)
-        imgdata.seek(0)
+        fig.savefig(plot_filename, dpi=dpi, transparent=True)
 
         print("done.")
 
     def create_plot_zoomed(self,
-                           dosave=False,
                            extra_ra=np.nan,
                            extra_dec=np.nan,
                            extra_radius=np.nan,
@@ -1198,21 +1190,21 @@ class SkyScanResult:
         print("Contour Area (90%):", contour_areas[1], "degrees (cartesian)",
             healpy_area, "degrees (scaled)")
 
-        if dosave:
-            # Dump the whole contour
-            path = unique_id + ".contour.pkl"
-            print("Saving contour to", path)
-            with open(path, "wb") as f:
-                pickle.dump(saving_contours, f)
 
-            healpy.write_map(f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
-                equatorial_map, coord = 'C', column_names = ['2LLH'],
-                extra_header = fits_header, overwrite=True)
+        # Dump the whole contour
+        path = unique_id + ".contour.pkl"
+        print("Saving contour to", path)
+        with open(path, "wb") as f:
+            pickle.dump(saving_contours, f)
 
-            # Save the figure
-            print("saving: {0}...".format(plot_filename))
-            #ax.invert_xaxis()
-            fig.savefig(plot_filename, dpi=dpi, transparent=True)
+        healpy.write_map(f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
+            equatorial_map, coord = 'C', column_names = ['2LLH'],
+            extra_header = fits_header, overwrite=True)
+
+        # Save the figure
+        print("saving: {0}...".format(plot_filename))
+        #ax.invert_xaxis()
+        fig.savefig(plot_filename, dpi=dpi, transparent=True)
 
         print("done.")
 
