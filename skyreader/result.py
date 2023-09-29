@@ -594,7 +594,7 @@ class SkyScanResult:
             if "nside-" not in k:
                 raise RuntimeError("\"nside\" not in result file..")
 
-    def create_plot(self, dozoom: bool = False):
+    def create_plot(self, dozoom = False):
 
         dpi = self.plot_dpi_standard if not dozoom else self.plot_dpi_zoomed
         xsize = self.plot_x_size_in * dpi
@@ -883,14 +883,14 @@ class SkyScanResult:
                     grid_map[(tmp_dec, tmp_ra)] = value
             print("done with map for nside {0}...".format(nside))
 
-        grid_dec = []; grid_ra = []; grid_value = []
+        grid_dec_list, grid_ra_list, grid_value_list = [], [], []
 
         for (dec, ra), value in grid_map.items():
-            grid_dec.append(dec); grid_ra.append(ra)
-            grid_value.append(value)
-        grid_dec = np.asarray(grid_dec)
-        grid_ra = np.asarray(grid_ra)
-        grid_value = np.asarray(grid_value)
+            grid_dec_list.append(dec); grid_ra_list.append(ra)
+            grid_value_list.append(value)
+        grid_dec: np.ndarray = np.asarray(grid_dec)
+        grid_ra: np.ndarray = np.asarray(grid_ra)
+        grid_value: np.ndarray = np.asarray(grid_value)
 
         sorting_indices = np.argsort(grid_value)
         grid_value = grid_value[sorting_indices]
@@ -1006,10 +1006,10 @@ class SkyScanResult:
                 _[:,1] %= 2*np.pi
                 contour_area += area(_)
             contour_area = abs(contour_area)
-            contour_area *= (180.*180.)/(np.pi*np.pi) # convert to square-degrees
-            contour_areas.append(contour_area)
+            contour_area_sqdeg = contour_area * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
+            contour_areas.append(contour_area_sqdeg)
             contour_label = contour_label + ' - area: {0:.2f} sqdeg'.format(
-                contour_area)
+                contour_area_sqdeg)
             first = True
             for contour in contours:
                 theta, phi = contour.T
@@ -1059,28 +1059,29 @@ class SkyScanResult:
                               dec, dec_plus, np.abs(dec_minus))
             print(contain_txt)
         if plot_bounding_box:
-            bounding_ras = []; bounding_decs = []
+            bounding_ras_list, bounding_decs_list = [], []
             # lower bound
-            bounding_ras.extend(list(np.linspace(ra+ra_minus,
+            bounding_ras_list.extend(list(np.linspace(ra+ra_minus,
                 ra+ra_plus, 10)))
-            bounding_decs.extend([dec+dec_minus]*10)
+            bounding_decs_list.extend([dec+dec_minus]*10)
             # right bound
-            bounding_ras.extend([ra+ra_plus]*10)
-            bounding_decs.extend(list(np.linspace(dec+dec_minus,
+            bounding_ras_list.extend([ra+ra_plus]*10)
+            bounding_decs_list.extend(list(np.linspace(dec+dec_minus,
                 dec+dec_plus, 10)))
             # upper bound
-            bounding_ras.extend(list(np.linspace(ra+ra_plus,
+            bounding_ras_list.extend(list(np.linspace(ra+ra_plus,
                 ra+ra_minus, 10)))
-            bounding_decs.extend([dec+dec_plus]*10)
+            bounding_decs_list.extend([dec+dec_plus]*10)
             # left bound
-            bounding_ras.extend([ra+ra_minus]*10)
-            bounding_decs.extend(list(np.linspace(dec+dec_plus,
+            bounding_ras_list.extend([ra+ra_minus]*10)
+            bounding_decs_list.extend(list(np.linspace(dec+dec_plus,
                 dec+dec_minus,10)))
             # join end to beginning
-            bounding_ras.append(bounding_ras[0])
-            bounding_decs.append(bounding_decs[0])
-            bounding_ras = np.asarray(bounding_ras)
-            bounding_decs = np.asarray(bounding_decs)
+            bounding_ras_list.append(bounding_ras_list[0])
+            bounding_decs_list.append(bounding_decs_list[0])
+
+            bounding_ras: np.ndarray = np.asarray(bounding_ras_list)
+            bounding_decs: np.ndarray = np.asarray(bounding_decs_list)
             bounding_phi = np.radians(bounding_ras)
             bounding_theta = np.pi/2 - np.radians(bounding_decs)
             bounding_contour = np.array([bounding_theta, bounding_phi])
@@ -1093,7 +1094,7 @@ class SkyScanResult:
                 c='r', linestyle='dashed', label=contour_label)
 
         # Output contours in RA, dec instead of theta, phi
-        saving_contours = []
+        saving_contours: list = []
         for contours in contours_by_level:
             saving_contours.append([])
             for contour in contours:
