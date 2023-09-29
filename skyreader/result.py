@@ -612,7 +612,6 @@ class SkyScanResult:
         nsides = self.nsides
         print(f"available nsides: {nsides}")
 
-        maps = []
         min_value = np.nan
         max_value = np.nan
         minRA=0.
@@ -687,12 +686,12 @@ class SkyScanResult:
         print(f"preparing plot: {plot_filename}...")
 
         # the color map to use
-        cmap = matplotlib.cm.plasma_r
+        cmap = matplotlib.cm.plasma_r # mypy warning
         cmap.set_under(alpha=0.) # make underflows transparent
         cmap.set_bad(alpha=1., color=(1.,0.,0.)) # make NaNs bright red
 
         # prepare the figure canvas
-        fig = matplotlib.pyplot.figure(figsize=[self.plot_x_size_in,self.plot_y_size_in])
+        fig = matplotlib.pyplot.figure(figsize=(self.plot_x_size_in,self.plot_y_size_in))
         if dozoom:
             ax = fig.add_subplot(111) #,projection='cartesian')
         else:
@@ -730,8 +729,8 @@ class SkyScanResult:
 
         if not dozoom:
             # graticule
-            ax.set_longitude_grid(30)
-            ax.set_latitude_grid(30)
+            ax.set_longitude_grid(30) # mypy warning
+            ax.set_latitude_grid(30) # mypy warning
             cb = fig.colorbar(image, orientation='horizontal', shrink=.6, pad=0.05, ticks=[min_value, max_value])
             cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
         else:
@@ -756,6 +755,7 @@ class SkyScanResult:
             x_width = 1.6 * np.sqrt(a)
 
             if np.isnan(x_width):
+                # mypy warning
                 x_width = 1.6*(max(CS.allsegs[i][0][:,0]) - min(CS.allsegs[i][0][:,0]))
             print(x_width)
             y_width = 0.5 * x_width
@@ -765,8 +765,9 @@ class SkyScanResult:
             lower_y = max(minDec -y_width*np.pi/180., -np.pi/2.)
             upper_y = min(minDec + y_width*np.pi/180., np.pi/2.)
 
-            ax.set_xlim( [lower_x, upper_x][::-1])
-            ax.set_ylim( [lower_y, upper_y])
+            # should this just be set_xlim(upper_x, lower_x) ?
+            ax.set_xlim( [lower_x, upper_x][::-1]) # mypy warning
+            ax.set_ylim(lower_y, upper_y)
 
             ax.xaxis.set_major_formatter(DecFormatter())
             ax.yaxis.set_major_formatter(DecFormatter())
@@ -781,7 +782,7 @@ class SkyScanResult:
 
         # cb.ax.xaxis.labelpad = -8
         # workaround for issue with viewers, see colorbar docstring
-        cb.solids.set_edgecolor("face")
+        cb.solids.set_edgecolor("face") # mypy warning
 
         if dozoom:
             ax.set_aspect('equal')
@@ -793,8 +794,9 @@ class SkyScanResult:
 
         # Otherwise, add the path effects.
         effects = [patheffects.withStroke(linewidth=1.1, foreground='w')]
+        # mypy warnings
         for artist in ax.findobj(text.Text):
-            artist.set_path_effects(effects)
+            artist.set_path_effects(effects) # mypy warning
 
         # remove white space around figure
         spacing = 0.01
@@ -916,7 +918,7 @@ class SkyScanResult:
 
         print("preparing plot: {0}...".format(plot_filename))
 
-        cmap = matplotlib.cm.plasma_r
+        cmap = matplotlib.cm.plasma_r # mypy warning
         cmap.set_under('w')
         cmap.set_bad(alpha=1., color=(1.,0.,0.)) # make NaNs bright red
 
