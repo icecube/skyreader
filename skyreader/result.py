@@ -944,7 +944,7 @@ class SkyScanResult:
                 sigma = np.rad2deg(sigma)
                 delta, step, bins = 0, 0, 0
                 delta= sigma/180.0*np.pi
-                step = 1./np.sin(delta)/10.
+                step = 1./np.sin(delta)/100.
                 bins = int(360./step)
                 Theta = np.zeros(bins+1, dtype=np.double)
                 Phi = np.zeros(bins+1, dtype=np.double)
@@ -981,7 +981,7 @@ class SkyScanResult:
                 contour90.append([Theta90[i], Phi90[i]])
             contour90 = np.asarray(contour90)
             contours_by_level = [[contour50], [contour90]]
-        print(contours_by_level)
+            
         # Check for RA values that are out of bounds
         for level in contours_by_level:
             for contour in level:
