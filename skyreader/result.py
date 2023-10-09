@@ -937,9 +937,13 @@ class SkyScanResult:
 
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
         # Call meander module to find contours
-        contours_by_level = meander.spherical_contours(sample_points,
-            grid_value, contour_levels
-            )
+        if not is_rude:
+            contours_by_level = meander.spherical_contours(sample_points,
+                grid_value, contour_levels
+                )
+            print(contours_by_level)
+        if is_rude:
+            print('Work in progress')
         # Check for RA values that are out of bounds
         for level in contours_by_level:
             for contour in level:
