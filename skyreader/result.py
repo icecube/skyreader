@@ -888,9 +888,9 @@ class SkyScanResult:
         for (dec, ra), value in grid_map.items():
             grid_dec_list.append(dec); grid_ra_list.append(ra)
             grid_value_list.append(value)
-        grid_dec: np.ndarray = np.asarray(grid_dec)
-        grid_ra: np.ndarray = np.asarray(grid_ra)
-        grid_value: np.ndarray = np.asarray(grid_value)
+        np.ndarray = np.asarray(grid_dec)
+        np.ndarray = np.asarray(grid_ra)
+        np.ndarray = np.asarray(grid_value)
 
         sorting_indices = np.argsort(grid_value)
         grid_value = grid_value[sorting_indices]
