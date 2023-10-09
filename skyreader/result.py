@@ -820,7 +820,8 @@ class SkyScanResult:
                            extra_radius=np.nan,
                            systematics=False,
                            plot_bounding_box=False,
-                           plot_4fgl=False):
+                           plot_4fgl=False,
+                           is_rude=False):
         """Uses healpy to plot a map."""
 
         def bounding_box(ra, dec, theta, phi):
