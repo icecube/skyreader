@@ -944,7 +944,7 @@ class SkyScanResult:
                 sigma = np.rad2deg(sigma)
                 delta, step, bins = 0, 0, 0
                 delta= sigma/180.0*np.pi
-                step = 1./np.sin(delta)/1000.
+                step = 1./np.sin(delta)/10.
                 bins = int(360./step)
                 Theta = np.zeros(bins+1, dtype=np.double)
                 Phi = np.zeros(bins+1, dtype=np.double)
