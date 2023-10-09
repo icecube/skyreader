@@ -972,12 +972,14 @@ class SkyScanResult:
             sigma90 = np.deg2rad(0.7)
             Theta50, Phi50 = circular_contour(minRA, minDec, sigma50, nside)
             Theta90, Phi90 = circular_contour(minRA, minDec, sigma90, nside)
-            contour50 = np.array([])
+            contour50 = list()
             for i in range(len(Theta50)):
-                contour50 = np.append(contour50, [Theta50[i], Phi50[i]])
-            contour90 = np.array([])
+                contour50.append([Theta50[i], Phi50[i]])
+            contour50 = np.asarray(contour50)
+            contour90 = list()
             for i in range(len(Theta90)):
-                contour90 = np.append(contour90, [Theta90[i], Phi90[i]])
+                contour90.append([Theta90[i], Phi90[i]])
+            contour90 = np.asarray(contour90)
             contours_by_level = [[contour50], [contour90]]
         print(contours_by_level)
         # Check for RA values that are out of bounds
