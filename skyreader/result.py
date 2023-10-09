@@ -849,7 +849,7 @@ class SkyScanResult:
         if systematics is not True:
             plot_filename = unique_id + ".plot_zoomed_wilks.pdf"
         else:
-            plot_filename = unique_id + ".plot_zoomed.pdf"
+            plot_filename = unique_id + ".plot_zoomed_gentlerude.pdf"
         print("saving plot to {0}".format(plot_filename))
 
         nsides = self.nsides
