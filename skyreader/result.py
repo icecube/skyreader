@@ -979,6 +979,7 @@ class SkyScanResult:
             for i in range(len(Theta90)):
                 contour90 = np.append(contour90, [Theta90[i], Phi90[i]])
             contours_by_level = [[contour50], [contour90]]
+        print(contours_by_level)
         # Check for RA values that are out of bounds
         for level in contours_by_level:
             for contour in level:
