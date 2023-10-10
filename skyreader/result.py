@@ -586,6 +586,7 @@ class SkyScanResult:
     plot_x_size_in = 6
     plot_dpi_standard = 150
     plot_dpi_zoomed = 1200
+    plot_colormap = matplotlib.colormaps['plasma_r']
 
     def check_result(self):
         """Check in legacy plotting code.
@@ -686,7 +687,7 @@ class SkyScanResult:
         print(f"preparing plot: {plot_filename}...")
 
         # the color map to use
-        cmap = matplotlib.cm.plasma_r # mypy warning
+        cmap = self.plot_colormap
         cmap.set_under(alpha=0.) # make underflows transparent
         cmap.set_bad(alpha=1., color=(1.,0.,0.)) # make NaNs bright red
 
@@ -918,7 +919,7 @@ class SkyScanResult:
 
         print("preparing plot: {0}...".format(plot_filename))
 
-        cmap = matplotlib.cm.plasma_r # mypy warning
+        cmap = self.plot_colormap
         cmap.set_under('w')
         cmap.set_bad(alpha=1., color=(1.,0.,0.)) # make NaNs bright red
 
