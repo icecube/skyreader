@@ -597,8 +597,9 @@ class SkyScanResult:
     
     @staticmethod
     # Calculates are using Gauss-Green theorem / shoelace formula
-    # TODO: vectorize using numpy
-    def calculate_area(vs: np.ndarray) -> float:
+    # TODO: vectorize using numpy.
+    # Note: in some cases the argument is not a np.ndarray so one has to convert the data series beforehand.
+    def calculate_area(vs) -> float:
         a = 0
         x0, y0 = vs[0]
         for [x1,y1] in vs[1:]:
@@ -733,8 +734,10 @@ class SkyScanResult:
 
         if not dozoom:
             # graticule
-            ax.set_longitude_grid(30) # mypy warning
-            ax.set_latitude_grid(30) # mypy warning
+            # mypy error: "Axes" has no attribute "set_longitude_grid"  [attr-defined]
+            ax.set_longitude_grid(30)
+            # mypy error: "Axes" has no attribute "set_latitude_grid"  [attr-defined]
+            ax.set_latitude_grid(30)
             cb = fig.colorbar(image, orientation='horizontal', shrink=.6, pad=0.05, ticks=[min_value, max_value])
             cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
         else:
@@ -760,7 +763,7 @@ class SkyScanResult:
             x_width = 1.6 * np.sqrt(a)
 
             if np.isnan(x_width):
-                # mypy warning
+                # error: "QuadContourSet" has no attribute "allsegs"  [attr-defined]
                 x_width = 1.6*(max(CS.allsegs[i][0][:,0]) - min(CS.allsegs[i][0][:,0]))
             print(x_width)
             y_width = 0.5 * x_width
@@ -786,7 +789,10 @@ class SkyScanResult:
 
         # cb.ax.xaxis.labelpad = -8
         # workaround for issue with viewers, see colorbar docstring
-        cb.solids.set_edgecolor("face") # mypy warning
+        # mypy compliance: since cb.solids could be None, we check that it is actually
+        #   a valid object before accessing it
+        if isinstance(cb.solids, matplotlib.collections.QuadMesh):
+            cb.solids.set_edgecolor("face")
 
         if dozoom:
             ax.set_aspect('equal')
@@ -800,7 +806,8 @@ class SkyScanResult:
         effects = [patheffects.withStroke(linewidth=1.1, foreground='w')]
         # mypy warnings
         for artist in ax.findobj(text.Text):
-            artist.set_path_effects(effects) # mypy warning
+            # mypy error: Argument 1 to "set_path_effects" of "Artist" has incompatible type "list[withStroke]"; expected "list[AbstractPathEffect]"  [arg-type]
+            artist.set_path_effects(effects)
 
         # remove white space around figure
         spacing = 0.01
@@ -990,7 +997,7 @@ class SkyScanResult:
         contour_areas=[]
         for contour_level, contour_label, contour_color, contours in zip(contour_levels,
             contour_labels, contour_colors, contours_by_level):
-            contour_area = 0
+            contour_area = 0.
             for contour in contours:
                 _ = contour.copy()
                 _[:,1] += np.pi-np.radians(ra)
