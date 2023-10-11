@@ -594,6 +594,17 @@ class SkyScanResult:
         for k in self.result:
             if "nside-" not in k:
                 raise RuntimeError("\"nside\" not in result file..")
+            
+    def calculate_area(vs: np.ndarray) -> float:
+        a = 0
+        x0, y0 = vs[0]
+        for [x1,y1] in vs[1:]:
+            dx = x1-x0
+            dy = y1-y0
+            a += 0.5*(y0*dx - x0*dy)
+            x0 = x1
+            y0 = y1
+        return a
 
     def create_plot(self, dozoom = False):
 
@@ -704,18 +715,7 @@ class SkyScanResult:
         image = ax.pcolormesh(ra, dec, grid_map, vmin=min_value, vmax=max_value, rasterized=True, cmap=cmap)
         # ax.set_xlim(np.pi, -np.pi)
 
-        # Use Green's theorem to compute the area
-        # enclosed by the given contour.
-        def area(vs):
-            a = 0
-            x0,y0 = vs[0]
-            for [x1,y1] in vs[1:]:
-                dx = x1-x0
-                dy = y1-y0
-                a += 0.5*(y0*dx - x0*dy)
-                x0 = x1
-                y0 = y1
-            return a
+
 
         contour_levels = (np.array([1.39, 4.61, 11.83, 28.74])+min_value)[:2]
         contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:2]
@@ -744,7 +744,7 @@ class SkyScanResult:
             for i in range(len(contour_labels)):
                 vs = cs_collections[i].get_paths()[0].vertices
                 # Compute area enclosed by vertices.
-                a = area(vs) # will be in square-radians
+                a = self.calculate_area(vs) # will be in square-radians
                 a = a*(180.*180.)/(np.pi*np.pi) # convert to square-degrees
 
                 leg_labels.append(f'{contour_labels[i]} - area: {a:.2f}sqdeg')
@@ -766,8 +766,7 @@ class SkyScanResult:
             lower_y = max(minDec -y_width*np.pi/180., -np.pi/2.)
             upper_y = min(minDec + y_width*np.pi/180., np.pi/2.)
 
-            # should this just be set_xlim(upper_x, lower_x) ?
-            ax.set_xlim( [lower_x, upper_x][::-1]) # mypy warning
+            ax.set_xlim(upper_x, lower_x)
             ax.set_ylim(lower_y, upper_y)
 
             ax.xaxis.set_major_formatter(DecFormatter())
@@ -983,19 +982,6 @@ class SkyScanResult:
         healpy.projplot(np.pi/2 - minDec, minRA,
             '*', ms=5, label=r'scan best fit', color='black', zorder=2)
 
-        # Use Green's theorem to compute the area
-        # enclosed by the given contour.
-        def area(vs):
-            a = 0
-            x0,y0 = vs[0]
-            for [x1,y1] in vs[1:]:
-                dx = x1-x0
-                dy = y1-y0
-                a += 0.5*(y0*dx - x0*dy)
-                x0 = x1
-                y0 = y1
-            return a
-
         # Plot the contours
         contour_areas=[]
         for contour_level, contour_label, contour_color, contours in zip(contour_levels,
@@ -1005,7 +991,7 @@ class SkyScanResult:
                 _ = contour.copy()
                 _[:,1] += np.pi-np.radians(ra)
                 _[:,1] %= 2*np.pi
-                contour_area += area(_)
+                contour_area += self.calculate_area(_)
             contour_area = abs(contour_area)
             contour_area_sqdeg = contour_area * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
             contour_areas.append(contour_area_sqdeg)
@@ -1087,7 +1073,7 @@ class SkyScanResult:
             bounding_theta = np.pi/2 - np.radians(bounding_decs)
             bounding_contour = np.array([bounding_theta, bounding_phi])
             bounding_contour_area = 0.
-            bounding_contour_area = area(bounding_contour.T)
+            bounding_contour_area = self.calculate_area(bounding_contour.T)
             bounding_contour_area *= (180.*180.)/(np.pi*np.pi) # convert to square-degrees
             contour_label = r'90% Bounding rectangle' + ' - area: {0:.2f} sqdeg'.format(
                 bounding_contour_area)
