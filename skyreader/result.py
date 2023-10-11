@@ -594,7 +594,10 @@ class SkyScanResult:
         for k in self.result:
             if "nside-" not in k:
                 raise RuntimeError("\"nside\" not in result file..")
-            
+    
+    @staticmethod
+    # Calculates are using Gauss-Green theorem / shoelace formula
+    # TODO: vectorize using numpy
     def calculate_area(vs: np.ndarray) -> float:
         a = 0
         x0, y0 = vs[0]
@@ -744,7 +747,8 @@ class SkyScanResult:
             for i in range(len(contour_labels)):
                 vs = cs_collections[i].get_paths()[0].vertices
                 # Compute area enclosed by vertices.
-                a = self.calculate_area(vs) # will be in square-radians
+                # Take absolute values to be independent of orientation of the boundary integral.
+                a = abs(self.calculate_area(vs)) # will be in square-radians
                 a = a*(180.*180.)/(np.pi*np.pi) # convert to square-degrees
 
                 leg_labels.append(f'{contour_labels[i]} - area: {a:.2f}sqdeg')
@@ -992,8 +996,7 @@ class SkyScanResult:
                 _[:,1] += np.pi-np.radians(ra)
                 _[:,1] %= 2*np.pi
                 contour_area += self.calculate_area(_)
-            contour_area = abs(contour_area)
-            contour_area_sqdeg = contour_area * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
+            contour_area_sqdeg = abs(contour_area) * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
             contour_areas.append(contour_area_sqdeg)
             contour_label = contour_label + ' - area: {0:.2f} sqdeg'.format(
                 contour_area_sqdeg)
@@ -1073,7 +1076,7 @@ class SkyScanResult:
             bounding_theta = np.pi/2 - np.radians(bounding_decs)
             bounding_contour = np.array([bounding_theta, bounding_phi])
             bounding_contour_area = 0.
-            bounding_contour_area = self.calculate_area(bounding_contour.T)
+            bounding_contour_area = abs(self.calculate_area(bounding_contour.T))
             bounding_contour_area *= (180.*180.)/(np.pi*np.pi) # convert to square-degrees
             contour_label = r'90% Bounding rectangle' + ' - area: {0:.2f} sqdeg'.format(
                 bounding_contour_area)
