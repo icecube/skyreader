@@ -192,6 +192,7 @@ class AstroMollweideAxes(MollweideAxes):
         Axes.set_ylim(self, -np.pi / 2.0, np.pi / 2.0)
 
     def _get_core_transform(self, resolution):
+        # mypy error: "_get_core_transform" undefined in superclass  [misc]
         return Affine2D().translate(-np.pi, 0.) + super(AstroMollweideAxes, self)._get_core_transform(resolution)
 
     class RaFormatter(Formatter):
@@ -207,6 +208,7 @@ class AstroMollweideAxes(MollweideAxes):
     def set_longitude_grid(self, degrees):
         # Copied from matplotlib.geo.GeoAxes.set_longitude_grid and modified
         number = (360 // degrees) + 1
+        # mypy error: Argument 1 to "FixedLocator" has incompatible type "ndarray[Any, dtype[floating[Any]]]"; expected "Sequence[float]"
         self.xaxis.set_major_locator(
             FixedLocator(
                 np.linspace(0, 2*np.pi, number, True)[1:-1]))
@@ -215,6 +217,7 @@ class AstroMollweideAxes(MollweideAxes):
 
     def _set_lim_and_transforms(self):
         # Copied from matplotlib.geo.GeoAxes._set_lim_and_transforms and modified
+        # mypy error: Argument 1 to "FixedLocator" has incompatible type "ndarray[Any, dtype[floating[Any]]]"; expected "Sequence[float]"
         super(AstroMollweideAxes, self)._set_lim_and_transforms()
 
         # This is the transform for latitude ticks.
@@ -223,6 +226,8 @@ class AstroMollweideAxes(MollweideAxes):
         self._yaxis_transform = \
             yaxis_stretch + \
             self.transData
+        # mypy error: "AstroMollweideAxes" has no attribute "transProjection"  [attr-defined]
+        # mypy error: "AstroMollweideAxes" has no attribute "transAffine"  [attr-defined]
         yaxis_text_base = \
             yaxis_stretch + \
             self.transProjection + \
