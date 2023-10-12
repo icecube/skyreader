@@ -101,5 +101,9 @@ wipac-dev-tools==1.7.0
     # via
     #   icecube-skyreader (setup.py)
     #   wipac-rest-tools
+<<<<<<< HEAD
 wipac-rest-tools==1.5.3
+=======
+wipac-rest-tools==1.6.0
+>>>>>>> main
     # via icecube-skyreader (setup.py)

@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.5 (2023-10-12)
+
+### Other
+
+* <bot> update requirements-examples.txt ([`1458ac1`](https://github.com/icecube/skyreader/commit/1458ac1d2ce9ec33512a294bd86e34f823ddd375))
+* Plotting functions cleanup ([#21](https://github.com/icecube/skyreader/issues/21)) ([`97dff8e`](https://github.com/icecube/skyreader/commit/97dff8efa79d5bd480f6e947f3fe47a87e565385))
+
 ## v1.2.4 (2023-08-11)
 
 ### Other

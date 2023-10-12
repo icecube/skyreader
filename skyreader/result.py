@@ -586,6 +586,10 @@ class SkyScanResult:
     plot_x_size_in = 6
     plot_dpi_standard = 150
     plot_dpi_zoomed = 1200
+<<<<<<< HEAD
+=======
+    plot_colormap = matplotlib.colormaps['plasma_r']
+>>>>>>> main
 
     def check_result(self):
         """Check in legacy plotting code.
@@ -593,6 +597,29 @@ class SkyScanResult:
         for k in self.result:
             if "nside-" not in k:
                 raise RuntimeError("\"nside\" not in result file..")
+    
+    @staticmethod
+    # Calculates are using Gauss-Green theorem / shoelace formula
+    # TODO: vectorize using numpy.
+    # Note: in some cases the argument is not a np.ndarray so one has to convert the data series beforehand.
+    def calculate_area(vs) -> float:
+        a = 0
+        x0, y0 = vs[0]
+        for [x1,y1] in vs[1:]:
+            dx = x1-x0
+            dy = y1-y0
+            a += 0.5*(y0*dx - x0*dy)
+            x0 = x1
+            y0 = y1
+        return a
+
+    def create_plot(self, dozoom = False):
+
+        dpi = self.plot_dpi_standard if not dozoom else self.plot_dpi_zoomed
+        xsize = self.plot_x_size_in * dpi
+        ysize = xsize // 2
+
+        self.check_result()
 
     def create_plot(self, dozoom = False):
 
@@ -686,7 +713,11 @@ class SkyScanResult:
         print(f"preparing plot: {plot_filename}...")
 
         # the color map to use
+<<<<<<< HEAD
         cmap = matplotlib.cm.plasma_r # mypy warning
+=======
+        cmap = self.plot_colormap
+>>>>>>> main
         cmap.set_under(alpha=0.) # make underflows transparent
         cmap.set_bad(alpha=1., color=(1.,0.,0.)) # make NaNs bright red
 
@@ -703,18 +734,7 @@ class SkyScanResult:
         image = ax.pcolormesh(ra, dec, grid_map, vmin=min_value, vmax=max_value, rasterized=True, cmap=cmap)
         # ax.set_xlim(np.pi, -np.pi)
 
-        # Use Green's theorem to compute the area
-        # enclosed by the given contour.
-        def area(vs):
-            a = 0
-            x0,y0 = vs[0]
-            for [x1,y1] in vs[1:]:
-                dx = x1-x0
-                dy = y1-y0
-                a += 0.5*(y0*dx - x0*dy)
-                x0 = x1
-                y0 = y1
-            return a
+
 
         contour_levels = (np.array([1.39, 4.61, 11.83, 28.74])+min_value)[:2]
         contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:2]
@@ -729,8 +749,15 @@ class SkyScanResult:
 
         if not dozoom:
             # graticule
+<<<<<<< HEAD
             ax.set_longitude_grid(30) # mypy warning
             ax.set_latitude_grid(30) # mypy warning
+=======
+            # mypy error: "Axes" has no attribute "set_longitude_grid"  [attr-defined]
+            ax.set_longitude_grid(30)
+            # mypy error: "Axes" has no attribute "set_latitude_grid"  [attr-defined]
+            ax.set_latitude_grid(30)
+>>>>>>> main
             cb = fig.colorbar(image, orientation='horizontal', shrink=.6, pad=0.05, ticks=[min_value, max_value])
             cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
         else:
@@ -743,7 +770,8 @@ class SkyScanResult:
             for i in range(len(contour_labels)):
                 vs = cs_collections[i].get_paths()[0].vertices
                 # Compute area enclosed by vertices.
-                a = area(vs) # will be in square-radians
+                # Take absolute values to be independent of orientation of the boundary integral.
+                a = abs(self.calculate_area(vs)) # will be in square-radians
                 a = a*(180.*180.)/(np.pi*np.pi) # convert to square-degrees
 
                 leg_labels.append(f'{contour_labels[i]} - area: {a:.2f}sqdeg')
@@ -755,7 +783,11 @@ class SkyScanResult:
             x_width = 1.6 * np.sqrt(a)
 
             if np.isnan(x_width):
+<<<<<<< HEAD
                 # mypy warning
+=======
+                # error: "QuadContourSet" has no attribute "allsegs"  [attr-defined]
+>>>>>>> main
                 x_width = 1.6*(max(CS.allsegs[i][0][:,0]) - min(CS.allsegs[i][0][:,0]))
             print(x_width)
             y_width = 0.5 * x_width
@@ -765,8 +797,12 @@ class SkyScanResult:
             lower_y = max(minDec -y_width*np.pi/180., -np.pi/2.)
             upper_y = min(minDec + y_width*np.pi/180., np.pi/2.)
 
+<<<<<<< HEAD
             # should this just be set_xlim(upper_x, lower_x) ?
             ax.set_xlim( [lower_x, upper_x][::-1]) # mypy warning
+=======
+            ax.set_xlim(upper_x, lower_x)
+>>>>>>> main
             ax.set_ylim(lower_y, upper_y)
 
             ax.xaxis.set_major_formatter(DecFormatter())
@@ -782,7 +818,14 @@ class SkyScanResult:
 
         # cb.ax.xaxis.labelpad = -8
         # workaround for issue with viewers, see colorbar docstring
+<<<<<<< HEAD
         cb.solids.set_edgecolor("face") # mypy warning
+=======
+        # mypy compliance: since cb.solids could be None, we check that it is actually
+        #   a valid object before accessing it
+        if isinstance(cb.solids, matplotlib.collections.QuadMesh):
+            cb.solids.set_edgecolor("face")
+>>>>>>> main
 
         if dozoom:
             ax.set_aspect('equal')
@@ -796,7 +839,12 @@ class SkyScanResult:
         effects = [patheffects.withStroke(linewidth=1.1, foreground='w')]
         # mypy warnings
         for artist in ax.findobj(text.Text):
+<<<<<<< HEAD
             artist.set_path_effects(effects) # mypy warning
+=======
+            # mypy error: Argument 1 to "set_path_effects" of "Artist" has incompatible type "list[withStroke]"; expected "list[AbstractPathEffect]"  [arg-type]
+            artist.set_path_effects(effects)
+>>>>>>> main
 
         # remove white space around figure
         spacing = 0.01
@@ -820,8 +868,12 @@ class SkyScanResult:
                            extra_radius=np.nan,
                            systematics=False,
                            plot_bounding_box=False,
+<<<<<<< HEAD
                            plot_4fgl=False,
                            is_rude=False):
+=======
+                           plot_4fgl=False):
+>>>>>>> main
         """Uses healpy to plot a map."""
 
         def bounding_box(ra, dec, theta, phi):
@@ -919,7 +971,11 @@ class SkyScanResult:
 
         print("preparing plot: {0}...".format(plot_filename))
 
+<<<<<<< HEAD
         cmap = matplotlib.cm.plasma_r # mypy warning
+=======
+        cmap = self.plot_colormap
+>>>>>>> main
         cmap.set_under('w')
         cmap.set_bad(alpha=1., color=(1.,0.,0.)) # make NaNs bright red
 
@@ -1025,31 +1081,23 @@ class SkyScanResult:
         healpy.projplot(np.pi/2 - minDec, minRA,
             '*', ms=5, label=r'scan best fit', color='black', zorder=2)
 
-        # Use Green's theorem to compute the area
-        # enclosed by the given contour.
-        def area(vs):
-            a = 0
-            x0,y0 = vs[0]
-            for [x1,y1] in vs[1:]:
-                dx = x1-x0
-                dy = y1-y0
-                a += 0.5*(y0*dx - x0*dy)
-                x0 = x1
-                y0 = y1
-            return a
-
         # Plot the contours
         contour_areas=[]
         for contour_level, contour_label, contour_color, contours in zip(contour_levels,
             contour_labels, contour_colors, contours_by_level):
-            contour_area = 0
+            contour_area = 0.
             for contour in contours:
                 _ = contour.copy()
                 _[:,1] += np.pi-np.radians(ra)
                 _[:,1] %= 2*np.pi
+<<<<<<< HEAD
                 contour_area += area(_)
             contour_area = abs(contour_area)
             contour_area_sqdeg = contour_area * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
+=======
+                contour_area += self.calculate_area(_)
+            contour_area_sqdeg = abs(contour_area) * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
+>>>>>>> main
             contour_areas.append(contour_area_sqdeg)
             contour_label = contour_label + ' - area: {0:.2f} sqdeg'.format(
                 contour_area_sqdeg)
@@ -1129,7 +1177,7 @@ class SkyScanResult:
             bounding_theta = np.pi/2 - np.radians(bounding_decs)
             bounding_contour = np.array([bounding_theta, bounding_phi])
             bounding_contour_area = 0.
-            bounding_contour_area = area(bounding_contour.T)
+            bounding_contour_area = abs(self.calculate_area(bounding_contour.T))
             bounding_contour_area *= (180.*180.)/(np.pi*np.pi) # convert to square-degrees
             contour_label = r'90% Bounding rectangle' + ' - area: {0:.2f} sqdeg'.format(
                 bounding_contour_area)
