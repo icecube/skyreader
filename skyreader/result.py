@@ -4,8 +4,6 @@
 # pylint: skip-file
 # flake8: noqa
 
-
-import io
 import itertools as it
 import json
 import logging
@@ -584,47 +582,52 @@ class SkyScanResult:
     Plotting routines
     """
 
-    def create_plot(self,
-                    dosave=False,
-                    dozoom=False,
-                    log_func=None,
-                    upload_func=None,
-                    final_channels=None):
+    plot_y_size_in = 3.85
+    plot_x_size_in = 6
+    plot_dpi_standard = 150
+    plot_dpi_zoomed = 1200
+    plot_colormap = matplotlib.colormaps['plasma_r']
 
-        if log_func is None:
-            def log_func(x):
-                print(x)
-
-        if upload_func is None:
-            def upload_func(file_buffer, name, title):
-                pass
-
-        if final_channels is None:
-            final_channels=["#test_messaging"]
-        y_inches = 3.85
-        x_inches = 6
-        dpi = 150 if not dozoom else 1200
-        xsize = x_inches*dpi
-        ysize = xsize//2
-
-        lonra=[-10.,10.]
-        latra=[-10.,10.]
-
+    def check_result(self):
+        """Check in legacy plotting code.
+        """
         for k in self.result:
             if "nside-" not in k:
                 raise RuntimeError("\"nside\" not in result file..")
+    
+    @staticmethod
+    # Calculates are using Gauss-Green theorem / shoelace formula
+    # TODO: vectorize using numpy.
+    # Note: in some cases the argument is not a np.ndarray so one has to convert the data series beforehand.
+    def calculate_area(vs) -> float:
+        a = 0
+        x0, y0 = vs[0]
+        for [x1,y1] in vs[1:]:
+            dx = x1-x0
+            dy = y1-y0
+            a += 0.5*(y0*dx - x0*dy)
+            x0 = x1
+            y0 = y1
+        return a
+
+    def create_plot(self, dozoom = False):
+
+        dpi = self.plot_dpi_standard if not dozoom else self.plot_dpi_zoomed
+        xsize = self.plot_x_size_in * dpi
+        ysize = xsize // 2
+
+        self.check_result()
 
         event_metadata = self.get_event_metadata()
         unique_id = f'{str(event_metadata)}_{self.get_nside_string()}'
         plot_title = f"Run: {event_metadata.run_id} Event {event_metadata.event_id}: Type: {event_metadata.event_type} MJD: {event_metadata.mjd}"
 
-        plot_filename = f"{unique_id}.{'plot_zoomed.' if dozoom else ''}pdf"
+        plot_filename = f"{unique_id}.{'plot_zoomed_legacy.' if dozoom else ''}pdf"
         print(f"saving plot to {plot_filename}")
 
         nsides = self.nsides
         print(f"available nsides: {nsides}")
 
-        maps = []
         min_value = np.nan
         max_value = np.nan
         minRA=0.
@@ -699,12 +702,12 @@ class SkyScanResult:
         print(f"preparing plot: {plot_filename}...")
 
         # the color map to use
-        cmap = matplotlib.cm.plasma_r
+        cmap = self.plot_colormap
         cmap.set_under(alpha=0.) # make underflows transparent
         cmap.set_bad(alpha=1., color=(1.,0.,0.)) # make NaNs bright red
 
         # prepare the figure canvas
-        fig = matplotlib.pyplot.figure(figsize=[x_inches,y_inches])
+        fig = matplotlib.pyplot.figure(figsize=(self.plot_x_size_in,self.plot_y_size_in))
         if dozoom:
             ax = fig.add_subplot(111) #,projection='cartesian')
         else:
@@ -716,18 +719,7 @@ class SkyScanResult:
         image = ax.pcolormesh(ra, dec, grid_map, vmin=min_value, vmax=max_value, rasterized=True, cmap=cmap)
         # ax.set_xlim(np.pi, -np.pi)
 
-        # Use Green's theorem to compute the area
-        # enclosed by the given contour.
-        def area(vs):
-            a = 0
-            x0,y0 = vs[0]
-            for [x1,y1] in vs[1:]:
-                dx = x1-x0
-                dy = y1-y0
-                a += 0.5*(y0*dx - x0*dy)
-                x0 = x1
-                y0 = y1
-            return a
+
 
         contour_levels = (np.array([1.39, 4.61, 11.83, 28.74])+min_value)[:2]
         contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:2]
@@ -742,7 +734,9 @@ class SkyScanResult:
 
         if not dozoom:
             # graticule
+            # mypy error: "Axes" has no attribute "set_longitude_grid"  [attr-defined]
             ax.set_longitude_grid(30)
+            # mypy error: "Axes" has no attribute "set_latitude_grid"  [attr-defined]
             ax.set_latitude_grid(30)
             cb = fig.colorbar(image, orientation='horizontal', shrink=.6, pad=0.05, ticks=[min_value, max_value])
             cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
@@ -756,7 +750,8 @@ class SkyScanResult:
             for i in range(len(contour_labels)):
                 vs = cs_collections[i].get_paths()[0].vertices
                 # Compute area enclosed by vertices.
-                a = area(vs) # will be in square-radians
+                # Take absolute values to be independent of orientation of the boundary integral.
+                a = abs(self.calculate_area(vs)) # will be in square-radians
                 a = a*(180.*180.)/(np.pi*np.pi) # convert to square-degrees
 
                 leg_labels.append(f'{contour_labels[i]} - area: {a:.2f}sqdeg')
@@ -768,6 +763,7 @@ class SkyScanResult:
             x_width = 1.6 * np.sqrt(a)
 
             if np.isnan(x_width):
+                # error: "QuadContourSet" has no attribute "allsegs"  [attr-defined]
                 x_width = 1.6*(max(CS.allsegs[i][0][:,0]) - min(CS.allsegs[i][0][:,0]))
             print(x_width)
             y_width = 0.5 * x_width
@@ -777,8 +773,8 @@ class SkyScanResult:
             lower_y = max(minDec -y_width*np.pi/180., -np.pi/2.)
             upper_y = min(minDec + y_width*np.pi/180., np.pi/2.)
 
-            ax.set_xlim( [lower_x, upper_x][::-1])
-            ax.set_ylim( [lower_y, upper_y])
+            ax.set_xlim(upper_x, lower_x)
+            ax.set_ylim(lower_y, upper_y)
 
             ax.xaxis.set_major_formatter(DecFormatter())
             ax.yaxis.set_major_formatter(DecFormatter())
@@ -793,7 +789,10 @@ class SkyScanResult:
 
         # cb.ax.xaxis.labelpad = -8
         # workaround for issue with viewers, see colorbar docstring
-        cb.solids.set_edgecolor("face")
+        # mypy compliance: since cb.solids could be None, we check that it is actually
+        #   a valid object before accessing it
+        if isinstance(cb.solids, matplotlib.collections.QuadMesh):
+            cb.solids.set_edgecolor("face")
 
         if dozoom:
             ax.set_aspect('equal')
@@ -805,7 +804,9 @@ class SkyScanResult:
 
         # Otherwise, add the path effects.
         effects = [patheffects.withStroke(linewidth=1.1, foreground='w')]
+        # mypy warnings
         for artist in ax.findobj(text.Text):
+            # mypy error: Argument 1 to "set_path_effects" of "Artist" has incompatible type "list[withStroke]"; expected "list[AbstractPathEffect]"  [arg-type]
             artist.set_path_effects(effects)
 
         # remove white space around figure
@@ -818,43 +819,20 @@ class SkyScanResult:
         # set the title
         fig.suptitle(plot_title)
 
-        if dosave:
-            print(f"saving: {plot_filename}...")
+        print(f"saving: {plot_filename}...")
 
-            fig.savefig(plot_filename, dpi=dpi, transparent=True)
-
-        # use io.BytesIO to save this into a memory buffer
-        imgdata = io.BytesIO()
-        fig.savefig(imgdata, format='png', dpi=dpi, transparent=True)
-        imgdata.seek(0)
+        fig.savefig(plot_filename, dpi=dpi, transparent=True)
 
         print("done.")
 
-        return imgdata
-
     def create_plot_zoomed(self,
-                           dosave=False,
-                           log_func=None,
-                           upload_func=None,
                            extra_ra=np.nan,
                            extra_dec=np.nan,
                            extra_radius=np.nan,
                            systematics=False,
                            plot_bounding_box=False,
-                           plot_4fgl=False,
-                           final_channels=None):
+                           plot_4fgl=False):
         """Uses healpy to plot a map."""
-
-        if log_func is None:
-            def log_func(x):
-                print(x)
-
-        if upload_func is None:
-            def upload_func(file_buffer, name, title):
-                pass
-
-        if final_channels is None:
-            final_channels=["#test_messaging"]
 
         def bounding_box(ra, dec, theta, phi):
             shift = ra-180
@@ -865,18 +843,12 @@ class SkyScanResult:
             dec_minus = (np.pi/2-np.max(theta))*180./np.pi - dec
             return ra_plus, ra_minus, dec_plus, dec_minus
 
-        y_inches = 3.85
-        x_inches = 6.
-        dpi = 1200.
-        xsize = x_inches*dpi
-        ysize = xsize/2.
+        dpi = self.plot_dpi_zoomed
 
         lonra=[-10.,10.]
         latra=[-10.,10.]
 
-        for k in self.result:
-            if "nside-" not in k:
-                raise RuntimeError("\"nside\" not in result file..")
+        self.check_result()
 
         event_metadata = self.get_event_metadata()
         unique_id = f'{str(event_metadata)}_{self.get_nside_string()}'
@@ -922,14 +894,14 @@ class SkyScanResult:
                     grid_map[(tmp_dec, tmp_ra)] = value
             print("done with map for nside {0}...".format(nside))
 
-        grid_dec = []; grid_ra = []; grid_value = []
+        grid_dec_list, grid_ra_list, grid_value_list = [], [], []
 
         for (dec, ra), value in grid_map.items():
-            grid_dec.append(dec); grid_ra.append(ra)
-            grid_value.append(value)
-        grid_dec = np.asarray(grid_dec)
-        grid_ra = np.asarray(grid_ra)
-        grid_value = np.asarray(grid_value)
+            grid_dec_list.append(dec); grid_ra_list.append(ra)
+            grid_value_list.append(value)
+        grid_dec: np.ndarray = np.asarray(grid_dec_list)
+        grid_ra: np.ndarray = np.asarray(grid_ra_list)
+        grid_value: np.ndarray = np.asarray(grid_value_list)
 
         sorting_indices = np.argsort(grid_value)
         grid_value = grid_value[sorting_indices]
@@ -957,7 +929,7 @@ class SkyScanResult:
 
         print("preparing plot: {0}...".format(plot_filename))
 
-        cmap = matplotlib.cm.plasma_r
+        cmap = self.plot_colormap
         cmap.set_under('w')
         cmap.set_bad(alpha=1., color=(1.,0.,0.)) # make NaNs bright red
 
@@ -1021,34 +993,20 @@ class SkyScanResult:
         healpy.projplot(np.pi/2 - minDec, minRA,
             '*', ms=5, label=r'scan best fit', color='black', zorder=2)
 
-        # Use Green's theorem to compute the area
-        # enclosed by the given contour.
-        def area(vs):
-            a = 0
-            x0,y0 = vs[0]
-            for [x1,y1] in vs[1:]:
-                dx = x1-x0
-                dy = y1-y0
-                a += 0.5*(y0*dx - x0*dy)
-                x0 = x1
-                y0 = y1
-            return a
-
         # Plot the contours
         contour_areas=[]
         for contour_level, contour_label, contour_color, contours in zip(contour_levels,
             contour_labels, contour_colors, contours_by_level):
-            contour_area = 0
+            contour_area = 0.
             for contour in contours:
                 _ = contour.copy()
                 _[:,1] += np.pi-np.radians(ra)
                 _[:,1] %= 2*np.pi
-                contour_area += area(_)
-            contour_area = abs(contour_area)
-            contour_area *= (180.*180.)/(np.pi*np.pi) # convert to square-degrees
-            contour_areas.append(contour_area)
+                contour_area += self.calculate_area(_)
+            contour_area_sqdeg = abs(contour_area) * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
+            contour_areas.append(contour_area_sqdeg)
             contour_label = contour_label + ' - area: {0:.2f} sqdeg'.format(
-                contour_area)
+                contour_area_sqdeg)
             first = True
             for contour in contours:
                 theta, phi = contour.T
@@ -1096,35 +1054,36 @@ class SkyScanResult:
                               ra, ra_plus, np.abs(ra_minus)) + " \n" + \
                           "\t Dec = {0:.2f} + {1:.2f} - {2:.2f}".format(
                               dec, dec_plus, np.abs(dec_minus))
-            log_func(contain_txt)
+            print(contain_txt)
         if plot_bounding_box:
-            bounding_ras = []; bounding_decs = []
+            bounding_ras_list, bounding_decs_list = [], []
             # lower bound
-            bounding_ras.extend(list(np.linspace(ra+ra_minus,
+            bounding_ras_list.extend(list(np.linspace(ra+ra_minus,
                 ra+ra_plus, 10)))
-            bounding_decs.extend([dec+dec_minus]*10)
+            bounding_decs_list.extend([dec+dec_minus]*10)
             # right bound
-            bounding_ras.extend([ra+ra_plus]*10)
-            bounding_decs.extend(list(np.linspace(dec+dec_minus,
+            bounding_ras_list.extend([ra+ra_plus]*10)
+            bounding_decs_list.extend(list(np.linspace(dec+dec_minus,
                 dec+dec_plus, 10)))
             # upper bound
-            bounding_ras.extend(list(np.linspace(ra+ra_plus,
+            bounding_ras_list.extend(list(np.linspace(ra+ra_plus,
                 ra+ra_minus, 10)))
-            bounding_decs.extend([dec+dec_plus]*10)
+            bounding_decs_list.extend([dec+dec_plus]*10)
             # left bound
-            bounding_ras.extend([ra+ra_minus]*10)
-            bounding_decs.extend(list(np.linspace(dec+dec_plus,
+            bounding_ras_list.extend([ra+ra_minus]*10)
+            bounding_decs_list.extend(list(np.linspace(dec+dec_plus,
                 dec+dec_minus,10)))
             # join end to beginning
-            bounding_ras.append(bounding_ras[0])
-            bounding_decs.append(bounding_decs[0])
-            bounding_ras = np.asarray(bounding_ras)
-            bounding_decs = np.asarray(bounding_decs)
+            bounding_ras_list.append(bounding_ras_list[0])
+            bounding_decs_list.append(bounding_decs_list[0])
+
+            bounding_ras: np.ndarray = np.asarray(bounding_ras_list)
+            bounding_decs: np.ndarray = np.asarray(bounding_decs_list)
             bounding_phi = np.radians(bounding_ras)
             bounding_theta = np.pi/2 - np.radians(bounding_decs)
             bounding_contour = np.array([bounding_theta, bounding_phi])
             bounding_contour_area = 0.
-            bounding_contour_area = area(bounding_contour.T)
+            bounding_contour_area = abs(self.calculate_area(bounding_contour.T))
             bounding_contour_area *= (180.*180.)/(np.pi*np.pi) # convert to square-degrees
             contour_label = r'90% Bounding rectangle' + ' - area: {0:.2f} sqdeg'.format(
                 bounding_contour_area)
@@ -1132,7 +1091,7 @@ class SkyScanResult:
                 c='r', linestyle='dashed', label=contour_label)
 
         # Output contours in RA, dec instead of theta, phi
-        saving_contours = []
+        saving_contours: list = []
         for contours in contours_by_level:
             saving_contours.append([])
             for contour in contours:
@@ -1150,19 +1109,11 @@ class SkyScanResult:
             tab = {"ra (rad)": ras, "dec (rad)": decs}
             savename = unique_id + ".contour_" + val + ".txt"
             try:
-                ascii.write(tab, savename, overwrite=True)
                 print("Dumping to", savename)
-                for i, ch in enumerate(final_channels):
-                    output = io.StringIO()
-                    #output = str.encode(savename)
-                    if dosave:
-                        ascii.write(tab, output, overwrite=True)
-                    output.seek(0)
-                    print(upload_func(output, savename, savename))
-                    output.truncate(0)
-                    del output
-            except OSError:
-                log_func("Memory Error prevented contours from being written")
+                ascii.write(tab, savename, overwrite=True)
+            except OSError as err:
+                print("OS Error prevented contours from being written, maybe a memory issue.")
+                print(err)
 
         uncertainty = [(ra_minus, ra_plus), (dec_minus, dec_plus)]
         fits_header = format_fits_header(
@@ -1235,38 +1186,25 @@ class SkyScanResult:
         print("Contour Area (90%):", contour_areas[1], "degrees (cartesian)",
             healpy_area, "degrees (scaled)")
 
-        if dosave:
-            # Dump the whole contour
-            path = unique_id + ".contour.pkl"
-            print("Saving contour to", path)
-            with open(path, "wb") as f:
-                pickle.dump(saving_contours, f)
 
-            healpy.write_map(f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
-                equatorial_map, coord = 'C', column_names = ['2LLH'],
-                extra_header = fits_header, overwrite=True)
+        # Dump the whole contour
+        path = unique_id + ".contour.pkl"
+        print("Saving contour to", path)
+        with open(path, "wb") as f:
+            pickle.dump(saving_contours, f)
 
-            # Save the figure
-            print("saving: {0}...".format(plot_filename))
-            #ax.invert_xaxis()
-            fig.savefig(plot_filename, dpi=dpi, transparent=True)
+        healpy.write_map(f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
+            equatorial_map, coord = 'C', column_names = ['2LLH'],
+            extra_header = fits_header, overwrite=True)
+
+        # Save the figure
+        print("saving: {0}...".format(plot_filename))
+        #ax.invert_xaxis()
+        fig.savefig(plot_filename, dpi=dpi, transparent=True)
 
         print("done.")
 
-        if systematics is True:
-            title = "Millipede contour, assuming IC160427A systematics:"
-        else:
-            title = "Millipede contour, assuming Wilks' Theorem:"
-
-        for i, ch in enumerate(final_channels):
-            imgdata = io.BytesIO()
-            fig.savefig(imgdata, format='png', dpi=600, transparent=True)
-            imgdata.seek(0)
-
-            savename = plot_filename[:-4] + ".png"
-            print(savename)
-            # config.slack_channel=ch
-            upload_func(imgdata, savename, title)
+        savename = plot_filename[:-4] + ".png"
+        print(savename)
 
         plt.close()
-        return imgdata

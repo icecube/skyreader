@@ -39,8 +39,8 @@ def main() -> None:
     serialzed = rc.request_seq("GET", f"/scan/{args.scan_id}/result")["skyscan_result"]
 
     result = SkyScanResult.deserialize(serialzed)
-    result.create_plot(dosave=True)
-    result.create_plot_zoomed(dosave=True, plot_bounding_box=True)
+    result.create_plot()
+    result.create_plot_zoomed(plot_bounding_box=True)
 
 
 if __name__ == "__main__":
