@@ -857,7 +857,9 @@ class SkyScanResult:
                            systematics=False,
                            plot_bounding_box=False,
                            plot_4fgl=False,
-                           is_rude=False):
+                           circular=False,
+                           circular_err50=0.2,
+                           circular_err90=0.7):
         """Uses healpy to plot a map."""
 
         def bounding_box(ra, dec, theta, phi):
@@ -974,13 +976,13 @@ class SkyScanResult:
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
         
         # Call meander module to find contours
-        if not is_rude:
+        if not circular:
             contours_by_level = meander.spherical_contours(sample_points,
                 grid_value, contour_levels
                 )
-        if is_rude:
-            sigma50 = np.deg2rad(0.2)
-            sigma90 = np.deg2rad(0.7)
+        if circular:
+            sigma50 = np.deg2rad(circular_err50)
+            sigma90 = np.deg2rad(circular_err90)
             Theta50, Phi50 = self.circular_contour(minRA, minDec, sigma50, nside)
             Theta90, Phi90 = self.circular_contour(minRA, minDec, sigma90, nside)
             contour50 = list()
@@ -1185,7 +1187,7 @@ class SkyScanResult:
                 lonlat=True, c='m', marker='x', s=20, label=r'Reported online (50%, 90%)')
             for cont_lev, cont_scale, cont_col, cont_sty in zip(['50', '90.'], 
                     [1., 2.1459/1.177], ['m', 'm'], ['-', '--']):
-                spline_contour = circular_contour(extra_ra_rad, extra_dec_rad,
+                spline_contour = self.circular_contour(extra_ra_rad, extra_dec_rad,
                     extra_radius_rad*cont_scale, healpy.get_nside(equatorial_map))
                 spline_lon = spline_contour[1]
                 spline_lat = np.pi/2. - spline_contour[0]
