@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.6 (2023-10-13)
+
+### Other
+
+* New option for circular contours with radii sent as parameters ([#25](https://github.com/icecube/skyreader/issues/25)) ([`24ff08b`](https://github.com/icecube/skyreader/commit/24ff08b393df39da21b3d540c7e3197b7d400f29))
+
 ## v1.2.5 (2023-10-12)
 
 ### Other
