@@ -825,7 +825,7 @@ class SkyScanResult:
 
         print("done.")
 
-    def circular_contour(ra, dec, sigma, nside):
+    def circular_contour(self, ra, dec, sigma, nside):
             """For plotting circular contours on skymaps ra, dec, sigma all
             expected in radians."""
             dec = np.pi/2. - dec
