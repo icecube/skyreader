@@ -985,8 +985,8 @@ class SkyScanResult:
             sigma90 = np.deg2rad(circular_err90)
             Theta50, Phi50 = self.circular_contour(minRA, minDec, sigma50, nside)
             Theta90, Phi90 = self.circular_contour(minRA, minDec, sigma90, nside)
-            contour50 = np.dstack(Theta50,Phi50)
-            contour90 = np.dstack(Theta90,Phi90)
+            contour50 = np.dstack((Theta50,Phi50))
+            contour90 = np.dstack((Theta90,Phi90))
             contours_by_level = [[contour50], [contour90]]
             
         # Check for RA values that are out of bounds
