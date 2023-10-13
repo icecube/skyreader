@@ -825,13 +825,42 @@ class SkyScanResult:
 
         print("done.")
 
+    @staticmethod
+    def circular_contour(ra, dec, sigma, nside):
+            """For plotting circular contours on skymaps ra, dec, sigma all
+            expected in radians."""
+            dec = np.pi/2. - dec
+            sigma = np.rad2deg(sigma)
+            delta, step, bins = 0, 0, 0
+            delta= sigma/180.0*np.pi
+            step = 1./np.sin(delta)/10.
+            bins = int(360./step)
+            Theta = np.zeros(bins+1, dtype=np.double)
+            Phi = np.zeros(bins+1, dtype=np.double)
+            # define the contour
+            for j in range(0,bins) :
+                phi = j*step/180.*np.pi
+                vx = np.cos(phi)*np.sin(ra)*np.sin(delta) + np.cos(ra)*(np.cos(delta)*np.sin(dec) + np.cos(dec)*np.sin(delta)*np.sin(phi))
+                vy = np.cos(delta)*np.sin(dec)*np.sin(ra) + np.sin(delta)*(-np.cos(ra)*np.cos(phi) + np.cos(dec)*np.sin(ra)*np.sin(phi))
+                vz = np.cos(dec)*np.cos(delta) - np.sin(dec)*np.sin(delta)*np.sin(phi)
+                idx = healpy.vec2pix(nside, vx, vy, vz)
+                DEC, RA = healpy.pix2ang(nside, idx)
+                Theta[j] = DEC
+                Phi[j] = RA
+            Theta[bins] = Theta[0]
+            Phi[bins] = Phi[0]
+            return Theta, Phi
+
     def create_plot_zoomed(self,
                            extra_ra=np.nan,
                            extra_dec=np.nan,
                            extra_radius=np.nan,
                            systematics=False,
                            plot_bounding_box=False,
-                           plot_4fgl=False):
+                           plot_4fgl=False,
+                           circular=False,
+                           circular_err50=0.2,
+                           circular_err90=0.7):
         """Uses healpy to plot a map."""
 
         def bounding_box(ra, dec, theta, phi):
@@ -946,10 +975,21 @@ class SkyScanResult:
             contour_colors=['k', 'r', 'g', 'b'][:3]
 
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
+        
         # Call meander module to find contours
-        contours_by_level = meander.spherical_contours(sample_points,
-            grid_value, contour_levels
-            )
+        if not circular:
+            contours_by_level = meander.spherical_contours(sample_points,
+                grid_value, contour_levels
+                )
+        if circular:
+            sigma50 = np.deg2rad(circular_err50)
+            sigma90 = np.deg2rad(circular_err90)
+            Theta50, Phi50 = self.circular_contour(minRA, minDec, sigma50, nside)
+            Theta90, Phi90 = self.circular_contour(minRA, minDec, sigma90, nside)
+            contour50 = np.dstack((Theta50,Phi50))
+            contour90 = np.dstack((Theta90,Phi90))
+            contours_by_level = [contour50, contour90]
+            
         # Check for RA values that are out of bounds
         for level in contours_by_level:
             for contour in level:
@@ -1128,31 +1168,6 @@ class SkyScanResult:
         # Plot the original online reconstruction location
         if np.sum(np.isnan([extra_ra, extra_dec, extra_radius])) == 0:
 
-            def circular_contour(ra, dec, sigma, nside):
-                """For plotting circular contours on skymaps ra, dec, sigma all
-                expected in radians."""
-                dec = np.pi/2. - dec
-                sigma = np.rad2deg(sigma)
-                delta, step, bins = 0, 0, 0
-                delta= sigma/180.0*np.pi
-                step = 1./np.sin(delta)/10.
-                bins = int(360./step)
-                Theta = np.zeros(bins+1, dtype=np.double)
-                Phi = np.zeros(bins+1, dtype=np.double)
-                # define the contour
-                for j in range(0,bins) :
-                    phi = j*step/180.*np.pi
-                    vx = np.cos(phi)*np.sin(ra)*np.sin(delta) + np.cos(ra)*(np.cos(delta)*np.sin(dec) + np.cos(dec)*np.sin(delta)*np.sin(phi))
-                    vy = np.cos(delta)*np.sin(dec)*np.sin(ra) + np.sin(delta)*(-np.cos(ra)*np.cos(phi) + np.cos(dec)*np.sin(ra)*np.sin(phi))
-                    vz = np.cos(dec)*np.cos(delta) - np.sin(dec)*np.sin(delta)*np.sin(phi)
-                    idx = healpy.vec2pix(nside, vx, vy, vz)
-                    DEC, RA = healpy.pix2ang(nside, idx)
-                    Theta[j] = DEC
-                    Phi[j] = RA
-                Theta[bins] = Theta[0]
-                Phi[bins] = Phi[0]
-                return Theta, Phi
-
             # dist = angular_distance(minRA, minDec, extra_ra * np.pi/180., extra_dec * np.pi/180.)
             # print("Millipede best fit is", dist /(np.pi * extra_radius/(1.177 * 180.)), "sigma from reported best fit")
         
@@ -1167,7 +1182,7 @@ class SkyScanResult:
                 lonlat=True, c='m', marker='x', s=20, label=r'Reported online (50%, 90%)')
             for cont_lev, cont_scale, cont_col, cont_sty in zip(['50', '90.'], 
                     [1., 2.1459/1.177], ['m', 'm'], ['-', '--']):
-                spline_contour = circular_contour(extra_ra_rad, extra_dec_rad,
+                spline_contour = self.circular_contour(extra_ra_rad, extra_dec_rad,
                     extra_radius_rad*cont_scale, healpy.get_nside(equatorial_map))
                 spline_lon = spline_contour[1]
                 spline_lat = np.pi/2. - spline_contour[0]
