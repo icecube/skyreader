@@ -586,10 +586,7 @@ class SkyScanResult:
     plot_x_size_in = 6
     plot_dpi_standard = 150
     plot_dpi_zoomed = 1200
-<<<<<<< HEAD
-=======
     plot_colormap = matplotlib.colormaps['plasma_r']
->>>>>>> main
 
     def check_result(self):
         """Check in legacy plotting code.
@@ -612,14 +609,6 @@ class SkyScanResult:
             x0 = x1
             y0 = y1
         return a
-
-    def create_plot(self, dozoom = False):
-
-        dpi = self.plot_dpi_standard if not dozoom else self.plot_dpi_zoomed
-        xsize = self.plot_x_size_in * dpi
-        ysize = xsize // 2
-
-        self.check_result()
 
     def create_plot(self, dozoom = False):
 
@@ -713,11 +702,7 @@ class SkyScanResult:
         print(f"preparing plot: {plot_filename}...")
 
         # the color map to use
-<<<<<<< HEAD
-        cmap = matplotlib.cm.plasma_r # mypy warning
-=======
         cmap = self.plot_colormap
->>>>>>> main
         cmap.set_under(alpha=0.) # make underflows transparent
         cmap.set_bad(alpha=1., color=(1.,0.,0.)) # make NaNs bright red
 
@@ -749,15 +734,10 @@ class SkyScanResult:
 
         if not dozoom:
             # graticule
-<<<<<<< HEAD
-            ax.set_longitude_grid(30) # mypy warning
-            ax.set_latitude_grid(30) # mypy warning
-=======
             # mypy error: "Axes" has no attribute "set_longitude_grid"  [attr-defined]
             ax.set_longitude_grid(30)
             # mypy error: "Axes" has no attribute "set_latitude_grid"  [attr-defined]
             ax.set_latitude_grid(30)
->>>>>>> main
             cb = fig.colorbar(image, orientation='horizontal', shrink=.6, pad=0.05, ticks=[min_value, max_value])
             cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
         else:
@@ -783,11 +763,7 @@ class SkyScanResult:
             x_width = 1.6 * np.sqrt(a)
 
             if np.isnan(x_width):
-<<<<<<< HEAD
-                # mypy warning
-=======
                 # error: "QuadContourSet" has no attribute "allsegs"  [attr-defined]
->>>>>>> main
                 x_width = 1.6*(max(CS.allsegs[i][0][:,0]) - min(CS.allsegs[i][0][:,0]))
             print(x_width)
             y_width = 0.5 * x_width
@@ -797,12 +773,7 @@ class SkyScanResult:
             lower_y = max(minDec -y_width*np.pi/180., -np.pi/2.)
             upper_y = min(minDec + y_width*np.pi/180., np.pi/2.)
 
-<<<<<<< HEAD
-            # should this just be set_xlim(upper_x, lower_x) ?
-            ax.set_xlim( [lower_x, upper_x][::-1]) # mypy warning
-=======
             ax.set_xlim(upper_x, lower_x)
->>>>>>> main
             ax.set_ylim(lower_y, upper_y)
 
             ax.xaxis.set_major_formatter(DecFormatter())
@@ -818,14 +789,10 @@ class SkyScanResult:
 
         # cb.ax.xaxis.labelpad = -8
         # workaround for issue with viewers, see colorbar docstring
-<<<<<<< HEAD
-        cb.solids.set_edgecolor("face") # mypy warning
-=======
         # mypy compliance: since cb.solids could be None, we check that it is actually
         #   a valid object before accessing it
         if isinstance(cb.solids, matplotlib.collections.QuadMesh):
             cb.solids.set_edgecolor("face")
->>>>>>> main
 
         if dozoom:
             ax.set_aspect('equal')
@@ -839,12 +806,8 @@ class SkyScanResult:
         effects = [patheffects.withStroke(linewidth=1.1, foreground='w')]
         # mypy warnings
         for artist in ax.findobj(text.Text):
-<<<<<<< HEAD
-            artist.set_path_effects(effects) # mypy warning
-=======
             # mypy error: Argument 1 to "set_path_effects" of "Artist" has incompatible type "list[withStroke]"; expected "list[AbstractPathEffect]"  [arg-type]
             artist.set_path_effects(effects)
->>>>>>> main
 
         # remove white space around figure
         spacing = 0.01
@@ -868,12 +831,8 @@ class SkyScanResult:
                            extra_radius=np.nan,
                            systematics=False,
                            plot_bounding_box=False,
-<<<<<<< HEAD
                            plot_4fgl=False,
                            is_rude=False):
-=======
-                           plot_4fgl=False):
->>>>>>> main
         """Uses healpy to plot a map."""
 
         def bounding_box(ra, dec, theta, phi):
@@ -900,7 +859,7 @@ class SkyScanResult:
         print(f"available nsides: {nsides}")
 
         if systematics is not True:
-            plot_filename = unique_id + ".plot_zoomed_wilks_gentlerude.pdf"
+            plot_filename = unique_id + ".plot_zoomed_wilks.pdf"
         else:
             plot_filename = unique_id + ".plot_zoomed.pdf"
         print("saving plot to {0}".format(plot_filename))
@@ -971,11 +930,7 @@ class SkyScanResult:
 
         print("preparing plot: {0}...".format(plot_filename))
 
-<<<<<<< HEAD
-        cmap = matplotlib.cm.plasma_r # mypy warning
-=======
         cmap = self.plot_colormap
->>>>>>> main
         cmap.set_under('w')
         cmap.set_bad(alpha=1., color=(1.,0.,0.)) # make NaNs bright red
 
@@ -1090,14 +1045,8 @@ class SkyScanResult:
                 _ = contour.copy()
                 _[:,1] += np.pi-np.radians(ra)
                 _[:,1] %= 2*np.pi
-<<<<<<< HEAD
-                contour_area += area(_)
-            contour_area = abs(contour_area)
-            contour_area_sqdeg = contour_area * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
-=======
                 contour_area += self.calculate_area(_)
             contour_area_sqdeg = abs(contour_area) * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
->>>>>>> main
             contour_areas.append(contour_area_sqdeg)
             contour_label = contour_label + ' - area: {0:.2f} sqdeg'.format(
                 contour_area_sqdeg)
