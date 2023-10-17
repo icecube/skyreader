@@ -594,6 +594,9 @@ class SkyScanResult:
         for k in self.result:
             if "nside-" not in k:
                 raise RuntimeError("\"nside\" not in result file..")
+            
+    PLOT_DIR = Path("./output/plots")
+    PLOT_DIR.mkdir(exist_ok=True)       
     
     @staticmethod
     # Calculates are using Gauss-Green theorem / shoelace formula
@@ -821,7 +824,7 @@ class SkyScanResult:
 
         print(f"saving: {plot_filename}...")
 
-        fig.savefig(plot_filename, dpi=dpi, transparent=True)
+        fig.savefig(self.PLOT_DIR / plot_filename, dpi=dpi, transparent=True)
 
         print("done.")
 
@@ -1150,7 +1153,7 @@ class SkyScanResult:
             savename = unique_id + ".contour_" + val + ".txt"
             try:
                 print("Dumping to", savename)
-                ascii.write(tab, savename, overwrite=True)
+                ascii.write(tab, self.PLOT_DIR / savename, overwrite=True)
             except OSError as err:
                 print("OS Error prevented contours from being written, maybe a memory issue.")
                 print(err)
@@ -1215,7 +1218,7 @@ class SkyScanResult:
         # Save the figure
         print("saving: {0}...".format(plot_filename))
         #ax.invert_xaxis()
-        fig.savefig(plot_filename, dpi=dpi, transparent=True)
+        fig.savefig(self.PLOT_DIR / plot_filename, dpi=dpi, transparent=True)
 
         print("done.")
 
