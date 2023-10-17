@@ -1208,10 +1208,10 @@ class SkyScanResult:
         # Dump the whole contour
         path = unique_id + ".contour.pkl"
         print("Saving contour to", path)
-        with open(path, "wb") as f:
+        with open(self.PLOT_DIR / path, "wb") as f:
             pickle.dump(saving_contours, f)
 
-        healpy.write_map(f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
+        healpy.write_map(self.PLOT_DIR / f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
             equatorial_map, coord = 'C', column_names = ['2LLH'],
             extra_header = fits_header, overwrite=True)
 
