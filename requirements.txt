@@ -30,7 +30,7 @@ matplotlib==3.8.0
     #   icecube-skyreader (setup.py)
 meander==0.0.3
     # via icecube-skyreader (setup.py)
-numpy==1.26.0
+numpy==1.26.1
     # via
     #   astropy
     #   contourpy
@@ -46,9 +46,9 @@ packaging==23.2
     #   matplotlib
 pandas==2.1.1
     # via icecube-skyreader (setup.py)
-pillow==10.0.1
+pillow==10.1.0
     # via matplotlib
-pyerfa==2.0.0.3
+pyerfa==2.0.1.1
     # via astropy
 pyparsing==3.1.1
     # via matplotlib
@@ -70,7 +70,7 @@ typing-extensions==4.8.0
     # via wipac-dev-tools
 tzdata==2023.3
     # via pandas
-urllib3==2.0.6
+urllib3==2.0.7
     # via requests
 wipac-dev-tools==1.7.0
     # via icecube-skyreader (setup.py)
