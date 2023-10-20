@@ -24,7 +24,7 @@ from matplotlib import text
 
 from ..event_metadata import EventMetadata
 from ..result import SkyScanResult
-from .plot.plotting_tools import (
+from .plotting_tools import (
     DecFormatter,
     RaFormatter,
     format_fits_header,
@@ -40,7 +40,7 @@ class SkyScanPlotter:
     PLOT_DPI_ZOOMED = 1200
     PLOT_COLORMAP = matplotlib.colormaps['plasma_r']
 
-    def __init__():
+    def __init__(self):
         # Put here plotting parameters and things that do not depend on the individual scan.
         pass
 
@@ -66,8 +66,8 @@ class SkyScanPlotter:
         as the meshgrid is created for the full sky.
         """
         dpi = self.PLOT_DPI_STANDARD if not dozoom else self.PLOT_DPI_ZOOMED
-        xsize = self.PLOT_SIZE_X_IN * dpi
-        ysize = xsize // 2
+        xsize = int(self.PLOT_SIZE_X_IN * dpi) # number of  grid points along RA coordinate
+        ysize = int(xsize // 2) # number of grid points along dec coordinate
 
         event_metadata = result.get_event_metadata()
         unique_id = f'{str(event_metadata)}_{result.get_nside_string()}'
@@ -178,9 +178,9 @@ class SkyScanPlotter:
         leg_element=[]
         cs_collections = []
         for level, color in zip(contour_levels, contour_colors):
-            CS = ax.contour(ra, dec, grid_map, levels=[level], colors=[color])
-            cs_collections.append(CS.collections[0])
-            e, _ = CS.legend_elements()
+            contour_set = ax.contour(ra, dec, grid_map, levels=[level], colors=[color])
+            cs_collections.append(contour_set.collections[0])
+            e, _ = contour_set.legend_elements()
             leg_element.append(e[0])
 
         if not dozoom:
@@ -214,8 +214,11 @@ class SkyScanPlotter:
             x_width = 1.6 * np.sqrt(a)
 
             if np.isnan(x_width):
-                # error: "QuadContourSet" has no attribute "allsegs"  [attr-defined]
-                x_width = 1.6*(max(CS.allsegs[i][0][:,0]) - min(CS.allsegs[i][0][:,0]))
+                # mypy error: "QuadContourSet" has no attribute "allsegs"  [attr-defined]
+                # note contour_set is re-assigned at every iteration of the loop on
+                # contour_levels, contour_colors, so this effectively corresponds to the
+                # the last contour_set
+                x_width = 1.6*(max(contour_set.allsegs[i][0][:,0]) - min(contour_set.allsegs[i][0][:,0]))
             print(x_width)
             y_width = 0.5 * x_width
 
