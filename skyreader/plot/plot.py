@@ -22,8 +22,6 @@ from matplotlib import patheffects
 from matplotlib import pyplot as plt
 from matplotlib import text
 
-from . import LOGGER
-
 from .plotting_tools import (
     AstroMollweideAxes,
     DecFormatter,
@@ -35,6 +33,8 @@ from .plotting_tools import (
 
 from ..event_metadata import EventMetadata
 from ..result import SkyScanResult
+
+LOGGER = logging.getLogger("skyreader.plot")
 
 class SkyScanPlotter:
     PLOT_SIZE_Y_IN: float = 3.85
