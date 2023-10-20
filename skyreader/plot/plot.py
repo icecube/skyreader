@@ -22,8 +22,8 @@ from matplotlib import patheffects
 from matplotlib import pyplot as plt
 from matplotlib import text
 
-from ..event_metadata import EventMetadata
-from ..result import SkyScanResult
+from . import LOGGER
+
 from .plotting_tools import (
     DecFormatter,
     RaFormatter,
@@ -32,6 +32,8 @@ from .plotting_tools import (
     plot_catalog,
 )
 
+from ..event_metadata import EventMetadata
+from ..result import SkyScanResult
 
 class SkyScanPlotter:
     PLOT_SIZE_Y_IN: float = 3.85
@@ -66,40 +68,36 @@ class SkyScanPlotter:
         as the meshgrid is created for the full sky.
         """
         dpi = self.PLOT_DPI_STANDARD if not dozoom else self.PLOT_DPI_ZOOMED
+
         xsize = int(self.PLOT_SIZE_X_IN * dpi) # number of  grid points along RA coordinate
         ysize = int(xsize // 2) # number of grid points along dec coordinate
+        dec = np.linspace(-np.pi/2., np.pi/2., ysize)
+        ra = np.linspace(0., 2.*np.pi, xsize)
+        # project the map to a rectangular matrix xsize x ysize
+        RA, DEC = np.meshgrid(ra, dec)
+
+        # We may want to recover plotting in zenith and azimuth in the future.
+        # theta = np.linspace(np.pi, 0., ysize)
+        # phi   = np.linspace(0., 2.*np.pi, xsize)
+
+        nsides = result.nsides
+        LOGGER.info(f"available nsides: {nsides}")
 
         event_metadata = result.get_event_metadata()
         unique_id = f'{str(event_metadata)}_{result.get_nside_string()}'
         plot_title = f"Run: {event_metadata.run_id} Event {event_metadata.event_id}: Type: {event_metadata.event_type} MJD: {event_metadata.mjd}"
 
         plot_filename = f"{unique_id}.{'plot_zoomed_legacy.' if dozoom else ''}pdf"
-        print(f"saving plot to {plot_filename}")
+        LOGGER.info(f"saving plot to {plot_filename}")
 
-        nsides = result.nsides
-        print(f"available nsides: {nsides}")
-
-        min_value = np.nan
-        max_value = np.nan
-        minRA=0.
-        minDec=0.
-
-        # theta = np.linspace(np.pi, 0., ysize)
-        dec = np.linspace(-np.pi/2., np.pi/2., ysize)
-
-        # phi   = np.linspace(0., 2.*np.pi, xsize)
-        ra = np.linspace(0., 2.*np.pi, xsize)
-
-        # project the map to a rectangular matrix xsize x ysize
-        RA, DEC = np.meshgrid(ra, dec)
-
-        grid_map = None
-
-        grid_pix = None
+        min_llh, max_llh = np.nan, np.nan
+        min_ra, min_dec = 0., 0.
+        
+        grid_map, grid_pix = None, None
 
         # now plot maps above each other
         for nside in nsides:
-            print(("constructing map for nside {0}...".format(nside)))
+            LOGGER.info(f"constructing map for nside {nside}...")
             # grid_pix = healpy.ang2pix(nside, THETA, PHI)
             grid_pix = healpy.ang2pix(nside, np.pi/2. - DEC, RA)
             this_map = np.ones(healpy.nside2npix(nside))*np.inf
@@ -109,12 +107,12 @@ class SkyScanPlotter:
                 # show 2*delta_LLH
                 value = 2*pixel_data['llh']
                 if np.isfinite(value):
-                    if np.isnan(min_value) or value < min_value:
-                        minCoDec, minRA = healpy.pix2ang(nside, pixel)
-                        minDec = np.pi/2 - minCoDec
-                        min_value = value
-                    if np.isnan(max_value) or value > max_value:
-                        max_value = value
+                    if np.isnan(min_llh) or value < min_llh:
+                        minCoDec, min_ra = healpy.pix2ang(nside, pixel)
+                        min_dec = np.pi/2 - minCoDec
+                        min_llh = value
+                    if np.isnan(max_llh) or value > max_llh:
+                        max_llh = value
                 this_map[pixel] = value
 
             if grid_map is None:
@@ -124,7 +122,7 @@ class SkyScanPlotter:
 
             del this_map
 
-            print(("done with map for nside {0}...".format(nside)))
+            LOGGER.info(f"Completed map for nside {nside}.")
 
         # clean up
         if grid_pix is not None:
@@ -138,19 +136,19 @@ class SkyScanPlotter:
             del this_map
             del grid_pix
 
-        print("min  RA:", minRA *180./np.pi, "deg,", minRA*12./np.pi, "hours")
-        print("min dec:", minDec*180./np.pi, "deg")
+        LOGGER.info(f"min  RA: {min_ra *180./np.pi} deg, {min_ra*12./np.pi} hours.")
+        LOGGER.info(f"min Dec: {min_dec * 180./np.pi} deg")
 
         # renormalize
         if dozoom:
-            grid_map = grid_map - min_value
+            grid_map = grid_map - min_llh
             # max_value = max_value - min_value
-            min_value = 0.
-            max_value = 50
+            min_llh = 0.
+            max_llh = 50
 
         grid_map = np.ma.masked_invalid(grid_map)
 
-        print(f"preparing plot: {plot_filename}...")
+        LOGGER.info(f"Preparing plot: {plot_filename}...")
 
         # the color map to use
         cmap = self.PLOT_COLORMAP
@@ -167,12 +165,12 @@ class SkyScanPlotter:
 
         # rasterized makes the map bitmap while the labels remain vectorial
         # flip longitude to the astro convention
-        image = ax.pcolormesh(ra, dec, grid_map, vmin=min_value, vmax=max_value, rasterized=True, cmap=cmap)
+        image = ax.pcolormesh(ra, dec, grid_map, vmin=min_llh, vmax=max_llh, rasterized=True, cmap=cmap)
         # ax.set_xlim(np.pi, -np.pi)
 
 
 
-        contour_levels = (np.array([1.39, 4.61, 11.83, 28.74])+min_value)[:2]
+        contour_levels = (np.array([1.39, 4.61, 11.83, 28.74])+min_llh)[:2]
         contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:2]
         contour_colors=['k', 'r', 'g', 'b'][:2]
         leg_element=[]
@@ -189,7 +187,7 @@ class SkyScanPlotter:
             ax.set_longitude_grid(30)
             # mypy error: "Axes" has no attribute "set_latitude_grid"  [attr-defined]
             ax.set_latitude_grid(30)
-            cb = fig.colorbar(image, orientation='horizontal', shrink=.6, pad=0.05, ticks=[min_value, max_value])
+            cb = fig.colorbar(image, orientation='horizontal', shrink=.6, pad=0.05, ticks=[min_llh, max_llh])
             cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
         else:
             ax.set_xlabel('right ascension')
@@ -202,35 +200,48 @@ class SkyScanPlotter:
                 vs = cs_collections[i].get_paths()[0].vertices
                 # Compute area enclosed by vertices.
                 # Take absolute values to be independent of orientation of the boundary integral.
-                a = abs(self.calculate_area(vs)) # will be in square-radians
-                a = a*(180.*180.)/(np.pi*np.pi) # convert to square-degrees
+                contour_area = abs(self.calculate_area(vs)) # will be in square-radians
+                contour_area_sqdeg = contour_area*(180.*180.)/(np.pi*np.pi) # convert to square-degrees
 
-                leg_labels.append(f'{contour_labels[i]} - area: {a:.2f}sqdeg')
+                leg_labels.append(f'{contour_labels[i]} - area: {contour_area_sqdeg:.2f}sqdeg')
 
-            ax.scatter(minRA, minDec, s=20, marker='*', color='black', label=r'scan best-fit', zorder=2)
+            ax.scatter(min_ra, min_dec, s=20, marker='*', color='black', label=r'scan best-fit', zorder=2)
             ax.legend(leg_element, leg_labels, loc='lower right', fontsize=8, scatterpoints=1, ncol=2)
 
-            print("Contour Area (90%):", a, "degrees (cartesian)", a*np.cos(minDec)**2, "degrees (scaled)")
-            x_width = 1.6 * np.sqrt(a)
-
+            LOGGER.info(f"Contour Area (90%): {contour_area_sqdeg} degrees (cartesian) {contour_area_sqdeg * np.cos(min_dec)**2} degrees (scaled)")
+            
+            x_width = 1.6 * np.sqrt(contour_area_sqdeg)
+            LOGGER.info(f"x width is {x_width}")
+            
             if np.isnan(x_width):
+                # this get called only when contour_area / x_width is NaN so possibly never invoked in typical situations
+                
+                raise RuntimeError("Estimated area / width is NaN and the fallback logic for this scenario is no longer supported. If you encounter this error raise an issue to SkyReader.")
+                
                 # mypy error: "QuadContourSet" has no attribute "allsegs"  [attr-defined]
-                # note contour_set is re-assigned at every iteration of the loop on
+                # this attribute is likely deprecated but this scenario is rarely (if ever) hit
+                # original code is kept commented for the time being
+
+                # note: contour_set is re-assigned at every iteration of the loop on
                 # contour_levels, contour_colors, so this effectively corresponds to the
                 # the last contour_set
-                x_width = 1.6*(max(contour_set.allsegs[i][0][:,0]) - min(contour_set.allsegs[i][0][:,0]))
-            print(x_width)
+                
+                # x_width = 1.6*(max(contour_set.allsegs[i][0][:,0]) - min(contour_set.allsegs[i][0][:,0]))
+
+
             y_width = 0.5 * x_width
 
-            lower_x = max(minRA  - x_width*np.pi/180., 0.)
-            upper_x = min(minRA  + x_width*np.pi/180., 2 * np.pi)
-            lower_y = max(minDec -y_width*np.pi/180., -np.pi/2.)
-            upper_y = min(minDec + y_width*np.pi/180., np.pi/2.)
+            lower_x = max(min_ra  - x_width*np.pi/180., 0.)
+            upper_x = min(min_ra  + x_width*np.pi/180., 2 * np.pi)
+            lower_y = max(min_dec -y_width*np.pi/180., -np.pi/2.)
+            upper_y = min(min_dec + y_width*np.pi/180., np.pi/2.)
 
             ax.set_xlim(upper_x, lower_x)
             ax.set_ylim(lower_y, upper_y)
 
+            # why not RAFormatter?
             ax.xaxis.set_major_formatter(DecFormatter())
+
             ax.yaxis.set_major_formatter(DecFormatter())
 
             factor = 0.25*(np.pi/180.)
@@ -273,11 +284,11 @@ class SkyScanPlotter:
         # set the title
         fig.suptitle(plot_title)
 
-        print(f"saving: {plot_filename}...")
+        LOGGER.info(f"saving: {plot_filename}...")
 
         fig.savefig(plot_filename, dpi=dpi, transparent=True)
 
-        print("done.")
+        LOGGER.info("done.")
 
     @staticmethod
     def circular_contour(ra, dec, sigma, nside):
@@ -337,23 +348,23 @@ class SkyScanPlotter:
         plot_title = f"Run: {event_metadata.run_id} Event {event_metadata.event_id}: Type: {event_metadata.event_type} MJD: {event_metadata.mjd}"
 
         nsides = result.nsides
-        print(f"available nsides: {nsides}")
+        LOGGER.info(f"available nsides: {nsides}")
 
         if systematics is not True:
             plot_filename = unique_id + ".plot_zoomed_wilks.pdf"
         else:
             plot_filename = unique_id + ".plot_zoomed.pdf"
-        print("saving plot to {0}".format(plot_filename))
+        LOGGER.info(f"saving plot to {plot_filename}")
 
         nsides = result.nsides
-        print(f"available nsides: {nsides}")
+        LOGGER.info(f"available nsides: {nsides}")
 
         grid_map = dict()
         max_nside = max(nsides)
         equatorial_map = np.full(healpy.nside2npix(max_nside), np.nan)
 
         for nside in nsides:
-            print("constructing map for nside {0}...".format(nside))
+            LOGGER.info(f"constructing map for nside {nside}...")
             npix = healpy.nside2npix(nside)
 
             map_data = result.result[f'nside-{nside}']
@@ -374,7 +385,7 @@ class SkyScanPlotter:
                     tmp_dec = np.pi/2 - tmp_theta
                     tmp_ra = tmp_phi
                     grid_map[(tmp_dec, tmp_ra)] = value
-            print("done with map for nside {0}...".format(nside))
+            LOGGER.info(f"done with map for nside {nside}...")
 
         grid_dec_list, grid_ra_list, grid_value_list = [], [], []
 
@@ -391,11 +402,11 @@ class SkyScanPlotter:
         grid_ra = grid_ra[sorting_indices]
 
         min_value = grid_value[0]
-        minDec = grid_dec[0]
-        minRA = grid_ra[0]
+        min_dec = grid_dec[0]
+        min_ra = grid_ra[0]
 
-        print("min  RA:", minRA *180./np.pi, "deg,", minRA*12./np.pi, "hours")
-        print("min dec:", minDec*180./np.pi, "deg")
+        LOGGER.info(f"min  RA: {min_ra *180./np.pi} deg, {min_ra*12./np.pi} hours.")
+        LOGGER.info(f"min Dec: {min_dec * 180./np.pi} deg")
 
         # renormalize
         grid_value = grid_value - min_value
@@ -409,7 +420,7 @@ class SkyScanPlotter:
         equatorial_map -= np.nanmin(equatorial_map)
         equatorial_map *= 2.
 
-        print("preparing plot: {0}...".format(plot_filename))
+        LOGGER.info(f"preparing plot: {plot_filename}...")
 
         cmap = self.PLOT_COLORMAP
         cmap.set_under('w')
@@ -437,8 +448,8 @@ class SkyScanPlotter:
         if circular:
             sigma50 = np.deg2rad(circular_err50)
             sigma90 = np.deg2rad(circular_err90)
-            Theta50, Phi50 = self.circular_contour(minRA, minDec, sigma50, nside)
-            Theta90, Phi90 = self.circular_contour(minRA, minDec, sigma90, nside)
+            Theta50, Phi50 = self.circular_contour(min_ra, min_dec, sigma50, nside)
+            Theta90, Phi90 = self.circular_contour(min_ra, min_dec, sigma90, nside)
             contour50 = np.dstack((Theta50,Phi50))
             contour90 = np.dstack((Theta90,Phi90))
             contours_by_level = [contour50, contour90]
@@ -453,8 +464,8 @@ class SkyScanPlotter:
 
         # Find the rough extent of the contours to bound the plot
         contours = contours_by_level[-1]
-        ra = minRA * 180./np.pi
-        dec = minDec * 180./np.pi
+        ra = min_ra * 180./np.pi
+        dec = min_dec * 180./np.pi
         theta, phi = np.concatenate(contours_by_level[-1]).T
         ra_plus, ra_minus, dec_plus, dec_minus = bounding_box(ra, dec, theta, phi)
         ra_bound = min(15, max(3, max(-ra_minus, ra_plus)))
@@ -465,7 +476,7 @@ class SkyScanPlotter:
         #Begin the figure
         plt.clf()
         # Rotate into healpy coordinates
-        lon, lat = np.degrees(minRA), np.degrees(minDec)
+        lon, lat = np.degrees(min_ra), np.degrees(min_dec)
         healpy.cartview(map=equatorial_map, title=plot_title,
             min=0., #min 2DeltaLLH value for colorscale
             max=40., #max 2DeltaLLH value for colorscale
@@ -483,7 +494,7 @@ class SkyScanPlotter:
 
         # Plot the best-fit location
         # This requires some more coordinate transformations
-        healpy.projplot(np.pi/2 - minDec, minRA,
+        healpy.projplot(np.pi/2 - min_dec, min_ra,
             '*', ms=5, label=r'scan best fit', color='black', zorder=2)
 
         # Plot the contours
@@ -514,10 +525,10 @@ class SkyScanPlotter:
         healpy.graticule(dpar=2, dmer=2, force=True)
 
         # Set some axis limits
-        lower_ra = minRA + np.radians(lonra[0])
-        upper_ra = minRA + np.radians(lonra[1])
-        lower_dec = minDec + np.radians(latra[0])
-        upper_dec = minDec + np.radians(latra[1])
+        lower_ra = min_ra + np.radians(lonra[0])
+        upper_ra = min_ra + np.radians(lonra[1])
+        lower_dec = min_dec + np.radians(latra[0])
+        upper_dec = min_dec + np.radians(latra[1])
 
         lower_lon = np.degrees(lower_ra)
         upper_lon = np.degrees(upper_ra)
@@ -536,8 +547,8 @@ class SkyScanPlotter:
             plot_catalog(equatorial_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec)
 
         # Approximate contours as rectangles
-        ra = minRA * 180./np.pi
-        dec = minDec * 180./np.pi
+        ra = min_ra * 180./np.pi
+        dec = min_dec * 180./np.pi
         for l, contours in enumerate(contours_by_level[:2]):
             ra_plus = None
             theta, phi = np.concatenate(contours).T
@@ -547,7 +558,10 @@ class SkyScanPlotter:
                               ra, ra_plus, np.abs(ra_minus)) + " \n" + \
                           "\t Dec = {0:.2f} + {1:.2f} - {2:.2f}".format(
                               dec, dec_plus, np.abs(dec_minus))
+            # This is actually an output and not a logging info.
+            # TODO: we should wrap this in an object, return and log at the higher level.
             print(contain_txt)
+
         if plot_bounding_box:
             bounding_ras_list, bounding_decs_list = [], []
             # lower bound
@@ -602,18 +616,17 @@ class SkyScanPlotter:
             tab = {"ra (rad)": ras, "dec (rad)": decs}
             savename = unique_id + ".contour_" + val + ".txt"
             try:
-                print("Dumping to", savename)
+                LOGGER.info("Dumping to {savename}")
                 ascii.write(tab, savename, overwrite=True)
             except OSError as err:
-                print("OS Error prevented contours from being written, maybe a memory issue.")
-                print(err)
+                LOGGER.error("OS Error prevented contours from being written, maybe a memory issue. Error is:\n{err}")
 
         uncertainty = [(ra_minus, ra_plus), (dec_minus, dec_plus)]
         fits_header = format_fits_header(
             (event_metadata.run_id, event_metadata.event_id, event_metadata.event_type),
             0,
-            np.degrees(minRA),
-            np.degrees(minDec),
+            np.degrees(min_ra),
+            np.degrees(min_dec),
             uncertainty,
         )
         mmap_nside = healpy.get_nside(equatorial_map)
