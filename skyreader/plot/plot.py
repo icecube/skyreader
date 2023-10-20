@@ -4,11 +4,8 @@
 # pylint: skip-file
 # flake8: noqa
 
-import itertools as it
-import json
 import logging
 import pickle
-from functools import cached_property
 from pathlib import Path
 from typing import Any, Dict, Final, List, Optional, Tuple, TypedDict, Union
 
@@ -16,11 +13,11 @@ import healpy  # type: ignore[import]
 import matplotlib  # type: ignore[import]
 import meander  # type: ignore[import]
 import numpy as np
-import pandas as pd  # type: ignore[import]
 from astropy.io import ascii  # type: ignore[import]
 from matplotlib import patheffects
 from matplotlib import pyplot as plt
 from matplotlib import text
+from pathlib import Path
 
 from .plotting_tools import (
     AstroMollweideAxes,
@@ -31,7 +28,6 @@ from .plotting_tools import (
     plot_catalog,
 )
 
-from ..event_metadata import EventMetadata
 from ..result import SkyScanResult
 
 LOGGER = logging.getLogger("skyreader.plot")
@@ -43,9 +39,9 @@ class SkyScanPlotter:
     PLOT_DPI_ZOOMED = 1200
     PLOT_COLORMAP = matplotlib.colormaps['plasma_r']
 
-    def __init__(self):
-        # Put here plotting parameters and things that do not depend on the individual scan.
-        pass
+    def __init__(self, output_dir: Path = Path(".")):
+        # Set here plotting parameters and things that do not depend on the individual scan.
+        self.output_dir = output_dir
 
     @staticmethod
     # Calculates are using Gauss-Green theorem / shoelace formula
@@ -291,7 +287,7 @@ class SkyScanPlotter:
 
         LOGGER.info(f"saving: {plot_filename}...")
 
-        fig.savefig(plot_filename, dpi=dpi, transparent=True)
+        fig.savefig(self.output_dir / plot_filename, dpi=dpi, transparent=True)
 
         LOGGER.info("done.")
 
@@ -684,13 +680,10 @@ class SkyScanPlotter:
             extra_header = fits_header, overwrite=True)
 
         # Save the figure
-        print("saving: {0}...".format(plot_filename))
+        LOGGER.info(f"Saving: {plot_filename}...")
         #ax.invert_xaxis()
-        fig.savefig(plot_filename, dpi=dpi, transparent=True)
+        fig.savefig(self.output_dir / plot_filename, dpi=dpi, transparent=True)
 
-        print("done.")
-
-        savename = plot_filename[:-4] + ".png"
-        print(savename)
+        LOGGER.info("done.")
 
         plt.close()
