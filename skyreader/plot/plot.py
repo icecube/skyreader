@@ -25,6 +25,7 @@ from matplotlib import text
 from . import LOGGER
 
 from .plotting_tools import (
+    AstroMollweideAxes,
     DecFormatter,
     RaFormatter,
     format_fits_header,
@@ -157,6 +158,9 @@ class SkyScanPlotter:
 
         # prepare the figure canvas
         fig = matplotlib.pyplot.figure(figsize=(self.PLOT_SIZE_X_IN,self.PLOT_SIZE_Y_IN))
+
+        ax = None
+
         if dozoom:
             ax = fig.add_subplot(111) #,projection='cartesian')
         else:
@@ -183,10 +187,10 @@ class SkyScanPlotter:
 
         if not dozoom:
             # graticule
-            # mypy error: "Axes" has no attribute "set_longitude_grid"  [attr-defined]
-            ax.set_longitude_grid(30)
-            # mypy error: "Axes" has no attribute "set_latitude_grid"  [attr-defined]
-            ax.set_latitude_grid(30)
+            if isinstance(ax, AstroMollweideAxes):
+                # mypy guard
+                ax.set_longitude_grid(30)
+                ax.set_latitude_grid(30)
             cb = fig.colorbar(image, orientation='horizontal', shrink=.6, pad=0.05, ticks=[min_llh, max_llh])
             cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
         else:
@@ -261,6 +265,7 @@ class SkyScanPlotter:
 
         if dozoom:
             ax.set_aspect('equal')
+        
         ax.tick_params(axis='x', labelsize=10)
         ax.tick_params(axis='y', labelsize=10)
 
@@ -268,8 +273,8 @@ class SkyScanPlotter:
         ax.grid(True, color='k', alpha=0.5)
 
         # Otherwise, add the path effects.
-        effects = [patheffects.withStroke(linewidth=1.1, foreground='w')]
-        # mypy warnings
+        # mypy requires set_path_effects() to take a list of AbstractPathEffect 
+        effects: List[patheffects.AbstractPathEffect] = [patheffects.withStroke(linewidth=1.1, foreground='w')]
         for artist in ax.findobj(text.Text):
             # mypy error: Argument 1 to "set_path_effects" of "Artist" has incompatible type "list[withStroke]"; expected "list[AbstractPathEffect]"  [arg-type]
             artist.set_path_effects(effects)
