@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.7 (2023-10-22)
+
+### Other
+
+* Split plotting functionality from `SkyScanResult` ([#28](https://github.com/icecube/skyreader/issues/28)) ([`dcb25a0`](https://github.com/icecube/skyreader/commit/dcb25a0408c4986d1a4418bb1dba3f4cb9d84e75))
+* [split: restore `result.py`] ([`0de5408`](https://github.com/icecube/skyreader/commit/0de5408cb4c2921a289caee7bf74046ec7c82f16))
+* [split: add `plot/plot.py`] ([`10c9571`](https://github.com/icecube/skyreader/commit/10c957151699e13312cf9660568cd0b90701e4d8))
+* [split: temp] ([`f10a62e`](https://github.com/icecube/skyreader/commit/f10a62e2a82d74a422af0637dd3dd146f4d5566c))
+* [split: make `plot/plot.py`] ([`effd960`](https://github.com/icecube/skyreader/commit/effd960dd801eb1593fa05c2fe85e0e13d21b2f6))
+
 ## v1.2.6 (2023-10-13)
 
 ### Other
