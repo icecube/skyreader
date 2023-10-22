@@ -13,6 +13,15 @@ env:
 
 jobs:
 
+  py-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.versions.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: versions
+        uses: WIPACrepo/wipac-dev-py-versions-action@v2.1
+
   flake8:
     runs-on: ubuntu-latest
     steps:
@@ -21,11 +30,18 @@ jobs:
       - uses: WIPACrepo/wipac-dev-flake8-action@v1.0
 
   mypy:
+    needs: [py-versions]
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py3: ${{ fromJSON(needs.py-versions.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
-      - uses: WIPACrepo/wipac-dev-mypy-action@v1.2
+        with:
+          python-version: ${{ matrix.py3 }}
+      - uses: WIPACrepo/wipac-dev-mypy-action@v2.0
 
   py-setup:
     runs-on: ubuntu-latest
@@ -43,20 +59,11 @@ jobs:
           github.actor != 'dependabot[bot]' &&
           github.ref_type == 'branch'
         name: wipac-dev-py-setup-action (only for non-dependabot non-default branches)
-        uses: WIPACrepo/wipac-dev-py-setup-action@v1.14
+        uses: WIPACrepo/wipac-dev-py-setup-action@v2.7
         with:
           base-keywords: IceCube
           git_committer_name: ${{ env.BOT_NAME }}
           git_committer_email: ${{ env.BOT_EMAIL }}
-
-  py-versions:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.versions.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v3
-      - id: versions
-        uses: WIPACrepo/wipac-dev-py-versions-action@v2.1
 
   unit-tests:
     needs: [py-versions]

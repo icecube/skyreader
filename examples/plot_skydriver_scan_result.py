@@ -5,6 +5,7 @@ import argparse
 
 from rest_tools.client import RestClient, SavedDeviceGrantAuth
 from skyreader import SkyScanResult
+from skyreader.plot import SkyScanPlotter
 
 
 def get_rest_client() -> RestClient:
@@ -36,11 +37,14 @@ def main() -> None:
     args = parser.parse_args()
 
     rc = get_rest_client()
-    serialzed = rc.request_seq("GET", f"/scan/{args.scan_id}/result")["skyscan_result"]
+    serialized = rc.request_seq("GET", f"/scan/{args.scan_id}/result")["skyscan_result"]
 
-    result = SkyScanResult.deserialize(serialzed)
-    result.create_plot()
-    result.create_plot_zoomed(plot_bounding_box=True)
+    plotter = SkyScanPlotter()
+
+    result = SkyScanResult.deserialize(serialized)
+
+    plotter.create_plot(result)
+    plotter.create_plot_zoomed(result, plot_bounding_box=True)
 
 
 if __name__ == "__main__":

@@ -197,6 +197,7 @@ class AstroMollweideAxes(MollweideAxes):
 
     class RaFormatter(Formatter):
         # Copied from matplotlib.geo.GeoAxes.ThetaFormatter and modified
+        # https://matplotlib.org/stable/gallery/misc/custom_projection.html
         def __init__(self, round_to=1.0):
             self._round_to = round_to
 
@@ -207,6 +208,7 @@ class AstroMollweideAxes(MollweideAxes):
 
     def set_longitude_grid(self, degrees):
         # Copied from matplotlib.geo.GeoAxes.set_longitude_grid and modified
+        # https://matplotlib.org/stable/gallery/misc/custom_projection.html
         number = (360 // degrees) + 1
         # mypy error: Argument 1 to "FixedLocator" has incompatible type "ndarray[Any, dtype[floating[Any]]]"; expected "Sequence[float]"
         self.xaxis.set_major_locator(
@@ -217,6 +219,7 @@ class AstroMollweideAxes(MollweideAxes):
 
     def _set_lim_and_transforms(self):
         # Copied from matplotlib.geo.GeoAxes._set_lim_and_transforms and modified
+        # https://matplotlib.org/stable/gallery/misc/custom_projection.html
         # mypy error: Argument 1 to "FixedLocator" has incompatible type "ndarray[Any, dtype[floating[Any]]]"; expected "Sequence[float]"
         super(AstroMollweideAxes, self)._set_lim_and_transforms()
 
