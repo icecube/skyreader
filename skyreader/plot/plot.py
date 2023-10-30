@@ -58,13 +58,13 @@ class SkyScanPlotter:
             y0 = y1
         return a
 
-    def create_plot(self, result: SkyScanResult, dozoom: bool = False) -> None:
+    def create_plot(self, result: SkyScanResult) -> None:
         """Creates a full-sky plot using a meshgrid at fixed resolution.
         Optionally creates a zoomed-in plot. Resolutions are defined in
         PLOT_DPI_STANDARD and PLOT_DPI_ZOOMED. Zoomed mode is very inefficient
         as the meshgrid is created for the full sky.
         """
-        dpi = self.PLOT_DPI_STANDARD if not dozoom else self.PLOT_DPI_ZOOMED
+        dpi = self.PLOT_DPI_STANDARD # if not dozoom else self.PLOT_DPI_ZOOMED
 
         xsize = int(self.PLOT_SIZE_X_IN * dpi) # number of  grid points along RA coordinate
         ysize = int(xsize // 2) # number of grid points along dec coordinate
@@ -84,7 +84,8 @@ class SkyScanPlotter:
         unique_id = f'{str(event_metadata)}_{result.get_nside_string()}'
         plot_title = f"Run: {event_metadata.run_id} Event {event_metadata.event_id}: Type: {event_metadata.event_type} MJD: {event_metadata.mjd}"
 
-        plot_filename = f"{unique_id}.{'plot_zoomed_legacy.' if dozoom else ''}pdf"
+        # plot_filename = f"{unique_id}.{'plot_zoomed_legacy.' if dozoom else ''}pdf"
+        plot_filename = f"{unique_id}.pdf"
         LOGGER.info(f"saving plot to {plot_filename}")
 
         min_llh, max_llh = np.nan, np.nan
@@ -137,11 +138,13 @@ class SkyScanPlotter:
         LOGGER.info(f"min Dec: {min_dec * 180./np.pi} deg")
 
         # renormalize
-        if dozoom:
-            grid_map = grid_map - min_llh
-            # max_value = max_value - min_value
-            min_llh = 0.
-            max_llh = 50
+        # plot only delta LLH for zoomed plot
+        # crosscheck with create_plot_zoomed
+        # if dozoom:
+        #     grid_map = grid_map - min_llh
+        #     # max_value = max_value - min_value
+        #     min_llh = 0.
+        #     max_llh = 50
 
         grid_map = np.ma.masked_invalid(grid_map)
 
@@ -157,11 +160,11 @@ class SkyScanPlotter:
 
         ax = None
 
-        if dozoom:
-            ax = fig.add_subplot(111) #,projection='cartesian')
-        else:
-            cmap.set_over(alpha=0.)  # make underflows transparent
-            ax = fig.add_subplot(111,projection='astro mollweide')
+        # if dozoom:
+        #    ax = fig.add_subplot(111) #,projection='cartesian')
+        # else:
+        cmap.set_over(alpha=0.)  # make underflows transparent
+        ax = fig.add_subplot(111,projection='astro mollweide')
 
         # rasterized makes the map bitmap while the labels remain vectorial
         # flip longitude to the astro convention
@@ -181,14 +184,16 @@ class SkyScanPlotter:
             e, _ = contour_set.legend_elements()
             leg_element.append(e[0])
 
-        if not dozoom:
-            # graticule
-            if isinstance(ax, AstroMollweideAxes):
-                # mypy guard
-                ax.set_longitude_grid(30)
-                ax.set_latitude_grid(30)
-            cb = fig.colorbar(image, orientation='horizontal', shrink=.6, pad=0.05, ticks=[min_llh, max_llh])
-            cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
+        # if not dozoom:
+        # graticule
+        if isinstance(ax, AstroMollweideAxes):
+            # mypy guard
+            ax.set_longitude_grid(30)
+            ax.set_latitude_grid(30)
+        cb = fig.colorbar(image, orientation='horizontal', shrink=.6, pad=0.05, ticks=[min_llh, max_llh])
+        cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
+        
+        """
         else:
             ax.set_xlabel('right ascension')
             ax.set_ylabel('declination')
@@ -251,6 +256,7 @@ class SkyScanPlotter:
 
             ax.xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(base=tick_label_grid))
             ax.yaxis.set_major_locator(matplotlib.ticker.MultipleLocator(base=tick_label_grid))
+        """
 
         # cb.ax.xaxis.labelpad = -8
         # workaround for issue with viewers, see colorbar docstring
@@ -259,8 +265,8 @@ class SkyScanPlotter:
         if isinstance(cb.solids, matplotlib.collections.QuadMesh):
             cb.solids.set_edgecolor("face")
 
-        if dozoom:
-            ax.set_aspect('equal')
+        # if dozoom:
+        #    ax.set_aspect('equal')
         
         ax.tick_params(axis='x', labelsize=10)
         ax.tick_params(axis='y', labelsize=10)
@@ -277,10 +283,10 @@ class SkyScanPlotter:
 
         # remove white space around figure
         spacing = 0.01
-        if not dozoom:
-            fig.subplots_adjust(bottom=spacing, top=1.-spacing, left=spacing+0.04, right=1.-spacing)
-        else:
-            fig.subplots_adjust(bottom=spacing, top=0.92-spacing, left=spacing+0.1, right=1.-spacing)
+        # if not dozoom:
+        fig.subplots_adjust(bottom=spacing, top=1.-spacing, left=spacing+0.04, right=1.-spacing)
+        # else:
+        #    fig.subplots_adjust(bottom=spacing, top=0.92-spacing, left=spacing+0.1, right=1.-spacing)
 
         # set the title
         fig.suptitle(plot_title)
