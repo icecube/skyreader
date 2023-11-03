@@ -28,6 +28,8 @@ from .plotting_tools import (
     plot_catalog,
 )
 
+from .contours import GaussianContour
+
 from ..result import SkyScanResult
 
 LOGGER = logging.getLogger("skyreader.plot")
@@ -297,40 +299,15 @@ class SkyScanPlotter:
 
         LOGGER.info("done.")
 
-    @staticmethod
-    def circular_contour(ra, dec, sigma, nside):
-            """For plotting circular contours on skymaps ra, dec, sigma all
-            expected in radians."""
-            dec = np.pi/2. - dec
-            sigma = np.rad2deg(sigma)
-            delta, step, bins = 0, 0, 0
-            delta= sigma/180.0*np.pi
-            step = 1./np.sin(delta)/10.
-            bins = int(360./step)
-            Theta = np.zeros(bins+1, dtype=np.double)
-            Phi = np.zeros(bins+1, dtype=np.double)
-            # define the contour
-            for j in range(0,bins) :
-                phi = j*step/180.*np.pi
-                vx = np.cos(phi)*np.sin(ra)*np.sin(delta) + np.cos(ra)*(np.cos(delta)*np.sin(dec) + np.cos(dec)*np.sin(delta)*np.sin(phi))
-                vy = np.cos(delta)*np.sin(dec)*np.sin(ra) + np.sin(delta)*(-np.cos(ra)*np.cos(phi) + np.cos(dec)*np.sin(ra)*np.sin(phi))
-                vz = np.cos(dec)*np.cos(delta) - np.sin(dec)*np.sin(delta)*np.sin(phi)
-                idx = healpy.vec2pix(nside, vx, vy, vz)
-                DEC, RA = healpy.pix2ang(nside, idx)
-                Theta[j] = DEC
-                Phi[j] = RA
-            Theta[bins] = Theta[0]
-            Phi[bins] = Phi[0]
-            return Theta, Phi
-
     def create_plot_zoomed(self,
                            result: SkyScanResult,
+                           # contours: list[ContourSpec],
+                           plot_bounding_box=False,
+                           plot_4fgl=False,
                            extra_ra=np.nan,
                            extra_dec=np.nan,
                            extra_radius=np.nan,
                            systematics=False,
-                           plot_bounding_box=False,
-                           plot_4fgl=False,
                            circular=False,
                            circular_err50=0.2,
                            circular_err90=0.7):
@@ -357,10 +334,11 @@ class SkyScanPlotter:
         nsides = result.nsides
         LOGGER.info(f"available nsides: {nsides}")
 
-        if systematics is not True:
-            plot_filename = unique_id + ".plot_zoomed_wilks.pdf"
-        else:
-            plot_filename = unique_id + ".plot_zoomed.pdf"
+        # if systematics is not True:
+        #    plot_filename = unique_id + ".plot_zoomed_wilks.pdf"
+        
+        plot_filename = unique_id + ".plot_zoomed.pdf"
+        
         LOGGER.info(f"saving plot to {plot_filename}")
 
         nsides = result.nsides
@@ -638,30 +616,36 @@ class SkyScanPlotter:
         )
         mmap_nside = healpy.get_nside(equatorial_map)
 
-        # Plot the original online reconstruction location
+        # Plot additional contours
+            
+
         if np.sum(np.isnan([extra_ra, extra_dec, extra_radius])) == 0:
 
             # dist = angular_distance(minRA, minDec, extra_ra * np.pi/180., extra_dec * np.pi/180.)
             # print("Millipede best fit is", dist /(np.pi * extra_radius/(1.177 * 180.)), "sigma from reported best fit")
         
+            map_nside = healpy.get_nside(equatorial_map)
 
-            extra_ra_rad = np.radians(extra_ra)
-            extra_dec_rad = np.radians(extra_dec)
-            extra_radius_rad = np.radians(extra_radius)
-            extra_lon = extra_ra_rad
-            extra_lat = extra_dec_rad
+            c = GaussianContour(ra_deg=extra_ra, dec_deg=extra_dec, radius_50=extra_radius, title="Online SplineMPE")
 
-            healpy.projscatter(np.degrees(extra_lon), np.degrees(extra_lat),
-                lonlat=True, c='m', marker='x', s=20, label=r'Reported online (50%, 90%)')
-            for cont_lev, cont_scale, cont_col, cont_sty in zip(['50', '90.'], 
-                    [1., 2.1459/1.177], ['m', 'm'], ['-', '--']):
-                spline_contour = self.circular_contour(extra_ra_rad, extra_dec_rad,
-                    extra_radius_rad*cont_scale, healpy.get_nside(equatorial_map))
-                spline_lon = spline_contour[1]
+            # Plot center
+            healpy.projscatter(c.ra_deg,
+                               c.dec_deg,
+                               lonlat=True,
+                               c=c.color,
+                               marker=c.marker,
+                               s=c.marker_size,
+                               label=c.title)
+
+            for level in c.levels:
+                spline_contour = c.generate_contour(nside=map_nside, containment=level)
                 spline_lat = np.pi/2. - spline_contour[0]
-                healpy.projplot(np.degrees(spline_lon), np.degrees(spline_lat), 
-                    lonlat=True, linewidth=2., color=cont_col, 
-                    linestyle=cont_sty)
+                spline_lon = spline_contour[1]
+                healpy.projplot(np.degrees(spline_lon),
+                                np.degrees(spline_lat), 
+                                lonlat=True, linewidth=2.,
+                                color=c.color,
+                                linestyle=c.get_style(containment=level))
 
         plt.legend(fontsize=6, loc="lower left")
 
