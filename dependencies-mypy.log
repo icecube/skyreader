@@ -14,15 +14,15 @@ certifi==2023.7.22
     # via requests
 cffi==1.16.0
     # via cryptography
-charset-normalizer==3.3.1
+charset-normalizer==3.3.2
     # via requests
-contourpy==1.1.1
+contourpy==1.2.0
     # via matplotlib
 cryptography==41.0.5
     # via pyjwt
 cycler==0.12.1
     # via matplotlib
-fonttools==4.43.1
+fonttools==4.44.0
     # via matplotlib
 healpy==1.16.6
     # via icecube-skyreader (setup.py)
@@ -32,7 +32,7 @@ iniconfig==2.0.0
     # via pytest
 kiwisolver==1.4.5
     # via matplotlib
-matplotlib==3.8.0
+matplotlib==3.8.1
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
