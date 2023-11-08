@@ -28,7 +28,7 @@ from .plotting_tools import (
     plot_catalog,
 )
 
-from .contours import GaussianContour
+from .contours import GaussianContour, CircularContour
 
 from ..result import SkyScanResult
 
@@ -433,8 +433,8 @@ class SkyScanPlotter:
         if circular:
             sigma50 = np.deg2rad(circular_err50)
             sigma90 = np.deg2rad(circular_err90)
-            Theta50, Phi50 = self.circular_contour(min_ra, min_dec, sigma50, nside)
-            Theta90, Phi90 = self.circular_contour(min_ra, min_dec, sigma90, nside)
+            Theta50, Phi50 = CircularContour.circular_contour(min_ra, min_dec, sigma50, nside)
+            Theta90, Phi90 = CircularContour.circular_contour(min_ra, min_dec, sigma90, nside)
             contour50 = np.dstack((Theta50,Phi50))
             contour90 = np.dstack((Theta90,Phi90))
             contours_by_level = [contour50, contour90]
