@@ -62,9 +62,6 @@ class SkyScanPlotter:
 
     def create_plot(self, result: SkyScanResult) -> None:
         """Creates a full-sky plot using a meshgrid at fixed resolution.
-        Optionally creates a zoomed-in plot. Resolutions are defined in
-        PLOT_DPI_STANDARD and PLOT_DPI_ZOOMED. Zoomed mode is very inefficient
-        as the meshgrid is created for the full sky.
         """
         dpi = self.PLOT_DPI_STANDARD # if not dozoom else self.PLOT_DPI_ZOOMED
 
@@ -601,7 +598,7 @@ class SkyScanPlotter:
             tab = {"ra (rad)": ras, "dec (rad)": decs}
             savename = unique_id + ".contour_" + val + ".txt"
             try:
-                LOGGER.info("Dumping to {savename}")
+                LOGGER.info(f"Writing contour to {savename}")
                 ascii.write(tab, savename, overwrite=True)
             except OSError as err:
                 LOGGER.error("OS Error prevented contours from being written, maybe a memory issue. Error is:\n{err}")
