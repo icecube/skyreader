@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-import healpy
+import healpy  # type: ignore[import]
 import numpy as np
 from typing import ClassVar
 
@@ -54,8 +54,8 @@ class GaussianContour(CircularContour):
     marker: str = "x"
     marker_size: int = 20
 
-    CONTOUR_STYLES: ClassVar[dict[int, str]] = {50: "-", 90: "--"}
-    SCALE_FACTORS: ClassVar[dict[int, float]] = {50: 1.177, 90: 2.1459}
+    CONTOUR_STYLES: ClassVar[dict[float, str]] = {50.0: "-", 90.0: "--"}
+    SCALE_FACTORS: ClassVar[dict[float, float]] = {50.0: 1.177, 90.0: 2.1459}
 
     @property
     def dec_rad(self):
@@ -68,6 +68,10 @@ class GaussianContour(CircularContour):
     @property
     def sigma_deg(self):
         return self.radius_50 / self.SCALE_FACTORS[50]
+
+    @property
+    def sigma_rad(self):
+        return np.rad2deg(self.sigma_deg)
 
     def get_style(self, containment: float):
         return self.CONTOUR_STYLES[containment]
@@ -84,6 +88,6 @@ class GaussianContour(CircularContour):
         expected in radians."""
         radius_rad = self.sigma_rad * self.sigma2radius(containment=containment)
         theta, phi = self.circular_contour(
-            ra_rad=self.ra_rad, dec_rad=self.dec_rad, radius_rad=radius_rad
+            ra_rad=self.ra_rad, dec_rad=self.dec_rad, radius_rad=radius_rad, nside=nside
         )
         return theta, phi
