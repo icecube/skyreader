@@ -487,7 +487,7 @@ class SkyScanPlotter:
             )
 
         fig = plt.gcf()
-        fig.set_size_inches(self.PLOT_SIZE_X_IN,self.PLOT_SIZE_Y_IN)
+        fig.set_size_inches(self.PLOT_SIZE_X_IN,self.PLOT_SIZE_Y_IN - 0.85)
         ax = plt.gca()
         image = ax.get_images()[0]
         # Place colorbar by hand
