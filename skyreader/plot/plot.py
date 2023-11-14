@@ -493,9 +493,6 @@ class SkyScanPlotter:
         cb = fig.colorbar(image, ax=ax, orientation='horizontal', aspect=50)
         cb.ax.xaxis.set_label_text(r"$-2 \Delta \ln (L)$")
 
-        # Add title
-        fig.suptitle(plot_title)
-
         # Plot the best-fit location
         # This requires some more coordinate transformations
         healpy.projplot(np.pi/2 - min_dec, min_ra,
@@ -681,6 +678,12 @@ class SkyScanPlotter:
         healpy.write_map(f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
             equatorial_map, coord = 'C', column_names = ['2LLH'],
             extra_header = fits_header, overwrite=True)
+
+        # adjust dimensions of the plot
+        fig.subplots_adjust(bottom=spacing, top=1.-spacing, left=spacing+0.04, right=1.-spacing)
+
+        # add title
+        fig.suptitle(plot_title)
 
         # Save the figure
         LOGGER.info(f"Saving: {plot_filename}...")
