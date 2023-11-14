@@ -680,7 +680,7 @@ class SkyScanPlotter:
             extra_header = fits_header, overwrite=True)
 
         # add title
-        plt.title(plot_title)
+        fig.suptitle(plot_title, x=1)
 
         # Save the figure
         LOGGER.info(f"Saving: {plot_filename}...")
