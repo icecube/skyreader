@@ -679,9 +679,6 @@ class SkyScanPlotter:
             equatorial_map, coord = 'C', column_names = ['2LLH'],
             extra_header = fits_header, overwrite=True)
 
-        # add title
-        fig.suptitle(plot_title, y=1.5)
-
         # Save the figure
         LOGGER.info(f"Saving: {plot_filename}...")
         #ax.invert_xaxis()
