@@ -493,6 +493,9 @@ class SkyScanPlotter:
         cb = fig.colorbar(image, ax=ax, orientation='horizontal', aspect=50)
         cb.ax.xaxis.set_label_text(r"$-2 \Delta \ln (L)$")
 
+        # Add title
+        fig.suptitle(plot_title)
+
         # Plot the best-fit location
         # This requires some more coordinate transformations
         healpy.projplot(np.pi/2 - min_dec, min_ra,
