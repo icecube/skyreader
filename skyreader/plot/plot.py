@@ -680,6 +680,7 @@ class SkyScanPlotter:
             extra_header = fits_header, overwrite=True)
 
         # adjust dimensions of the plot
+        spacing = 0.01
         fig.subplots_adjust(bottom=spacing, top=1.-spacing, left=spacing+0.04, right=1.-spacing)
 
         # add title
