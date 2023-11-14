@@ -486,9 +486,10 @@ class SkyScanPlotter:
             unit=r"$-2 \Delta \ln (L)$",
             )
 
-        fig = matplotlib.pyplot.figure(figsize=(self.PLOT_SIZE_X_IN,self.PLOT_SIZE_Y_IN))
+        fig = plt.gcf()
+        fig.set_size_inches(self.PLOT_SIZE_X_IN,self.PLOT_SIZE_Y_IN)
         ax = plt.gca()
-        image = ax.get_images()
+        image = ax.get_images()[0]
         # Place colorbar by hand
         cb = fig.colorbar(image, ax=ax, orientation='horizontal', aspect=50)
         cb.ax.xaxis.set_label_text(r"$-2 \Delta \ln (L)$")
