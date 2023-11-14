@@ -487,7 +487,6 @@ class SkyScanPlotter:
             )
 
         fig = plt.gcf()
-        fig.set_size_inches(self.PLOT_SIZE_X_IN,self.PLOT_SIZE_Y_IN - 0.85)
         ax = plt.gca()
         image = ax.get_images()[0]
         # Place colorbar by hand
@@ -681,7 +680,7 @@ class SkyScanPlotter:
             extra_header = fits_header, overwrite=True)
 
         # add title
-        fig.suptitle(plot_title)
+        ax.set_title(plot_title)
 
         # Save the figure
         LOGGER.info(f"Saving: {plot_filename}...")
