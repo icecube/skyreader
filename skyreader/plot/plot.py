@@ -486,7 +486,7 @@ class SkyScanPlotter:
             unit=r"$-2 \Delta \ln (L)$",
             )
 
-        fig = plt.gcf()
+        fig = matplotlib.pyplot.figure(figsize=(self.PLOT_SIZE_X_IN,self.PLOT_SIZE_Y_IN))
         ax = plt.gca()
         image = ax.get_images()[0]
         # Place colorbar by hand
@@ -678,10 +678,6 @@ class SkyScanPlotter:
         healpy.write_map(f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
             equatorial_map, coord = 'C', column_names = ['2LLH'],
             extra_header = fits_header, overwrite=True)
-
-        # adjust dimensions of the plot
-        spacing = 0.01
-        fig.subplots_adjust(bottom=spacing, top=1.-spacing, left=spacing+0.04, right=1.-spacing)
 
         # add title
         fig.suptitle(plot_title)
