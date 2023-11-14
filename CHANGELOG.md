@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.8 (2023-11-14)
+
+### Other
+
+* Zoomed plot title ([#31](https://github.com/icecube/skyreader/issues/31)) ([`27401e5`](https://github.com/icecube/skyreader/commit/27401e50acfa354551cef9c02903e713d63ae3b2))
+
 ## v1.2.7 (2023-10-22)
 
 ### Other
