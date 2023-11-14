@@ -685,7 +685,7 @@ class SkyScanPlotter:
         # Save the figure
         LOGGER.info(f"Saving: {plot_filename}...")
         #ax.invert_xaxis()
-        fig.savefig(self.output_dir / plot_filename, dpi=dpi, transparent=True)
+        fig.savefig(self.output_dir / plot_filename, dpi=dpi, transparent=True, bbox_inches='tight')
 
         LOGGER.info("done.")
 
