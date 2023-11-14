@@ -22,7 +22,7 @@ cryptography==41.0.5
     # via pyjwt
 cycler==0.12.1
     # via matplotlib
-fonttools==4.44.0
+fonttools==4.44.1
     # via matplotlib
 healpy==1.16.6
     # via icecube-skyreader (setup.py)
