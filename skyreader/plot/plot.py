@@ -617,8 +617,8 @@ class SkyScanPlotter:
             tab = {"ra (rad)": ras, "dec (rad)": decs}
             savename = unique_id + ".contour_" + val + ".txt"
             try:
-                LOGGER.info("Dumping to {savename}")
-                ascii.write(tab, savename, overwrite=True)
+                LOGGER.info("Dumping to {self.output_dir / savename}")
+                ascii.write(tab, self.output_dir / savename, overwrite=True)
             except OSError as err:
                 LOGGER.error("OS Error prevented contours from being written, maybe a memory issue. Error is:\n{err}")
 
@@ -670,12 +670,12 @@ class SkyScanPlotter:
 
 
         # Dump the whole contour
-        path = unique_id + ".contour.pkl"
-        print("Saving contour to", path)
-        with open(path, "wb") as f:
+        pickle_path = self.output_dir / (unique_id + ".contour.pkl")
+        LOGGER.info(f"Saving contour to {pickle_path}")
+        with open(pickle_path, "wb") as f:
             pickle.dump(saving_contours, f)
 
-        healpy.write_map(f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
+        healpy.write_map(self.output_dir / f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
             equatorial_map, coord = 'C', column_names = ['2LLH'],
             extra_header = fits_header, overwrite=True)
 
