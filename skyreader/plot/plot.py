@@ -446,6 +446,7 @@ class SkyScanPlotter:
                 return c1*c2*c3**(-gamma)
             
             new_ts_values = king_function(pixel_space_angles)
+            print(pixel_space_angles, new_ts_values)
             equatorial_map[pixels] = new_ts_values
 
 
