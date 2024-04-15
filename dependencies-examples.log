@@ -8,7 +8,7 @@ astropy==6.0.1
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
-astropy-iers-data==0.2024.4.8.0.32.4
+astropy-iers-data==0.2024.4.15.2.45.49
     # via astropy
 cachetools==5.3.3
     # via wipac-rest-tools
@@ -58,7 +58,7 @@ pillow==10.3.0
     # via matplotlib
 pycparser==2.22
     # via cffi
-pyerfa==2.0.1.3
+pyerfa==2.0.1.4
     # via astropy
 pyjwt[crypto]==2.8.0
     # via wipac-rest-tools
