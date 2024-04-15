@@ -327,7 +327,8 @@ class SkyScanPlotter:
                            plot_4fgl=False,
                            circular=False,
                            circular_err50=0.2,
-                           circular_err90=0.7):
+                           circular_err90=0.7,
+                           rude=False):
         """Uses healpy to plot a map."""
 
         def bounding_box(ra, dec, theta, phi):
@@ -355,6 +356,10 @@ class SkyScanPlotter:
             plot_filename = unique_id + ".plot_zoomed_wilks.pdf"
         else:
             plot_filename = unique_id + ".plot_zoomed.pdf"
+
+        if rude:
+            plot_filename = plot_filename.split(".")[-2] + "_rude.pdf"
+
         LOGGER.info(f"saving plot to {plot_filename}")
 
         nsides = result.nsides
