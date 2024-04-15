@@ -429,6 +429,20 @@ class SkyScanPlotter:
         if rude:
 
             min_index = np.nanargmin(equatorial_map)
+
+            min_sra = np.sin(min_ra)
+            min_cra = np.cos(min_ra)
+            min_sdec = np.sin(min_dec)
+            min_cdec = np.cos(min_dec)
+            
+            grid_sra = np.sin(grid_ra)
+            grid_cra = np.cos(grid_ra)
+            grid_sdec = np.sin(grid_dec)
+            grid_cdec = np.cos(grid_dec)
+
+            scalar_prod = np.clip(min_cdec*grid_cdec*(min_cra*grid_cra + min_sra*grid_sra) + (min_sdec*grid_sdec))
+            ang_dist_grid = np.average(np.abs(np.arccos(scalar_prod)))
+
             x0,y0,z0 = healpy.pix2vec(max_nside, min_index)
             x1,y1,z1 = healpy.pix2vec(
                 max_nside, 
@@ -446,7 +460,7 @@ class SkyScanPlotter:
                 return c1*c2*c3**(-gamma)
             
             new_ts_values = -2*np.log(king_function(pixel_space_angles))
-            print(pixel_space_angles, new_ts_values)
+            grid_value = -2*np.log(king_function(ang_dist_grid))
             equatorial_map[pixels] = new_ts_values
 
 
