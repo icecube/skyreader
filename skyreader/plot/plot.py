@@ -440,7 +440,11 @@ class SkyScanPlotter:
             grid_sdec = np.sin(grid_dec)
             grid_cdec = np.cos(grid_dec)
 
-            scalar_prod = np.clip(min_cdec*grid_cdec*(min_cra*grid_cra + min_sra*grid_sra) + (min_sdec*grid_sdec))
+            scalar_prod = np.clip(
+                min_cdec*grid_cdec*(min_cra*grid_cra + min_sra*grid_sra) + (min_sdec*grid_sdec),
+                -1.,
+                1.,
+            )
             ang_dist_grid = np.average(np.abs(np.arccos(scalar_prod)))
 
             x0,y0,z0 = healpy.pix2vec(max_nside, min_index)
