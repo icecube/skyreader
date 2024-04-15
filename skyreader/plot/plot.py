@@ -457,15 +457,12 @@ class SkyScanPlotter:
             pixels = np.where(space_angle < 4.)[0]
             pixel_space_angles = space_angle[pixels]
 
-            def king_function(x, sigma=0.23, gamma=1.3):
-                c1 = 1/(2*np.pi*sigma**2)
-                c2 = 1 - 1/gamma
-                c3 = 1 + x**2/((sigma**2)*2*gamma)
-                return c1*c2*c3**(-gamma)
+            def king_function(x, sigma=0.133, gamma=0.788):
+                return 1 + x**2/((sigma**2)*2*gamma)
             
             new_ts_values = -2*np.log(king_function(pixel_space_angles))
             grid_value = -2*np.log(king_function(ang_dist_grid))
-            print(grid_value, ang_dist_grid, grid_sra)
+            
             equatorial_map[pixels] = new_ts_values
 
 
