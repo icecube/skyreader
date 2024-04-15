@@ -426,6 +426,32 @@ class SkyScanPlotter:
         equatorial_map -= np.nanmin(equatorial_map)
         equatorial_map *= 2.
 
+        if rude:
+
+            min_index = np.nanargmin(equatorial_map)
+
+            def king_function(x, sigma=0.21, gamma=1.6):
+                c1 = 1/(2*np.pi*sigma**2)
+                c2 = 1 - 1/gamma
+                c3 = 1 + x**2/((sigma**2)*2*gamma)
+                return c1*c2*c3**(-gamma)
+            
+            def pixel_dist(from_nside, from_pix, to_nside, to_pix):
+                x0,y0,z0 = healpy.pix2vec(from_nside, from_pix)
+                x1,y1,z1 = healpy.pix2vec(to_nside, to_pix)
+                cos_space_angle = numpy.clip(x0*x1 + y0*y1 + z0*z1, -1., 1.)
+                space_angle = numpy.arccos(cos_space_angle)
+                return space_angle
+            
+            for index in range(len(equatorial_map)):
+                ang_dist = pixel_dist(
+                    max_nside,
+                    min_index,
+                    max_nside,
+                    index,
+                )
+                equatorial_map[index] = king_function(np.rad2deg(ang_dist))
+
         LOGGER.info(f"preparing plot: {plot_filename}...")
 
         cmap = self.PLOT_COLORMAP
