@@ -358,7 +358,7 @@ class SkyScanPlotter:
             plot_filename = unique_id + ".plot_zoomed.pdf"
 
         if rude:
-            plot_filename = plot_filename.split(".")[-2] + "_rude.pdf"
+            plot_filename = plot_filename.split(".")[:-2] + "_rude.pdf"
 
         LOGGER.info(f"saving plot to {plot_filename}")
 
