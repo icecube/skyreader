@@ -462,7 +462,7 @@ class SkyScanPlotter:
             
             new_ts_values = log_king_function(pixel_space_angles)
             grid_value = log_king_function(ang_dist_grid)
-            
+            print(grid_value)
             equatorial_map[pixels] = new_ts_values
 
 
