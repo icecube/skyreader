@@ -439,8 +439,8 @@ class SkyScanPlotter:
             def pixel_dist(from_nside, from_pix, to_nside, to_pix):
                 x0,y0,z0 = healpy.pix2vec(from_nside, from_pix)
                 x1,y1,z1 = healpy.pix2vec(to_nside, to_pix)
-                cos_space_angle = numpy.clip(x0*x1 + y0*y1 + z0*z1, -1., 1.)
-                space_angle = numpy.arccos(cos_space_angle)
+                cos_space_angle = np.clip(x0*x1 + y0*y1 + z0*z1, -1., 1.)
+                space_angle = np.arccos(cos_space_angle)
                 return space_angle
             
             for index in range(len(equatorial_map)):
