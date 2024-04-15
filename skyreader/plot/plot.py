@@ -460,8 +460,8 @@ class SkyScanPlotter:
             def log_king_function(x, sigma=0.133, gamma=0.788):
                 return 2*gamma*(1 + x**2/((sigma**2)*2*gamma))
             
-            new_ts_values = -2*np.log(log_king_function(pixel_space_angles))
-            grid_value = -2*np.log(log_king_function(ang_dist_grid))
+            new_ts_values = log_king_function(pixel_space_angles)
+            grid_value = log_king_function(ang_dist_grid)
             
             equatorial_map[pixels] = new_ts_values
 
