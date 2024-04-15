@@ -445,7 +445,7 @@ class SkyScanPlotter:
                 -1.,
                 1.,
             )
-            ang_dist_grid = np.average(np.abs(np.arccos(scalar_prod)))
+            ang_dist_grid = np.abs(np.arccos(scalar_prod))
 
             x0,y0,z0 = healpy.pix2vec(max_nside, min_index)
             x1,y1,z1 = healpy.pix2vec(
