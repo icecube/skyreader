@@ -454,7 +454,7 @@ class SkyScanPlotter:
             )
             cos_space_angle = np.clip(x0*x1 + y0*y1 + z0*z1, -1., 1.)
             space_angle = np.rad2deg(np.arccos(cos_space_angle))
-            pixels = np.where(space_angle < 4.)[0]
+            pixels = np.where(space_angle < 8.)[0]
             pixel_space_angles = space_angle[pixels]
 
             def king_function(x, sigma=0.133, gamma=0.788):
