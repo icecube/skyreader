@@ -4,11 +4,11 @@
 #
 #    pip-compile --output-file=dependencies.log
 #
-astropy==6.0.1
+astropy==6.1.0
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
-astropy-iers-data==0.2024.4.15.2.45.49
+astropy-iers-data==0.2024.5.13.0.30.12
     # via astropy
 certifi==2024.2.2
     # via requests
