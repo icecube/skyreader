@@ -707,7 +707,7 @@ class SkyScanPlotter:
         # For vertical events, calculate the area with the number of pixels
         # In the healpy map
         healpy_areas = list()
-        for lev in contour_levels[1:2]:
+        for lev in contour_levels[0:2]:
             area_per_pix = healpy.nside2pixarea(healpy.get_nside(equatorial_map))
             num_pixs = np.count_nonzero(equatorial_map[~np.isnan(equatorial_map)] < lev)
             healpy_area = num_pixs * area_per_pix * (180./np.pi)**2.
