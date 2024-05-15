@@ -462,7 +462,7 @@ class SkyScanPlotter:
             
             new_ts_values = log_exp(pixel_space_angles)
             grid_value = log_exp(ang_dist_grid)
-            print(grid_value)
+            #print(grid_value)
             equatorial_map[pixels] = new_ts_values
 
 
@@ -705,13 +705,17 @@ class SkyScanPlotter:
         plt.legend(fontsize=6, loc="lower left")
 
         # For vertical events, calculate the area with the number of pixels
-        # In the healpy map   
+        # In the healpy map
+        healpy_areas = list()
         for lev in contour_levels[1:2]:
             area_per_pix = healpy.nside2pixarea(healpy.get_nside(equatorial_map))
             num_pixs = np.count_nonzero(equatorial_map[~np.isnan(equatorial_map)] < lev)
             healpy_area = num_pixs * area_per_pix * (180./np.pi)**2.
+            healpy_areas.append(healpy_area)
+        print("Contour Area (50%):", contour_areas[0], "degrees (cartesian)",
+            healpy_areas[0], "degrees (scaled)")
         print("Contour Area (90%):", contour_areas[1], "degrees (cartesian)",
-            healpy_area, "degrees (scaled)")
+            healpy_areas[1], "degrees (scaled)")
 
 
         # Dump the whole contour
