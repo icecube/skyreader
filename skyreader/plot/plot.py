@@ -457,11 +457,15 @@ class SkyScanPlotter:
             pixels = np.where(space_angle < 8.)[0]
             pixel_space_angles = space_angle[pixels]
 
-            def log_exp(x, lam=6.6):
-                return x*lam
+            def log_gauss(x, sigma=0.17):
+                """
+                neutrino floor: sigma=0.17 deg
+                rude events: sigma=0.326 deg
+                """
+                return (x/sigma)**2
             
-            new_ts_values = log_exp(pixel_space_angles)
-            grid_value = log_exp(ang_dist_grid)
+            new_ts_values = log_gauss(pixel_space_angles)
+            grid_value = log_gauss(ang_dist_grid)
             #print(grid_value)
             equatorial_map[pixels] = new_ts_values
 
