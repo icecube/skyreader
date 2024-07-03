@@ -457,7 +457,7 @@ class SkyScanPlotter:
             pixels = np.where(space_angle < 8.)[0]
             pixel_space_angles = space_angle[pixels]
 
-            def log_gauss(x, sigma=0.17):
+            def log_gauss(x, sigma=0.326):
                 """
                 neutrino floor: sigma=0.17 deg
                 rude events: sigma=0.326 deg
