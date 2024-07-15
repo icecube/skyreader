@@ -38,7 +38,8 @@ class SkyScanPlotter:
     PLOT_DPI_STANDARD = 150
     PLOT_DPI_ZOOMED = 1200
     PLOT_COLORMAP = matplotlib.colormaps['plasma_r']
-    CONTOUR90_TO_SIGMA = 2.146
+    SIGMA_TO_CONTOUR90 = 2.146
+    NEUTRINOFLOOR_SIGMA = 0.2
 
     def __init__(self, output_dir: Path = Path(".")):
         # Set here plotting parameters and things that do not depend on the individual scan.
@@ -329,7 +330,8 @@ class SkyScanPlotter:
                            circular=False,
                            circular_err50=0.2,
                            circular_err90=0.7,
-                           circularized_ts_map=False):
+                           circularized_ts_map=False,
+                           neutrino_floor=False):
         """Uses healpy to plot a map."""
 
         def bounding_box(ra, dec, theta, phi):
@@ -427,6 +429,33 @@ class SkyScanPlotter:
         equatorial_map -= np.nanmin(equatorial_map)
         equatorial_map *= 2.
 
+        # Calculate the contours
+        if systematics:
+            # from Pan-Starrs event 127852
+            contour_levels = (np.array([22.2, 64.2])+min_value) # these are values determined from MC by Will on the TS (2*LLH)
+            contour_labels = [r'50% (IC160427A syst.)', r'90% (IC160427A syst.)']
+            contour_colors=['k', 'r']
+        else:
+            # Wilks
+            contour_levels = (np.array([1.39, 4.61, 11.83, 28.74])+min_value)[:3]
+            contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
+            contour_colors=['k', 'r', 'g', 'b'][:3]
+
+        # For vertical events, calculate the area with the number of pixels
+        # In the healpy map
+        healpy_areas = list()
+        for lev in contour_levels[0:2]:
+            area_per_pix = healpy.nside2pixarea(healpy.get_nside(equatorial_map))
+            num_pixs = np.count_nonzero(equatorial_map[~np.isnan(equatorial_map)] < lev)
+            healpy_area = num_pixs * area_per_pix * (180./np.pi)**2.
+            healpy_areas.append(healpy_area)
+        
+        if neutrino_floor:
+            neutrino_floor_90_area = np.pi * (self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR90)**2
+            if healpy_areas[1] < neutrino_floor_90_area:
+                circularized_ts_map = True
+                circular_err90 = self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR90
+
         if circularized_ts_map:
 
             min_index = np.nanargmin(equatorial_map)
@@ -465,11 +494,18 @@ class SkyScanPlotter:
                 """
                 return (x/sigma)**2
             
-            event_sigma = circular_err90/self.CONTOUR90_TO_SIGMA
+            event_sigma = circular_err90/self.SIGMA_TO_CONTOUR90
             new_ts_values = log_gauss(pixel_space_angles, event_sigma)
             grid_value = log_gauss(ang_dist_grid, event_sigma)
             #print(grid_value)
             equatorial_map[pixels] = new_ts_values
+            
+            healpy_areas = list()
+            for lev in contour_levels[0:2]:
+                area_per_pix = healpy.nside2pixarea(healpy.get_nside(equatorial_map))
+                num_pixs = np.count_nonzero(equatorial_map[~np.isnan(equatorial_map)] < lev)
+                healpy_area = num_pixs * area_per_pix * (180./np.pi)**2.
+                healpy_areas.append(healpy_area)
 
 
         LOGGER.info(f"preparing plot: {plot_filename}...")
@@ -477,18 +513,6 @@ class SkyScanPlotter:
         cmap = self.PLOT_COLORMAP
         cmap.set_under('w')
         cmap.set_bad(alpha=1., color=(1.,0.,0.)) # make NaNs bright red
-
-        # Calculate the contours
-        if systematics:
-            # from Pan-Starrs event 127852
-            contour_levels = (np.array([22.2, 64.2])+min_value) # these are values determined from MC by Will on the TS (2*LLH)
-            contour_labels = [r'50% (IC160427A syst.)', r'90% (IC160427A syst.)']
-            contour_colors=['k', 'r']
-        else:
-            # Wilks
-            contour_levels = (np.array([1.39, 4.61, 11.83, 28.74])+min_value)[:3]
-            contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
-            contour_colors=['k', 'r', 'g', 'b'][:3]
 
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
         
@@ -548,15 +572,6 @@ class SkyScanPlotter:
         # This requires some more coordinate transformations
         healpy.projplot(np.pi/2 - min_dec, min_ra,
             '*', ms=5, label=r'scan best fit', color='black', zorder=2)
-            
-        # For vertical events, calculate the area with the number of pixels
-        # In the healpy map
-        healpy_areas = list()
-        for lev in contour_levels[0:2]:
-            area_per_pix = healpy.nside2pixarea(healpy.get_nside(equatorial_map))
-            num_pixs = np.count_nonzero(equatorial_map[~np.isnan(equatorial_map)] < lev)
-            healpy_area = num_pixs * area_per_pix * (180./np.pi)**2.
-            healpy_areas.append(healpy_area)
 
         # Plot the contours
         for contour_area_sqdeg, contour_label, contour_color, contours in zip(healpy_areas,
