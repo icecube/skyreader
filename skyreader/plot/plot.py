@@ -665,7 +665,7 @@ class SkyScanPlotter:
             maxim_dec_rad = np.deg2rad(dec + dec_plus)
             minim_dec_rad = np.deg2rad(dec - np.abs(dec_minus))
             print(maxim_dec_rad, minim_dec_rad)
-            bounding_contour_area = (np.deg2rad(ra_plus) - np.deg2rad(np.abs(ra_minus)))*(np.sin(maxim_dec_rad)-np.sin(minim_dec_rad))
+            bounding_contour_area = (np.deg2rad(ra_plus) - np.deg2rad(np.abs(ra_minus)))*(np.cos(maxim_dec_rad)-np.cos(minim_dec_rad))
             bounding_contour_area *= (180.*180.)/(np.pi*np.pi) # convert to square-degrees
             contour_label = r'90% Bounding rectangle' + ' - area: {0:.2f} sqdeg'.format(
                 bounding_contour_area)
