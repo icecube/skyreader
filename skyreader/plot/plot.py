@@ -548,19 +548,20 @@ class SkyScanPlotter:
         # This requires some more coordinate transformations
         healpy.projplot(np.pi/2 - min_dec, min_ra,
             '*', ms=5, label=r'scan best fit', color='black', zorder=2)
+            
+        # For vertical events, calculate the area with the number of pixels
+        # In the healpy map
+        healpy_areas = list()
+        for lev in contour_levels[0:2]:
+            area_per_pix = healpy.nside2pixarea(healpy.get_nside(equatorial_map))
+            num_pixs = np.count_nonzero(equatorial_map[~np.isnan(equatorial_map)] < lev)
+            healpy_area = num_pixs * area_per_pix * (180./np.pi)**2.
+            healpy_areas.append(healpy_area)
 
         # Plot the contours
         contour_areas=[]
-        for contour_level, contour_label, contour_color, contours in zip(contour_levels,
+        for contour_area_sqdeg, contour_label, contour_color, contours in zip(healpy_areas,
             contour_labels, contour_colors, contours_by_level):
-            contour_area = 0.
-            for contour in contours:
-                _ = contour.copy()
-                _[:,1] += np.pi-np.radians(ra)
-                _[:,1] %= 2*np.pi
-                contour_area += self.calculate_area(_)
-            contour_area_sqdeg = abs(contour_area) * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
-            contour_areas.append(contour_area_sqdeg)
             contour_label = contour_label + ' - area: {0:.2f} sqdeg'.format(
                 contour_area_sqdeg)
             first = True
@@ -613,6 +614,11 @@ class SkyScanPlotter:
             # This is actually an output and not a logging info.
             # TODO: we should wrap this in an object, return and log at the higher level.
             print(contain_txt)
+
+        print("Contour Area (50%):", contour_areas[0], "degrees (cartesian)",
+            healpy_areas[0], "degrees (scaled)")
+        print("Contour Area (90%):", contour_areas[1], "degrees (cartesian)",
+            healpy_areas[1], "degrees (scaled)")
 
         if plot_bounding_box:
             bounding_ras_list, bounding_decs_list = [], []
@@ -709,19 +715,6 @@ class SkyScanPlotter:
                     linestyle=cont_sty)
 
         plt.legend(fontsize=6, loc="lower left")
-
-        # For vertical events, calculate the area with the number of pixels
-        # In the healpy map
-        healpy_areas = list()
-        for lev in contour_levels[0:2]:
-            area_per_pix = healpy.nside2pixarea(healpy.get_nside(equatorial_map))
-            num_pixs = np.count_nonzero(equatorial_map[~np.isnan(equatorial_map)] < lev)
-            healpy_area = num_pixs * area_per_pix * (180./np.pi)**2.
-            healpy_areas.append(healpy_area)
-        print("Contour Area (50%):", contour_areas[0], "degrees (cartesian)",
-            healpy_areas[0], "degrees (scaled)")
-        print("Contour Area (90%):", contour_areas[1], "degrees (cartesian)",
-            healpy_areas[1], "degrees (scaled)")
 
 
         # Dump the whole contour
