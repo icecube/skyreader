@@ -452,7 +452,12 @@ class SkyScanPlotter:
         
         if neutrino_floor:
             neutrino_floor_90_area = np.pi * (self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR90)**2
-            if healpy_areas[1] < neutrino_floor_90_area:
+            circularized_90_area = np.pi * contour90**2
+            if circularized_ts_map:
+                compare_90_area = circularized_90_area
+            else:
+                compare_90_area = neutrino_floor_90_area
+            if healpy_areas[1] < compare_90_area:
                 circularized_ts_map = True
                 circular_err90 = self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR90
 
@@ -499,7 +504,7 @@ class SkyScanPlotter:
             grid_value = log_gauss(ang_dist_grid, event_sigma)
             #print(grid_value)
             equatorial_map[pixels] = new_ts_values
-            
+
             healpy_areas = list()
             for lev in contour_levels[0:2]:
                 area_per_pix = healpy.nside2pixarea(healpy.get_nside(equatorial_map))
