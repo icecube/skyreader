@@ -38,6 +38,7 @@ class SkyScanPlotter:
     PLOT_DPI_STANDARD = 150
     PLOT_DPI_ZOOMED = 1200
     PLOT_COLORMAP = matplotlib.colormaps['plasma_r']
+    CONTOUR90_TO_SIGMA = 2.146
 
     def __init__(self, output_dir: Path = Path(".")):
         # Set here plotting parameters and things that do not depend on the individual scan.
@@ -457,15 +458,16 @@ class SkyScanPlotter:
             pixels = np.where(space_angle < 8.)[0]
             pixel_space_angles = space_angle[pixels]
 
-            def log_gauss(x, sigma=0.326):
+            def log_gauss(x, sigma):
                 """
                 neutrino floor: sigma=0.17 deg
                 rude events: sigma=0.326 deg
                 """
                 return (x/sigma)**2
             
-            new_ts_values = log_gauss(pixel_space_angles)
-            grid_value = log_gauss(ang_dist_grid)
+            event_sigma = circular_err90/2.146
+            new_ts_values = log_gauss(pixel_space_angles, event_sigma)
+            grid_value = log_gauss(ang_dist_grid, event_sigma)
             #print(grid_value)
             equatorial_map[pixels] = new_ts_values
 
