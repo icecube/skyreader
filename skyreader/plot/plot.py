@@ -452,13 +452,11 @@ class SkyScanPlotter:
         
         if neutrino_floor:
             neutrino_floor_90_area = np.pi * (self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR90)**2
-            circularized_90_area = np.pi * circular_err90**2
             if circularized_ts_map:
-                compare_90_area = circularized_90_area
+                compare_90_area = np.pi * circular_err90**2
             else:
-                compare_90_area = neutrino_floor_90_area
-            print(healpy_areas[1], compare_90_area)
-            if healpy_areas[1] < compare_90_area:
+                compare_90_area = healpy_areas[1]
+            if compare_90_area < neutrino_floor_90_area:
                 circularized_ts_map = True
                 circular_err90 = self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR90
 
