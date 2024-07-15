@@ -328,7 +328,7 @@ class SkyScanPlotter:
                            circular=False,
                            circular_err50=0.2,
                            circular_err90=0.7,
-                           rude=False):
+                           circularized_ts_map=False):
         """Uses healpy to plot a map."""
 
         def bounding_box(ra, dec, theta, phi):
@@ -357,8 +357,8 @@ class SkyScanPlotter:
         else:
             plot_filename = unique_id + ".plot_zoomed.pdf"
 
-        if rude:
-            plot_filename = plot_filename.split(".pdf")[-2] + "_rude.pdf"
+        if circularized_ts_map:
+            plot_filename = plot_filename.split(".pdf")[-2] + "_circularized_ts.pdf"
 
         LOGGER.info(f"saving plot to {plot_filename}")
 
@@ -426,7 +426,7 @@ class SkyScanPlotter:
         equatorial_map -= np.nanmin(equatorial_map)
         equatorial_map *= 2.
 
-        if rude:
+        if circularized_ts_map:
 
             min_index = np.nanargmin(equatorial_map)
 
