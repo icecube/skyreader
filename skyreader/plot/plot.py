@@ -662,9 +662,7 @@ class SkyScanPlotter:
             bounding_decs: np.ndarray = np.asarray(bounding_decs_list)
             bounding_phi = np.radians(bounding_ras)
             bounding_theta = np.pi/2 - np.radians(bounding_decs)
-            bounding_contour = np.array([bounding_theta, bounding_phi])
-            bounding_contour_area = 0.
-            bounding_contour_area = abs(self.calculate_area(bounding_contour.T))
+            bounding_contour_area = (np.deg2rad(ra_plus) - np.deg2rad(ra_minus))*(np.sin(np.deg2rad(dec_plus))-np.sin(np.deg2rad(dec_minus)))
             bounding_contour_area *= (180.*180.)/(np.pi*np.pi) # convert to square-degrees
             contour_label = r'90% Bounding rectangle' + ' - area: {0:.2f} sqdeg'.format(
                 bounding_contour_area)
