@@ -559,7 +559,6 @@ class SkyScanPlotter:
             healpy_areas.append(healpy_area)
 
         # Plot the contours
-        contour_areas=[]
         for contour_area_sqdeg, contour_label, contour_color, contours in zip(healpy_areas,
             contour_labels, contour_colors, contours_by_level):
             contour_label = contour_label + ' - area: {0:.2f} sqdeg'.format(
@@ -615,10 +614,8 @@ class SkyScanPlotter:
             # TODO: we should wrap this in an object, return and log at the higher level.
             print(contain_txt)
 
-        print("Contour Area (50%):", contour_areas[0], "degrees (cartesian)",
-            healpy_areas[0], "degrees (scaled)")
-        print("Contour Area (90%):", contour_areas[1], "degrees (cartesian)",
-            healpy_areas[1], "degrees (scaled)")
+        print("Contour Area (50%):", healpy_areas[0], "degrees (scaled)")
+        print("Contour Area (90%):", healpy_areas[1], "degrees (scaled)")
 
         if plot_bounding_box:
             bounding_ras_list, bounding_decs_list = [], []
