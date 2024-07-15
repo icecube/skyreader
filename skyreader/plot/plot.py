@@ -465,7 +465,7 @@ class SkyScanPlotter:
                 """
                 return (x/sigma)**2
             
-            event_sigma = circular_err90/2.146
+            event_sigma = circular_err90/self.CONTOUR90_TO_SIGMA
             new_ts_values = log_gauss(pixel_space_angles, event_sigma)
             grid_value = log_gauss(ang_dist_grid, event_sigma)
             #print(grid_value)
