@@ -53,6 +53,7 @@ class SkyScanPlotter:
         a = 0
         x0, y0 = vs[0]
         for [x1,y1] in vs[1:]:
+            print(np.rad2deg(x1), np.rad2deg(y1))
             dx = x1-x0
             dy = np.sin(y1)-np.sin(y0)
             a += 0.5*(np.sin(y0)*dx - x0*dy)
