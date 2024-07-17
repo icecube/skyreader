@@ -441,6 +441,8 @@ class SkyScanPlotter:
             contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
             contour_colors=['k', 'r', 'g', 'b'][:3]
 
+        sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
+
         # For vertical events, calculate the area with the number of pixels
         # In the healpy map
         healpy_areas = list()
@@ -534,8 +536,6 @@ class SkyScanPlotter:
         cmap = self.PLOT_COLORMAP
         cmap.set_under('w')
         cmap.set_bad(alpha=1., color=(1.,0.,0.)) # make NaNs bright red
-
-        sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
         
         # Call meander module to find contours
         if not circular:
