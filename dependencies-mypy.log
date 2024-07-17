@@ -10,7 +10,7 @@ astropy==6.1.1
     #   icecube-skyreader (setup.py)
 astropy-iers-data==0.2024.7.15.0.31.42
     # via astropy
-cachetools==5.3.3
+cachetools==5.4.0
     # via wipac-rest-tools
 certifi==2024.7.4
     # via requests
@@ -26,7 +26,7 @@ cycler==0.12.1
     # via matplotlib
 fonttools==4.53.1
     # via matplotlib
-healpy==1.17.1
+healpy==1.17.3
     # via icecube-skyreader (setup.py)
 idna==3.7
     # via requests

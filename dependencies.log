@@ -20,7 +20,7 @@ cycler==0.12.1
     # via matplotlib
 fonttools==4.53.1
     # via matplotlib
-healpy==1.17.1
+healpy==1.17.3
     # via icecube-skyreader (setup.py)
 idna==3.7
     # via requests
