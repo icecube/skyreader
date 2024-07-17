@@ -465,7 +465,6 @@ class SkyScanPlotter:
             area_per_pix = healpy.nside2pixarea(healpy.get_nside(equatorial_map))
             num_pixs = np.count_nonzero(equatorial_map[~np.isnan(equatorial_map)] < lev)
             healpy_area = num_pixs * area_per_pix * (180./np.pi)**2.
-            contour_area = self.calculate_area()
             healpy_areas.append(healpy_area)
             print(healpy_areas)
         
