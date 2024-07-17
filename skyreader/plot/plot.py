@@ -54,8 +54,8 @@ class SkyScanPlotter:
         x0, y0 = vs[0]
         for [x1,y1] in vs[1:]:
             dx = x1-x0
-            dy = y1-y0
-            a += 0.5*(y0*dx - x0*dy)
+            dy = np.sin(y1)-np.sin(y0)
+            a += 0.5*(np.sin(y0)*dx - x0*dy)
             x0 = x1
             y0 = y1
         return a
@@ -444,11 +444,28 @@ class SkyScanPlotter:
         # For vertical events, calculate the area with the number of pixels
         # In the healpy map
         healpy_areas = list()
+        contours_by_level = meander.spherical_contours(sample_points,
+            grid_value, contour_levels
+            )
+        contour_areas=[]
+        for contour_level, contour_label, contour_color, contours in zip(contour_levels,
+            contour_labels, contour_colors, contours_by_level):
+            contour_area = 0.
+            for contour in contours:
+                _ = contour.copy()
+                _[:,1] += np.pi-np.radians(ra)
+                _[:,1] %= 2*np.pi
+                contour_area += self.calculate_area(_)
+            contour_area_sqdeg = abs(contour_area) * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
+            contour_areas.append(contour_area_sqdeg)
+            print(contour_areas)
         for lev in contour_levels[0:2]:
             area_per_pix = healpy.nside2pixarea(healpy.get_nside(equatorial_map))
             num_pixs = np.count_nonzero(equatorial_map[~np.isnan(equatorial_map)] < lev)
             healpy_area = num_pixs * area_per_pix * (180./np.pi)**2.
+            contour_area = self.calculate_area()
             healpy_areas.append(healpy_area)
+            print(healpy_areas)
         
         if neutrino_floor:
             neutrino_floor_90_area = np.pi * (self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR90)**2
@@ -664,7 +681,7 @@ class SkyScanPlotter:
             bounding_theta = np.pi/2 - np.radians(bounding_decs)
             maxim_dec_rad = np.deg2rad(dec + dec_plus)
             minim_dec_rad = np.deg2rad(dec - np.abs(dec_minus))
-            bounding_contour_area = (np.deg2rad(ra_plus) + np.deg2rad(np.abs(ra_minus)))*(np.sin(maxim_dec_rad)-np.sin(minim_dec_rad))
+            bounding_contour_area = (np.deg2rad(ra_plus + np.abs(ra_minus)))*(np.sin(maxim_dec_rad)-np.sin(minim_dec_rad))
             bounding_contour_area *= (180.*180.)/(np.pi*np.pi) # convert to square-degrees
             contour_label = r'90% Bounding rectangle' + ' - area: {0:.2f} sqdeg'.format(
                 bounding_contour_area)
