@@ -518,7 +518,7 @@ class SkyScanPlotter:
             new_ts_values = log_gauss(space_angle, event_sigma)
             grid_value = log_gauss(ang_dist_grid, event_sigma)
             
-            equatorial_map[pixels] = new_ts_values
+            equatorial_map = new_ts_values
 
             # re-calculate areas
             contours_by_level = meander.spherical_contours(sample_points,
