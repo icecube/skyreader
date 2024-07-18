@@ -59,6 +59,20 @@ class SkyScanPlotter:
             x0 = x1
             y0 = y1
         return a
+    
+    # Given a list of contours by level, returns the areas of the contours
+    def get_contour_areas(self, contours_by_level_list) -> List[float]:
+        contour_areas=[]
+        for contours in contours_by_level_list:
+            contour_area = 0.
+            for contour in contours:
+                _ = contour.copy()
+                _[:,1] += np.pi-np.radians(ra)
+                _[:,1] %= 2*np.pi
+                contour_area += self.calculate_area(_)
+            contour_area_sqdeg = abs(contour_area) * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
+            contour_areas.append(contour_area_sqdeg)
+        return contour_areas
 
     def create_plot(self, result: SkyScanResult, dozoom: bool = False) -> None:
         """Creates a full-sky plot using a meshgrid at fixed resolution.
@@ -443,41 +457,26 @@ class SkyScanPlotter:
 
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
 
-        # For vertical events, calculate the area with the number of pixels
-        # In the healpy map
-        healpy_areas = list()
+        # Get contours from healpix map
         contours_by_level = meander.spherical_contours(sample_points,
             grid_value, contour_levels
             )
-        contour_areas=[]
-        for contour_level, contour_label, contour_color, contours in zip(contour_levels,
-            contour_labels, contour_colors, contours_by_level):
-            contour_area = 0.
-            for contour in contours:
-                _ = contour.copy()
-                _[:,1] += np.pi-np.radians(ra)
-                _[:,1] %= 2*np.pi
-                contour_area += self.calculate_area(_)
-            contour_area_sqdeg = abs(contour_area) * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
-            contour_areas.append(contour_area_sqdeg)
-            print(contour_areas)
-        for lev in contour_levels[0:2]:
-            area_per_pix = healpy.nside2pixarea(healpy.get_nside(equatorial_map))
-            num_pixs = np.count_nonzero(equatorial_map[~np.isnan(equatorial_map)] < lev)
-            healpy_area = num_pixs * area_per_pix * (180./np.pi)**2.
-            healpy_areas.append(healpy_area)
-            print(healpy_areas)
         
+        # Calculate areas using Gauss-Green's theorem for a spherical space
+        contour_areas = self.get_contour_areas(contours_by_level)
+        
+        # In case it is requested, check if neutrino floor must be applied
         if neutrino_floor:
             neutrino_floor_90_area = np.pi * (self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR90)**2
             if circularized_ts_map:
                 compare_90_area = np.pi * circular_err90**2
             else:
-                compare_90_area = healpy_areas[1]
+                compare_90_area = contour_areas[1]
             if compare_90_area < neutrino_floor_90_area:
                 circularized_ts_map = True
                 circular_err90 = self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR90
 
+        # In case it is requested, generate a mock ts map with a gaussian shape around the best fit direction
         if circularized_ts_map:
 
             min_index = np.nanargmin(equatorial_map)
@@ -506,28 +505,25 @@ class SkyScanPlotter:
             )
             cos_space_angle = np.clip(x0*x1 + y0*y1 + z0*z1, -1., 1.)
             space_angle = np.rad2deg(np.arccos(cos_space_angle))
-            pixels = np.where(space_angle < 8.)[0]
-            pixel_space_angles = space_angle[pixels]
 
             def log_gauss(x, sigma):
                 """
-                neutrino floor: sigma=0.17 deg
+                neutrino floor: sigma=0.20 deg
                 rude events: sigma=0.326 deg
                 """
                 return (x/sigma)**2
             
             event_sigma = circular_err90/self.SIGMA_TO_CONTOUR90
-            new_ts_values = log_gauss(pixel_space_angles, event_sigma)
+            new_ts_values = log_gauss(space_angle, event_sigma)
             grid_value = log_gauss(ang_dist_grid, event_sigma)
-            #print(grid_value)
+            
             equatorial_map[pixels] = new_ts_values
 
-            healpy_areas = list()
-            for lev in contour_levels[0:2]:
-                area_per_pix = healpy.nside2pixarea(healpy.get_nside(equatorial_map))
-                num_pixs = np.count_nonzero(equatorial_map[~np.isnan(equatorial_map)] < lev)
-                healpy_area = num_pixs * area_per_pix * (180./np.pi)**2.
-                healpy_areas.append(healpy_area)
+            # re-calculate areas
+            contours_by_level = meander.spherical_contours(sample_points,
+                grid_value, contour_levels
+            )
+            contour_areas = self.get_contour_areas(contours_by_level)
 
 
         LOGGER.info(f"preparing plot: {plot_filename}...")
@@ -536,11 +532,7 @@ class SkyScanPlotter:
         cmap.set_under('w')
         cmap.set_bad(alpha=1., color=(1.,0.,0.)) # make NaNs bright red
         
-        # Call meander module to find contours
-        if not circular:
-            contours_by_level = meander.spherical_contours(sample_points,
-                grid_value, contour_levels
-                )
+        # In case it is desired, just draw circular contours over the ts map
         if circular:
             sigma50 = np.deg2rad(circular_err50)
             sigma90 = np.deg2rad(circular_err90)
@@ -549,6 +541,9 @@ class SkyScanPlotter:
             contour50 = np.dstack((Theta50,Phi50))
             contour90 = np.dstack((Theta90,Phi90))
             contours_by_level = [contour50, contour90]
+
+            # re-calculate areas
+            contour_areas = self.get_contour_areas(contours_by_level)
             
         # Check for RA values that are out of bounds
         for level in contours_by_level:
@@ -594,7 +589,7 @@ class SkyScanPlotter:
             '*', ms=5, label=r'scan best fit', color='black', zorder=2)
 
         # Plot the contours
-        for contour_area_sqdeg, contour_label, contour_color, contours in zip(healpy_areas,
+        for contour_area_sqdeg, contour_label, contour_color, contours in zip(contour_areas,
             contour_labels, contour_colors, contours_by_level):
             contour_label = contour_label + ' - area: {0:.2f} sqdeg'.format(
                 contour_area_sqdeg)
@@ -649,8 +644,8 @@ class SkyScanPlotter:
             # TODO: we should wrap this in an object, return and log at the higher level.
             print(contain_txt)
 
-        print("Contour Area (50%):", healpy_areas[0], "degrees (scaled)")
-        print("Contour Area (90%):", healpy_areas[1], "degrees (scaled)")
+        print("Contour Area (50%):", contour_areas[0], "degrees (scaled)")
+        print("Contour Area (90%):", contour_areas[1], "degrees (scaled)")
 
         if plot_bounding_box:
             bounding_ras_list, bounding_decs_list = [], []
@@ -678,9 +673,9 @@ class SkyScanPlotter:
             bounding_decs: np.ndarray = np.asarray(bounding_decs_list)
             bounding_phi = np.radians(bounding_ras)
             bounding_theta = np.pi/2 - np.radians(bounding_decs)
-            maxim_dec_rad = np.deg2rad(dec + dec_plus)
-            minim_dec_rad = np.deg2rad(dec - np.abs(dec_minus))
-            bounding_contour_area = (np.deg2rad(ra_plus + np.abs(ra_minus)))*(np.sin(maxim_dec_rad)-np.sin(minim_dec_rad))
+            bounding_contour = np.array([bounding_theta, bounding_phi])
+            bounding_contour_area = 0.
+            bounding_contour_area = abs(self.calculate_area(bounding_contour.T))
             bounding_contour_area *= (180.*180.)/(np.pi*np.pi) # convert to square-degrees
             contour_label = r'90% Bounding rectangle' + ' - area: {0:.2f} sqdeg'.format(
                 bounding_contour_area)
