@@ -375,11 +375,6 @@ class SkyScanPlotter:
         else:
             plot_filename = unique_id + ".plot_zoomed.pdf"
 
-        if circularized_ts_map:
-            plot_filename = plot_filename.split(".pdf")[-2] + "_circularized_ts.pdf"
-
-        LOGGER.info(f"saving plot to {plot_filename}")
-
         nsides = result.nsides
         LOGGER.info(f"available nsides: {nsides}")
 
@@ -476,9 +471,17 @@ class SkyScanPlotter:
             if compare_90_area < neutrino_floor_90_area:
                 circularized_ts_map = True
                 circular_err90 = self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR90
+                LOGGER.info(f"Contour too small, applying neutrino floor...")
+
+        if circularized_ts_map:
+            plot_filename = plot_filename.split(".pdf")[-2] + "_circularized_ts.pdf"
+
+        LOGGER.info(f"saving plot to {plot_filename}")
 
         # In case it is requested, generate a mock ts map with a gaussian shape around the best fit direction
         if circularized_ts_map:
+
+            LOGGER.info(f"Generating a circularized ts map...")
 
             min_index = np.nanargmin(equatorial_map)
 
