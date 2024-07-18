@@ -61,8 +61,9 @@ class SkyScanPlotter:
         return a
     
     # Given a list of contours by level, returns the areas of the contours
-    def get_contour_areas(self, contours_by_level_list) -> List[float]:
+    def get_contour_areas(self, contours_by_level_list, min_ra) -> List[float]:
         contour_areas=[]
+        ra = min_ra * 180./np.pi
         for contours in contours_by_level_list:
             contour_area = 0.
             for contour in contours:
@@ -463,7 +464,7 @@ class SkyScanPlotter:
             )
         
         # Calculate areas using Gauss-Green's theorem for a spherical space
-        contour_areas = self.get_contour_areas(contours_by_level)
+        contour_areas = self.get_contour_areas(contours_by_level, min_ra)
         
         # In case it is requested, check if neutrino floor must be applied
         if neutrino_floor:
