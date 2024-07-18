@@ -524,7 +524,7 @@ class SkyScanPlotter:
             contours_by_level = meander.spherical_contours(sample_points,
                 grid_value, contour_levels
             )
-            contour_areas = self.get_contour_areas(contours_by_level)
+            contour_areas = self.get_contour_areas(contours_by_level, min_ra)
 
 
         LOGGER.info(f"preparing plot: {plot_filename}...")
@@ -544,7 +544,7 @@ class SkyScanPlotter:
             contours_by_level = [contour50, contour90]
 
             # re-calculate areas
-            contour_areas = self.get_contour_areas(contours_by_level)
+            contour_areas = self.get_contour_areas(contours_by_level, min_ra)
             
         # Check for RA values that are out of bounds
         for level in contours_by_level:
