@@ -74,6 +74,44 @@ class SkyScanPlotter:
             contour_area_sqdeg = abs(contour_area) * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
             contour_areas.append(contour_area_sqdeg)
         return contour_areas
+    
+    @staticmethod
+    # Returns the space angles for each pixel in the map
+    def get_space_angles(
+            min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
+        ) -> List[np.ndarray]:
+
+        min_sra = np.sin(min_ra)
+        min_cra = np.cos(min_ra)
+        min_sdec = np.sin(min_dec)
+        min_cdec = np.cos(min_dec)
+        
+        grid_sra = np.sin(grid_ra)
+        grid_cra = np.cos(grid_ra)
+        grid_sdec = np.sin(grid_dec)
+        grid_cdec = np.cos(grid_dec)
+
+        scalar_prod = np.clip(
+            min_cdec*grid_cdec*(min_cra*grid_cra + min_sra*grid_sra) + (min_sdec*grid_sdec),
+            -1.,
+            1.,
+        )
+        ang_dist_grid = np.rad2deg(np.abs(np.arccos(scalar_prod)))
+
+        x0,y0,z0 = healpy.pix2vec(max_nside, min_index)
+        x1,y1,z1 = healpy.pix2vec(
+            max_nside, 
+            np.asarray(list(range(healpy.nside2npix(max_nside))))
+        )
+        cos_space_angle = np.clip(x0*x1 + y0*y1 + z0*z1, -1., 1.)
+        space_angle = np.rad2deg(np.arccos(cos_space_angle))
+
+        return [space_angle, ang_dist_grid]
+    
+    @staticmethod
+    # Function to generate ts maps with a gaussian shape, x is the angular distance in degrees
+    def log_gauss(x, sigma):
+        return (x/sigma)**2
 
     def create_plot(self, result: SkyScanResult, dozoom: bool = False) -> None:
         """Creates a full-sky plot using a meshgrid at fixed resolution.
@@ -478,51 +516,22 @@ class SkyScanPlotter:
 
         LOGGER.info(f"saving plot to {plot_filename}")
 
-        # In case it is requested, generate a mock ts map with a gaussian shape around the best fit direction
+        # In case it is requested, generate a mock ts map with a gaussian shape 
+        # around the best fit direction
         if circularized_ts_map:
 
             LOGGER.info(f"Generating a circularized ts map...")
 
             min_index = np.nanargmin(equatorial_map)
 
-            min_sra = np.sin(min_ra)
-            min_cra = np.cos(min_ra)
-            min_sdec = np.sin(min_dec)
-            min_cdec = np.cos(min_dec)
-            
-            grid_sra = np.sin(grid_ra)
-            grid_cra = np.cos(grid_ra)
-            grid_sdec = np.sin(grid_dec)
-            grid_cdec = np.cos(grid_dec)
-
-            scalar_prod = np.clip(
-                min_cdec*grid_cdec*(min_cra*grid_cra + min_sra*grid_sra) + (min_sdec*grid_sdec),
-                -1.,
-                1.,
+            space_angle, ang_dist_grid = self.get_space_angles(
+                min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
             )
-            ang_dist_grid = np.rad2deg(np.abs(np.arccos(scalar_prod)))
-
-            x0,y0,z0 = healpy.pix2vec(max_nside, min_index)
-            x1,y1,z1 = healpy.pix2vec(
-                max_nside, 
-                np.asarray(list(range(healpy.nside2npix(max_nside))))
-            )
-            cos_space_angle = np.clip(x0*x1 + y0*y1 + z0*z1, -1., 1.)
-            space_angle = np.rad2deg(np.arccos(cos_space_angle))
-
-            def log_gauss(x, sigma):
-                """
-                neutrino floor: sigma=0.20 deg
-                rude events: sigma=0.326 deg
-                """
-                return (x/sigma)**2
             
             event_sigma = circular_err90/self.SIGMA_TO_CONTOUR90
-            new_ts_values = log_gauss(space_angle, event_sigma)
-            grid_value = log_gauss(ang_dist_grid, event_sigma)
+            equatorial_map = self.log_gauss(space_angle, event_sigma)
+            grid_value = self.log_gauss(ang_dist_grid, event_sigma)
             
-            equatorial_map = new_ts_values
-
             # re-calculate areas
             contours_by_level = meander.spherical_contours(sample_points,
                 grid_value, contour_levels
