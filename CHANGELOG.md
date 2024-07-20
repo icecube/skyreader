@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.9 (2024-04-25)
+
+### Other
+
+* Update function for plotting map with the last available Fermi LAT source catalog ([#33](https://github.com/icecube/skyreader/issues/33)) ([`8fbce83`](https://github.com/icecube/skyreader/commit/8fbce8301773decaad3bc1278226ad10c21cfc3a))
+
 ## v1.2.8 (2023-11-14)
 
 ### Other
