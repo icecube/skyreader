@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.10 (2024-07-21)
+
+### Other
+
+* <bot> update dependencies*.log files(s) ([`eacbc29`](https://github.com/icecube/skyreader/commit/eacbc294a002b5d7ce2294cc68982b5484bd1d84))
+* All plotting outputs to the same directory ([#32](https://github.com/icecube/skyreader/issues/32)) ([`8cee17e`](https://github.com/icecube/skyreader/commit/8cee17ebc7da42b69c60da5e3908fa13fb17872d))
+
 ## v1.2.9 (2024-04-25)
 
 ### Other
