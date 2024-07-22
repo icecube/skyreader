@@ -2,6 +2,19 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.10 (2024-07-21)
+
+### Other
+
+* <bot> update dependencies*.log files(s) ([`eacbc29`](https://github.com/icecube/skyreader/commit/eacbc294a002b5d7ce2294cc68982b5484bd1d84))
+* All plotting outputs to the same directory ([#32](https://github.com/icecube/skyreader/issues/32)) ([`8cee17e`](https://github.com/icecube/skyreader/commit/8cee17ebc7da42b69c60da5e3908fa13fb17872d))
+
+## v1.2.9 (2024-04-25)
+
+### Other
+
+* Update function for plotting map with the last available Fermi LAT source catalog ([#33](https://github.com/icecube/skyreader/issues/33)) ([`8fbce83`](https://github.com/icecube/skyreader/commit/8fbce8301773decaad3bc1278226ad10c21cfc3a))
+
 ## v1.2.8 (2023-11-14)
 
 ### Other
