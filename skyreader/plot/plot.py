@@ -26,6 +26,10 @@ from .plotting_tools import (
     format_fits_header,
     hp_ticklabels,
     plot_catalog,
+    calculate_area,
+    get_contour_areas,
+    get_space_angles,
+    log_gauss,
 )
 
 from ..result import SkyScanResult
@@ -44,74 +48,6 @@ class SkyScanPlotter:
     def __init__(self, output_dir: Path = Path(".")):
         # Set here plotting parameters and things that do not depend on the individual scan.
         self.output_dir = output_dir
-
-    @staticmethod
-    # Calculates are using Gauss-Green theorem / shoelace formula
-    # TODO: vectorize using numpy.
-    # Note: in some cases the argument is not a np.ndarray so one has to convert the data series beforehand.
-    def calculate_area(vs) -> float:
-        a = 0
-        x0, y0 = vs[0]
-        for [x1,y1] in vs[1:]:
-            dx = np.cos(x1)-np.cos(x0)
-            dy = y1-y0
-            a += 0.5*(y0*dx - np.cos(x0)*dy)
-            x0 = x1
-            y0 = y1
-        return a
-    
-    # Given a list of contours by level, returns the areas of the contours
-    def get_contour_areas(self, contours_by_level_list, min_ra) -> List[float]:
-        contour_areas=[]
-        ra = min_ra * 180./np.pi
-        for contours in contours_by_level_list:
-            contour_area = 0.
-            for contour in contours:
-                _ = contour.copy()
-                _[:,1] += np.pi-np.radians(ra)
-                _[:,1] %= 2*np.pi
-                contour_area += self.calculate_area(_)
-            contour_area_sqdeg = abs(contour_area) * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
-            contour_areas.append(contour_area_sqdeg)
-        return contour_areas
-    
-    @staticmethod
-    # Returns the space angles for each pixel in the map
-    def get_space_angles(
-            min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
-        ) -> List[np.ndarray]:
-
-        min_sra = np.sin(min_ra)
-        min_cra = np.cos(min_ra)
-        min_sdec = np.sin(min_dec)
-        min_cdec = np.cos(min_dec)
-        
-        grid_sra = np.sin(grid_ra)
-        grid_cra = np.cos(grid_ra)
-        grid_sdec = np.sin(grid_dec)
-        grid_cdec = np.cos(grid_dec)
-
-        scalar_prod = np.clip(
-            min_cdec*grid_cdec*(min_cra*grid_cra + min_sra*grid_sra) + (min_sdec*grid_sdec),
-            -1.,
-            1.,
-        )
-        ang_dist_grid = np.rad2deg(np.abs(np.arccos(scalar_prod)))
-
-        x0,y0,z0 = healpy.pix2vec(max_nside, min_index)
-        x1,y1,z1 = healpy.pix2vec(
-            max_nside, 
-            np.asarray(list(range(healpy.nside2npix(max_nside))))
-        )
-        cos_space_angle = np.clip(x0*x1 + y0*y1 + z0*z1, -1., 1.)
-        space_angle = np.rad2deg(np.arccos(cos_space_angle))
-
-        return [space_angle, ang_dist_grid]
-    
-    @staticmethod
-    # Function to generate ts maps with a gaussian shape, x is the angular distance in degrees
-    def log_gauss(x, sigma):
-        return (x/sigma)**2
 
     def create_plot(self, result: SkyScanResult, dozoom: bool = False) -> None:
         """Creates a full-sky plot using a meshgrid at fixed resolution.
@@ -255,7 +191,7 @@ class SkyScanPlotter:
                 vs = cs_collections[i].get_paths()[0].vertices
                 # Compute area enclosed by vertices.
                 # Take absolute values to be independent of orientation of the boundary integral.
-                contour_area = abs(self.calculate_area(vs)) # will be in square-radians
+                contour_area = abs(calculate_area(vs)) # will be in square-radians
                 contour_area_sqdeg = contour_area*(180.*180.)/(np.pi*np.pi) # convert to square-degrees
 
                 leg_labels.append(f'{contour_labels[i]} - area: {contour_area_sqdeg:.2f}sqdeg')
@@ -497,7 +433,7 @@ class SkyScanPlotter:
             )
         
         # Calculate areas using Gauss-Green's theorem for a spherical space
-        contour_areas = self.get_contour_areas(contours_by_level, min_ra)
+        contour_areas = get_contour_areas(contours_by_level, min_ra)
         
         # In case it is requested, check if neutrino floor must be applied
         if neutrino_floor:
@@ -524,19 +460,19 @@ class SkyScanPlotter:
 
             min_index = np.nanargmin(equatorial_map)
 
-            space_angle, ang_dist_grid = self.get_space_angles(
+            space_angle, ang_dist_grid = get_space_angles(
                 min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
             )
             
             event_sigma = circular_err90/self.SIGMA_TO_CONTOUR90
-            equatorial_map = self.log_gauss(space_angle, event_sigma)
-            grid_value = self.log_gauss(ang_dist_grid, event_sigma)
+            equatorial_map = log_gauss(space_angle, event_sigma)
+            grid_value = log_gauss(ang_dist_grid, event_sigma)
             
             # re-calculate areas
             contours_by_level = meander.spherical_contours(sample_points,
                 grid_value, contour_levels
             )
-            contour_areas = self.get_contour_areas(contours_by_level, min_ra)
+            contour_areas = get_contour_areas(contours_by_level, min_ra)
 
 
         LOGGER.info(f"preparing plot: {plot_filename}...")
@@ -556,7 +492,7 @@ class SkyScanPlotter:
             contours_by_level = [contour50, contour90]
 
             # re-calculate areas
-            contour_areas = self.get_contour_areas(contours_by_level, min_ra)
+            contour_areas = get_contour_areas(contours_by_level, min_ra)
             
         # Check for RA values that are out of bounds
         for level in contours_by_level:
@@ -688,7 +624,7 @@ class SkyScanPlotter:
             bounding_theta = np.pi/2 - np.radians(bounding_decs)
             bounding_contour = np.array([bounding_theta, bounding_phi])
             bounding_contour_area = 0.
-            bounding_contour_area = abs(self.calculate_area(bounding_contour.T))
+            bounding_contour_area = abs(calculate_area(bounding_contour.T))
             bounding_contour_area *= (180.*180.)/(np.pi*np.pi) # convert to square-degrees
             contour_label = r'90% Bounding rectangle' + ' - area: {0:.2f} sqdeg'.format(
                 bounding_contour_area)
@@ -714,8 +650,8 @@ class SkyScanPlotter:
             tab = {"ra (rad)": ras, "dec (rad)": decs}
             savename = unique_id + ".contour_" + val + ".txt"
             try:
-                LOGGER.info("Dumping to {self.output_dir / savename}")
-                ascii.write(tab, self.output_dir / savename, overwrite=True)
+                LOGGER.info("Dumping to {savename}")
+                ascii.write(tab, savename, overwrite=True)
             except OSError as err:
                 LOGGER.error("OS Error prevented contours from being written, maybe a memory issue. Error is:\n{err}")
 
@@ -758,12 +694,12 @@ class SkyScanPlotter:
 
 
         # Dump the whole contour
-        pickle_path = self.output_dir / (unique_id + ".contour.pkl")
-        LOGGER.info(f"Saving contour to {pickle_path}")
-        with open(pickle_path, "wb") as f:
+        path = unique_id + ".contour.pkl"
+        print("Saving contour to", path)
+        with open(path, "wb") as f:
             pickle.dump(saving_contours, f)
 
-        healpy.write_map(self.output_dir / f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
+        healpy.write_map(f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
             equatorial_map, coord = 'C', column_names = ['2LLH'],
             extra_header = fits_header, overwrite=True)
 
