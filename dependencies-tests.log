@@ -4,7 +4,7 @@
 #
 #    pip-compile --extra=tests --output-file=dependencies-tests.log
 #
-astropy==6.1.1
+astropy==6.1.2
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
@@ -57,7 +57,7 @@ pyerfa==2.0.1.4
     # via astropy
 pyparsing==3.1.2
     # via matplotlib
-pytest==8.3.1
+pytest==8.3.2
     # via
     #   icecube-skyreader (setup.py)
     #   pytest-mock

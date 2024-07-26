@@ -4,7 +4,7 @@
 #
 #    pip-compile --extra=mypy --output-file=dependencies-mypy.log
 #
-astropy==6.1.1
+astropy==6.1.2
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
@@ -69,7 +69,7 @@ pyparsing==3.1.2
     # via matplotlib
 pypng==0.20220715.0
     # via qrcode
-pytest==8.3.1
+pytest==8.3.2
     # via
     #   icecube-skyreader (setup.py)
     #   pytest-mock
