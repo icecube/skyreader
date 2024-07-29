@@ -51,9 +51,9 @@ class SkyScanPlotter:
         a = 0
         x0, y0 = vs[0]
         for [x1,y1] in vs[1:]:
-            dx = x1-x0
+            dx = np.cos(x1)-np.cos(x0)
             dy = y1-y0
-            a += 0.5*(y0*dx - x0*dy)
+            a += 0.5*(y0*dx - np.cos(x0)*dy)
             x0 = x1
             y0 = y1
         return a
@@ -500,7 +500,7 @@ class SkyScanPlotter:
 
         # Plot the contours
         contour_areas=[]
-        for contour_level, contour_label, contour_color, contours in zip(contour_levels,
+        for contour_label, contour_color, contours in zip(
             contour_labels, contour_colors, contours_by_level):
             contour_area = 0.
             for contour in contours:
@@ -659,14 +659,9 @@ class SkyScanPlotter:
 
         plt.legend(fontsize=6, loc="lower left")
 
-        # For vertical events, calculate the area with the number of pixels
-        # In the healpy map   
-        for lev in contour_levels[1:2]:
-            area_per_pix = healpy.nside2pixarea(healpy.get_nside(equatorial_map))
-            num_pixs = np.count_nonzero(equatorial_map[~np.isnan(equatorial_map)] < lev)
-            healpy_area = num_pixs * area_per_pix * (180./np.pi)**2.
-        print("Contour Area (90%):", contour_areas[1], "degrees (cartesian)",
-            healpy_area, "degrees (scaled)")
+
+        print("Contour Area (50%):", contour_areas[0], "degrees (scaled)")
+        print("Contour Area (90%):", contour_areas[1], "degrees (scaled)")
 
 
         # Dump the whole contour
