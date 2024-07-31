@@ -2,7 +2,6 @@
 
 # fmt: off
 # pylint: skip-file
-# flake8: noqa
 
 import logging
 import pickle
