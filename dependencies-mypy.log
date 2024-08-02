@@ -63,7 +63,7 @@ pycparser==2.22
     # via cffi
 pyerfa==2.0.1.4
     # via astropy
-pyjwt[crypto]==2.8.0
+pyjwt[crypto]==2.9.0
     # via wipac-rest-tools
 pyparsing==3.1.2
     # via matplotlib
