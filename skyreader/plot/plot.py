@@ -16,6 +16,7 @@ from astropy.io import ascii  # type: ignore[import]
 from matplotlib import patheffects
 from matplotlib import pyplot as plt
 from matplotlib import text
+from matplotlib.projections import projection_registry
 
 from .plotting_tools import (
     AstroMollweideAxes,
@@ -32,6 +33,8 @@ from .plotting_tools import (
 from ..result import SkyScanResult
 
 LOGGER = logging.getLogger("skyreader.plot")
+
+projection_registry.register(AstroMollweideAxes)
 
 
 class SkyScanPlotter:
