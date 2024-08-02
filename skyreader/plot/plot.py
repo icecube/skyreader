@@ -24,15 +24,19 @@ from .plotting_tools import (
     format_fits_header,
     hp_ticklabels,
     plot_catalog,
-    calculate_area,
-    get_contour_areas,
     get_space_angles,
-    log_gauss,
 )
+from .areas import calculate_area, get_contour_areas
 
 from ..result import SkyScanResult
 
 LOGGER = logging.getLogger("skyreader.plot")
+
+
+# Function to generate ts maps with a gaussian shape,
+# x is the angular distance in degrees
+def log_gauss(x, sigma):
+    return (x/sigma)**2
 
 
 class SkyScanPlotter:

@@ -149,35 +149,6 @@ def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec,
                 fontsize=6,
                 path_effects=pe)
     del fgl
-
-# Calculates are using Gauss-Green theorem / shoelace formula
-# TODO: vectorize using numpy.
-# Note: in some cases the argument is not a np.ndarray so one has to convert the data series beforehand.
-def calculate_area(vs) -> float:
-    a = 0
-    x0, y0 = vs[0]
-    for [x1,y1] in vs[1:]:
-        dx = np.cos(x1)-np.cos(x0)
-        dy = y1-y0
-        a += 0.5*(y0*dx - np.cos(x0)*dy)
-        x0 = x1
-        y0 = y1
-    return a
-
-# Given a list of contours by level, returns the areas of the contours
-def get_contour_areas(contours_by_level_list, min_ra) -> List[float]:
-    contour_areas=[]
-    ra = min_ra * 180./np.pi
-    for contours in contours_by_level_list:
-        contour_area = 0.
-        for contour in contours:
-            _ = contour.copy()
-            _[:,1] += np.pi-np.radians(ra)
-            _[:,1] %= 2*np.pi
-            contour_area += calculate_area(_)
-        contour_area_sqdeg = abs(contour_area) * (180.*180.)/(np.pi*np.pi) # convert to square-degrees
-        contour_areas.append(contour_area_sqdeg)
-    return contour_areas
  
 # Returns the space angles for each pixel in the map
 def get_space_angles(
@@ -210,10 +181,6 @@ def get_space_angles(
     space_angle = np.rad2deg(np.arccos(cos_space_angle))
 
     return [space_angle, ang_dist_grid]
-
-# Function to generate ts maps with a gaussian shape, x is the angular distance in degrees
-def log_gauss(x, sigma):
-    return (x/sigma)**2
 
 ##
 # Mollweide axes with phi axis flipped and in hours from 24 to 0 instead of
