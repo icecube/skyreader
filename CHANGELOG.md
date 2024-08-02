@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.11 (2024-08-02)
+
+### Other
+
+* <bot> update dependencies*.log files(s) ([`439e8f9`](https://github.com/icecube/skyreader/commit/439e8f970cfe8f2ffd17a5c58cbe1d4d4f812fcb))
+* Area calculation spherical space ([#36](https://github.com/icecube/skyreader/issues/36)) ([`43ae13f`](https://github.com/icecube/skyreader/commit/43ae13f20fdbb7c06060c4ab87a9cc76c65c7d88))
+
 ## v1.2.10 (2024-07-21)
 
 ### Other
