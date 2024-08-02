@@ -16,7 +16,7 @@ from astropy.io import ascii  # type: ignore[import]
 from matplotlib import patheffects
 from matplotlib import pyplot as plt
 from matplotlib import text
-from matplotlib.projections import projection_registry
+from matplotlib.projections import projection_registry  # type: ignore[import]
 
 from .plotting_tools import (
     AstroMollweideAxes,
@@ -34,8 +34,6 @@ from ..result import SkyScanResult
 
 LOGGER = logging.getLogger("skyreader.plot")
 
-projection_registry.register(AstroMollweideAxes)
-
 
 class SkyScanPlotter:
     PLOT_SIZE_Y_IN: float = 3.85
@@ -50,6 +48,7 @@ class SkyScanPlotter:
         # Set here plotting parameters and things that
         # do not depend on the individual scan.
         self.output_dir = output_dir
+        projection_registry.register(AstroMollweideAxes)
 
     def create_plot(self, result: SkyScanResult, dozoom: bool = False) -> None:
         """Creates a full-sky plot using a meshgrid at fixed resolution.

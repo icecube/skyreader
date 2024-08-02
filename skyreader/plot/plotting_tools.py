@@ -10,7 +10,6 @@ import matplotlib.patheffects as path_effects  # type: ignore[import]
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes  # type: ignore[import]
-from matplotlib.projections import projection_registry  # type: ignore[import]
 from matplotlib.projections.geo import MollweideAxes  # type: ignore[import]
 from matplotlib.ticker import FixedLocator, Formatter  # type: ignore[import]
 from matplotlib.transforms import Affine2D  # type: ignore[import]
