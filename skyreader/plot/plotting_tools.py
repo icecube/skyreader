@@ -10,10 +10,10 @@ import matplotlib.patheffects as path_effects  # type: ignore[import]
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes  # type: ignore[import]
-from matplotlib.projections import projection_registry  # type: ignore[import]
 from matplotlib.projections.geo import MollweideAxes  # type: ignore[import]
 from matplotlib.ticker import FixedLocator, Formatter  # type: ignore[import]
 from matplotlib.transforms import Affine2D  # type: ignore[import]
+from typing import List
 
 matplotlib.use('agg')
 
@@ -111,7 +111,7 @@ def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec,
         cmap_min=0., cmap_max=250.):
     """"Plots the 4FGL catalog in a color that contrasts with the background
     healpix map."""
-    hdu = pyfits.open('/cvmfs/icecube.opensciencegrid.org/users/azegarelli/realtime/catalogs/gll_psc_v34.fit') ## LAT 14-year Source Catalog (4FGL-DR4 in FITS format) ; https://fermi.gsfc.nasa.gov/ssc/data/access/lat/14yr_catalog/
+    hdu = pyfits.open('/cvmfs/icecube.opensciencegrid.org/users/steinrob/reference_catalogues/Fermi_4FGL_v18.fit')
     fgl = hdu[1]
     pe = [path_effects.Stroke(linewidth=0.5, foreground=cmap(0.0)),
         path_effects.Normal()]
@@ -149,7 +149,38 @@ def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec,
                 fontsize=6,
                 path_effects=pe)
     del fgl
+ 
+# Returns the space angles for each pixel in the map
+def get_space_angles(
+        min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
+    ) -> List[np.ndarray]:
 
+    min_sra = np.sin(min_ra)
+    min_cra = np.cos(min_ra)
+    min_sdec = np.sin(min_dec)
+    min_cdec = np.cos(min_dec)
+    
+    grid_sra = np.sin(grid_ra)
+    grid_cra = np.cos(grid_ra)
+    grid_sdec = np.sin(grid_dec)
+    grid_cdec = np.cos(grid_dec)
+
+    scalar_prod = np.clip(
+        min_cdec*grid_cdec*(min_cra*grid_cra + min_sra*grid_sra) + (min_sdec*grid_sdec),
+        -1.,
+        1.,
+    )
+    ang_dist_grid = np.rad2deg(np.abs(np.arccos(scalar_prod)))
+
+    x0,y0,z0 = healpy.pix2vec(max_nside, min_index)
+    x1,y1,z1 = healpy.pix2vec(
+        max_nside, 
+        np.asarray(list(range(healpy.nside2npix(max_nside))))
+    )
+    cos_space_angle = np.clip(x0*x1 + y0*y1 + z0*z1, -1., 1.)
+    space_angle = np.rad2deg(np.arccos(cos_space_angle))
+
+    return [space_angle, ang_dist_grid]
 
 ##
 # Mollweide axes with phi axis flipped and in hours from 24 to 0 instead of
@@ -215,7 +246,7 @@ class AstroMollweideAxes(MollweideAxes):
             FixedLocator(
                 np.linspace(0, 2*np.pi, number, True)[1:-1]))
         self._longitude_degrees = degrees
-        self.xaxis.set_major_formatter(self.RaFormatter(degrees))
+        self.xaxis.set_major_formatter(self.RaFormatter(degrees)) 
 
     def _set_lim_and_transforms(self):
         # Copied from matplotlib.geo.GeoAxes._set_lim_and_transforms and modified
@@ -251,5 +282,3 @@ class AstroMollweideAxes(MollweideAxes):
         return Affine2D() \
             .scale(0.5 / xscale, 0.5 / yscale) \
             .translate(0.5, 0.5)
-
-projection_registry.register(AstroMollweideAxes)
