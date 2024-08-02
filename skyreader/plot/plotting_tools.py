@@ -317,4 +317,4 @@ class AstroMollweideAxes(MollweideAxes):
             .scale(0.5 / xscale, 0.5 / yscale) \
             .translate(0.5, 0.5)
 
-projection_registry.register(AstroMollweideAxes)
+#projection_registry.register(AstroMollweideAxes)
