@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List
 
+
 # Calculates are using Gauss-Green theorem / shoelace formula
 # TODO: vectorize using numpy.
 # Note: in some cases the argument is not a np.ndarray so one has
@@ -16,9 +17,10 @@ def calculate_area(vs) -> float:
         y0 = y1
     return a
 
+
 # Given a list of contours by level, returns the areas of the contours
 def get_contour_areas(contours_by_level_list, min_ra) -> List[float]:
-    contour_areas=[]
+    contour_areas = []
     ra = min_ra * 180./np.pi
     for contours in contours_by_level_list:
         contour_area = 0.
