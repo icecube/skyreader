@@ -136,7 +136,7 @@ class SkyScanPlotter:
             del grid_pix
 
         LOGGER.info(
-            f"min  RA: {min_ra *180./np.pi} deg, {min_ra*12./np.pi} hours."
+            f"min  RA: {min_ra * 180./np.pi} deg, {min_ra*12./np.pi} hours."
         )
         LOGGER.info(f"min Dec: {min_dec * 180./np.pi} deg")
 
@@ -485,7 +485,7 @@ class SkyScanPlotter:
         min_ra = grid_ra[0]
 
         LOGGER.info(
-            f"min  RA: {min_ra *180./np.pi} deg, {min_ra*12./np.pi} hours."
+            f"min  RA: {min_ra * 180./np.pi} deg, {min_ra*12./np.pi} hours."
         )
         LOGGER.info(f"min Dec: {min_dec * 180./np.pi} deg")
 
