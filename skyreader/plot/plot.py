@@ -563,18 +563,16 @@ class SkyScanPlotter:
                     if area90_toosmall and not refine_area90:
                         contour_levels[1] += 1.0
                     elif not area90_toosmall and refine_area90:
-                        contour_levels[1] -= 0.01
+                        contour_levels[1] -= 0.1
                     elif area90_toosmall and refine_area90:
                         contour_levels[1] += 0.01
-                        made_contour90 = True
                 if not made_contour50:
                     if area50_toosmall and not refine_area50:
                         contour_levels[0] += 1.0
                     elif not area50_toosmall and refine_area50:
-                        contour_levels[0] -= 0.01
+                        contour_levels[0] -= 0.1
                     elif area50_toosmall and refine_area50:
                         contour_levels[0] += 0.01
-                        made_contour50 = True
                 LOGGER.info(f"New levels: {contour_levels}")
                 contours_by_level = meander.spherical_contours(
                     sample_points,
@@ -589,6 +587,10 @@ class SkyScanPlotter:
                     refine_area50 = True
                 if not area90_toosmall and not refine_area90:
                     refine_area90 = True
+                if not area50_toosmall and refine_area50:
+                    made_contour50 = True
+                if not area90_toosmall and refine_area90:
+                    made_contour90 = True
 
         LOGGER.info(f"saving plot to {plot_filename}")
         LOGGER.info(f"preparing plot: {plot_filename}...")
