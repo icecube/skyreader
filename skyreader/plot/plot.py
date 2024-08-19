@@ -571,9 +571,9 @@ class SkyScanPlotter:
                     if area50_toosmall and not refine_area50:
                         contour_levels[0] += 1.0
                     elif not area50_toosmall and refine_area50:
-                        contour_levels[1] -= 0.01
+                        contour_levels[0] -= 0.01
                     elif area50_toosmall and refine_area50:
-                        contour_levels[1] += 0.01
+                        contour_levels[0] += 0.01
                         made_contour50 = True
                 LOGGER.info(f"New levels: {contour_levels}")
                 contours_by_level = meander.spherical_contours(
