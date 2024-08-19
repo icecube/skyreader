@@ -551,14 +551,26 @@ class SkyScanPlotter:
                 self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR50)**2
             area50_toosmall = contour_areas[0] < neutrino_floor_50_area
             area90_toosmall = contour_areas[1] < neutrino_floor_90_area
+            toosmall_areas = area50_toosmall or area90_toosmall
+            refine_area50 = False
+            refine_area90 = False
+            refine_areas = refine_area50 or refine_area90
             while (
-                area50_toosmall or area90_toosmall
+                toosmall_areas or refine_areas
             ):
                 LOGGER.info("Contour too small, applying neutrino floor...")
-                if area90_toosmall:
+                if area90_toosmall and not refine_area90:
                     contour_levels[1] += 1.0
-                if area50_toosmall:
+                elif not area90_toosmall and refine_area90:
+                    contour_levels[1] -= 0.01
+                elif area90_toosmall and refine_area90:
+                    contour_levels[1] += 0.01
+                if area50_toosmall and not refine_area50:
                     contour_levels[0] += 1.0
+                elif not area50_toosmall and refine_area50:
+                    contour_levels[1] -= 0.01
+                elif area50_toosmall and refine_area50:
+                    contour_levels[1] += 0.01
                 LOGGER.info(f"New levels: {contour_levels}")
                 contours_by_level = meander.spherical_contours(
                     sample_points,
@@ -569,6 +581,14 @@ class SkyScanPlotter:
                 LOGGER.info(f"New areas: {contour_areas}")
                 area50_toosmall = contour_areas[0] < neutrino_floor_50_area
                 area90_toosmall = contour_areas[1] < neutrino_floor_90_area
+                if not area50_toosmall and not refine_area50:
+                    refine_area50 = True
+                if not area90_toosmall and not refine_area90:
+                    refine_area90 = True
+                if not area50_toosmall and refine_area50:
+                    refine_area50 = False
+                if not area90_toosmall and refine_area90:
+                    refine_area90 = False
 
         LOGGER.info(f"saving plot to {plot_filename}")
         LOGGER.info(f"preparing plot: {plot_filename}...")
