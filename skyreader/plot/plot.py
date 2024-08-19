@@ -46,6 +46,7 @@ class SkyScanPlotter:
     PLOT_DPI_ZOOMED = 1200
     PLOT_COLORMAP = matplotlib.colormaps['plasma_r']
     SIGMA_TO_CONTOUR90 = 2.146
+    SIGMA_TO_CONTOUR50 = 1.177
     NEUTRINOFLOOR_SIGMA = 0.2
 
     def __init__(self, output_dir: Path = Path(".")):
@@ -406,7 +407,6 @@ class SkyScanPlotter:
                            circular=False,
                            circular_err50=0.2,
                            circular_err90=0.7,
-                           circularized_ts_map=False,
                            neutrino_floor=False):
         """Uses healpy to plot a map."""
 
@@ -516,6 +516,13 @@ class SkyScanPlotter:
                 r'50% (IC160427A syst.)', r'90% (IC160427A syst.)'
             ]
             contour_colors = ['k', 'r']
+        elif neutrino_floor:
+            # Wilks
+            contour_levels = (
+                np.array([1.39, 4.61])+min_value
+            )[:3]
+            contour_labels = [r'50%', r'90%'][:3]
+            contour_colors = ['k', 'r'][:3]
         else:
             # Wilks
             contour_levels = (
@@ -540,47 +547,28 @@ class SkyScanPlotter:
         if neutrino_floor:
             neutrino_floor_90_area = np.pi * (
                 self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR90)**2
-            if circularized_ts_map:
-                compare_90_area = np.pi * circular_err90**2
-            else:
-                compare_90_area = contour_areas[1]
-            if compare_90_area < neutrino_floor_90_area:
-                circularized_ts_map = True
-                circular_err90 = (
-                    self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR90
-                )
+            neutrino_floor_50_area = np.pi * (
+                self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR50)**2
+            area50_toosmall = contour_areas[0] < neutrino_floor_50_area
+            area90_toosmall = contour_areas[1] < neutrino_floor_90_area
+            while (
+                area50_toosmall or area90_toosmall
+            ):
                 LOGGER.info("Contour too small, applying neutrino floor...")
-
-        if circularized_ts_map:
-            main_plot_filename = plot_filename.split(".pdf")[-2]
-            plot_filename = main_plot_filename + "_circularized_ts.pdf"
+                if area90_toosmall:
+                    contour_levels[1] + 0.01
+                if area50_toosmall:
+                    contour_levels[0] + 0.01
+                contours_by_level = meander.spherical_contours(
+                    sample_points,
+                    grid_value,
+                    contour_levels,
+                )
+                contour_areas = get_contour_areas(contours_by_level, min_ra)
+                area50_toosmall = contour_areas[0] < neutrino_floor_50_area
+                area90_toosmall = contour_areas[1] < neutrino_floor_90_area
 
         LOGGER.info(f"saving plot to {plot_filename}")
-
-        # In case it is requested, generate a mock ts map with a gaussian shape
-        # around the best fit direction
-        if circularized_ts_map:
-
-            LOGGER.info("Generating a circularized ts map...")
-
-            min_index = np.nanargmin(equatorial_map)
-
-            space_angle, ang_dist_grid = get_space_angles(
-                min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
-            )
-
-            event_sigma = circular_err90/self.SIGMA_TO_CONTOUR90
-            equatorial_map = log_gauss(space_angle, event_sigma)
-            grid_value = log_gauss(ang_dist_grid, event_sigma)
-
-            # re-calculate areas
-            contours_by_level = meander.spherical_contours(
-                sample_points,
-                grid_value,
-                contour_levels
-            )
-            contour_areas = get_contour_areas(contours_by_level, min_ra)
-
         LOGGER.info(f"preparing plot: {plot_filename}...")
 
         cmap = self.PLOT_COLORMAP
