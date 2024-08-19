@@ -8,7 +8,7 @@ astropy==6.1.2
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
-astropy-iers-data==0.2024.7.29.0.32.7
+astropy-iers-data==0.2024.8.19.0.32.16
     # via astropy
 certifi==2024.7.4
     # via requests
@@ -28,11 +28,11 @@ iniconfig==2.0.0
     # via pytest
 kiwisolver==1.4.5
     # via matplotlib
-matplotlib==3.9.1
+matplotlib==3.9.2
     # via icecube-skyreader (setup.py)
 meander==0.0.3
     # via icecube-skyreader (setup.py)
-numpy==2.0.1
+numpy==2.1.0
     # via
     #   astropy
     #   contourpy
@@ -69,7 +69,7 @@ python-dateutil==2.9.0.post0
     #   pandas
 pytz==2024.1
     # via pandas
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via astropy
 requests==2.32.3
     # via wipac-dev-tools
@@ -83,5 +83,5 @@ tzdata==2024.1
     # via pandas
 urllib3==2.2.2
     # via requests
-wipac-dev-tools==1.10.7
+wipac-dev-tools==1.12.0
     # via icecube-skyreader (setup.py)
