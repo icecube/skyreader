@@ -583,14 +583,14 @@ class SkyScanPlotter:
                 LOGGER.info(f"New areas: {contour_areas}")
                 area50_toosmall = contour_areas[0] < neutrino_floor_50_area
                 area90_toosmall = contour_areas[1] < neutrino_floor_90_area
-                if not area50_toosmall and not refine_area50:
-                    refine_area50 = True
-                if not area90_toosmall and not refine_area90:
-                    refine_area90 = True
                 if not area50_toosmall and refine_area50:
                     made_contour50 = True
                 if not area90_toosmall and refine_area90:
                     made_contour90 = True
+                if not area50_toosmall and not refine_area50:
+                    refine_area50 = True
+                if not area90_toosmall and not refine_area90:
+                    refine_area90 = True
 
         LOGGER.info(f"saving plot to {plot_filename}")
         LOGGER.info(f"preparing plot: {plot_filename}...")
