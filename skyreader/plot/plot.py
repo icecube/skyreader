@@ -556,15 +556,17 @@ class SkyScanPlotter:
             ):
                 LOGGER.info("Contour too small, applying neutrino floor...")
                 if area90_toosmall:
-                    contour_levels[1] + 0.01
+                    contour_levels[1] += 0.01
                 if area50_toosmall:
-                    contour_levels[0] + 0.01
+                    contour_levels[0] += 0.01
+                LOGGER.info(f"New levels: {contour_levels}")
                 contours_by_level = meander.spherical_contours(
                     sample_points,
                     grid_value,
                     contour_levels,
                 )
                 contour_areas = get_contour_areas(contours_by_level, min_ra)
+                LOGGER.info(f"New areas: {contour_areas}")
                 area50_toosmall = contour_areas[0] < neutrino_floor_50_area
                 area90_toosmall = contour_areas[1] < neutrino_floor_90_area
 
