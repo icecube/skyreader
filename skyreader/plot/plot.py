@@ -551,7 +551,7 @@ class SkyScanPlotter:
                 self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR50)**2
             area50_toosmall = contour_areas[0] < neutrino_floor_50_area
             area90_toosmall = contour_areas[1] < neutrino_floor_90_area
-            if (
+            while (
                 area50_toosmall or area90_toosmall
             ):
                 LOGGER.info("Contour too small, applying neutrino floor...")
