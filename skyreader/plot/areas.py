@@ -22,14 +22,14 @@ def calculate_area(vs) -> float:
 def get_contour_areas(contours_by_level_list, min_ra) -> List[float]:
     contour_areas = []
     ra = min_ra * 180./np.pi
-    for contours in contours_by_level_list:
+    for i, contours in enumerate(contours_by_level_list):
         contour_area = 0.
         for contour in contours:
             _ = contour.copy()
             _[:,1] += np.pi-np.radians(ra)
             _[:,1] %= 2*np.pi
             contour_area += calculate_area(_)
-            print(contour, contour_area * (180.*180.)/(np.pi*np.pi))
+            print(i, contour_area * (180.*180.)/(np.pi*np.pi))
         # convert to square-degrees
         contour_area_sqdeg = abs(contour_area) * (180.*180.)/(np.pi*np.pi)
         contour_areas.append(contour_area_sqdeg)
