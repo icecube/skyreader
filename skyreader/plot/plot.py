@@ -579,7 +579,7 @@ class SkyScanPlotter:
                     refinement_level,
                     change_level,
             ):
-                LOGGER.info(f"Heyo, {refinement_level}")
+                LOGGER.info(f"Heyo, {refinement_level} {refinement_steps[-1]}")
                 if different_status and change_level:
                     if refinement_level == refinement_steps[-1]:
                         LOGGER.info(f"Hi, {refinement_level}")
@@ -589,6 +589,7 @@ class SkyScanPlotter:
                             refinement_steps == refinement_level
                         )[0][0]
                         refinement_level = refinement_steps[ref_index + 1]
+                LOGGER.info(f"change_level: {change_level}")
                 return refinement_level, change_level
             
             while np.sum(change_levels) > 0:
