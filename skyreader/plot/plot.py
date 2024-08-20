@@ -616,6 +616,7 @@ class SkyScanPlotter:
                         change_levels[index],
                     )
                     areas_toosmall[index] = new_area_toosmall
+                    print(change_levels)
 
         LOGGER.info(f"saving plot to {plot_filename}")
         LOGGER.info(f"preparing plot: {plot_filename}...")
