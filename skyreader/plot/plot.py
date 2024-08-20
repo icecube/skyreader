@@ -560,12 +560,15 @@ class SkyScanPlotter:
                 )
             ]
             change_levels = copy.copy(areas_toosmall)
-            first_refinement_step = 1.0
-            n_refinement_steps = 3
-            width_btw_steps = 10
+            first_refinement_step = 5.0
+            n_refinement_steps = 5
+            width_btw_steps = 5
             refinement_steps = np.array([
-                ((-1)**step_num) * first_refinement_step / (
-                    width_btw_steps ** step_num
+                round(
+                    ((-1)**step_num) * first_refinement_step / (
+                        width_btw_steps ** step_num
+                    ),
+                    2,
                 ) for step_num in range(
                     n_refinement_steps
                 )
