@@ -587,7 +587,7 @@ class SkyScanPlotter:
                     else:
                         ref_index = np.where(
                             refinement_steps == refinement_level
-                        )[0]
+                        )[0][0]
                         refinement_level = refinement_steps[ref_index + 1]
                 return refinement_level, change_level
             
