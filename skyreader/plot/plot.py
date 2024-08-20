@@ -569,6 +569,7 @@ class SkyScanPlotter:
                     n_refinement_steps
                 )
             ])
+            print(refinement_steps)
             refinement_levels = [
                 first_refinement_step for _ in range(len(nufloor_areas))
             ]
