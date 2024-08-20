@@ -607,7 +607,6 @@ class SkyScanPlotter:
                     grid_value,
                     contour_levels,
                 )
-                LOGGER.info(contours_by_level)
                 contour_areas = get_contour_areas(contours_by_level, min_ra)
                 LOGGER.info(f"New areas: {contour_areas}")
                 for index in range(len(nufloor_areas)):
