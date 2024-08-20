@@ -545,25 +545,54 @@ class SkyScanPlotter:
 
         # In case it is requested, check if neutrino floor must be applied
         if neutrino_floor:
-            neutrino_floor_90_area = np.pi * (
-                self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR90)**2
-            neutrino_floor_50_area = np.pi * (
-                self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR50)**2
-            area50_toosmall = contour_areas[0] < neutrino_floor_50_area
-            area90_toosmall = contour_areas[1] < neutrino_floor_90_area
-            change_50level = area50_toosmall
-            change_90level = area90_toosmall
-            refinement_level50 = 1.0
-            refinement_level90 = 1.0
-            while (
-                change_50level or change_90level
+            radius_list = [
+                self.SIGMA_TO_CONTOUR50,
+                self.SIGMA_TO_CONTOUR90,
+            ]
+            nufloor_areas = np.array(
+                np.pi * (self.NEUTRINOFLOOR_SIGMA * radius_list)**2
+            )
+            areas_toosmall = [
+                cont_area < floor_area for cont_area, floor_area in zip(
+                    contour_areas[:len(nufloor_areas)],
+                    nufloor_areas,
+                )
+            ]
+            change_levels = areas_toosmall
+            first_refinement_step = 1.0
+            n_refinement_steps = 3
+            width_btw_steps = 10
+            refinement_steps = np.array([
+                ((-1)**step_num) * first_refinement_step / (
+                    step_num * width_btw_steps
+                ) for step_num in range(
+                    n_refinement_steps
+                )
+            ])
+            refinement_levels = [
+                first_refinement_step for _ in range(len(nufloor_areas))
+            ]
+
+            def update_refinement_level(
+                    different_status,
+                    refinement_level,
+                    change_level,
             ):
+                if different_status and change_level:
+                    ref_index = np.where(
+                        refinement_steps == refinement_level
+                    )[0]
+                    if ref_index == refinement_steps[-1]:
+                        change_level = False
+                    else:
+                        refinement_level = refinement_steps[ref_index + 1]
+                return refinement_level, change_level
+            
+            while np.sum(change_levels) > 0:
                 LOGGER.info("Contour too small, applying neutrino floor...")
-                if change_90level:
-                    contour_levels[1] += refinement_level90
-                if change_50level:
-                    contour_levels[0] += refinement_level50
-                    
+                for j, change_level in enumerate(change_levels):
+                    if change_level:
+                        contour_levels[j] += refinement_levels[j]
                 LOGGER.info(f"New levels: {contour_levels}")
                 contours_by_level = meander.spherical_contours(
                     sample_points,
@@ -572,20 +601,19 @@ class SkyScanPlotter:
                 )
                 contour_areas = get_contour_areas(contours_by_level, min_ra)
                 LOGGER.info(f"New areas: {contour_areas}")
-                area50_toosmall = contour_areas[0] < neutrino_floor_50_area
-                area90_toosmall = contour_areas[1] < neutrino_floor_90_area
-                if not area50_toosmall and refinement_level50 == 1.0:
-                    refinement_level50 = -0.1
-                if not area90_toosmall and refinement_level90 == 1.0:
-                    refinement_level90 = -0.1
-                if area50_toosmall and refinement_level50 == -0.1:
-                    refinement_level50 = 0.01
-                if area90_toosmall and refinement_level90 == -0.1:
-                    refinement_level90 = 0.01
-                if not area50_toosmall and refinement_level50 == 0.01:
-                    change_50level = False
-                if not area90_toosmall and refinement_level90 == 0.01:
-                    change_90level = False
+                for index in range(len(nufloor_areas)):
+                    new_area_toosmall = (
+                        contour_areas[index] < nufloor_areas[index]
+                    )
+                    (
+                        refinement_levels[index],
+                        change_levels[index],
+                    ) = update_refinement_level(
+                        new_area_toosmall != areas_toosmall[index],
+                        refinement_levels[index],
+                        change_levels[index],
+                    )
+                    areas_toosmall[index] = new_area_toosmall
 
         LOGGER.info(f"saving plot to {plot_filename}")
         LOGGER.info(f"preparing plot: {plot_filename}...")
