@@ -592,6 +592,7 @@ class SkyScanPlotter:
                         ref_index = np.where(
                             refinement_steps == refinement_level
                         )[0][0]
+                        change_level = False
                         refinement_level = refinement_steps[ref_index + 1]
                 LOGGER.info(f"change_level: {change_level}")
                 return refinement_level, change_level
