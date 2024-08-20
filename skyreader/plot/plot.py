@@ -581,7 +581,7 @@ class SkyScanPlotter:
             ):
                 if different_status and change_level:
                     if refinement_level == refinement_steps[-1]:
-                        print(f"Hi, {refinement_level}")
+                        LOGGER.info(f"Hi, {refinement_level}")
                         change_level = False
                     else:
                         ref_index = np.where(
