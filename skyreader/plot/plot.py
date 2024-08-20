@@ -7,6 +7,7 @@ import logging
 import pickle
 from pathlib import Path
 from typing import List
+import copy
 
 import healpy  # type: ignore[import]
 import matplotlib  # type: ignore[import]
@@ -558,7 +559,7 @@ class SkyScanPlotter:
                     nufloor_areas,
                 )
             ]
-            change_levels = areas_toosmall
+            change_levels = copy.copy(areas_toosmall)
             first_refinement_step = 1.0
             n_refinement_steps = 3
             width_btw_steps = 10
