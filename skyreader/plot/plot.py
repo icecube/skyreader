@@ -564,7 +564,7 @@ class SkyScanPlotter:
             width_btw_steps = 10
             refinement_steps = np.array([
                 ((-1)**step_num) * first_refinement_step / (
-                    step_num * width_btw_steps
+                    (step_num + 1) * width_btw_steps
                 ) for step_num in range(
                     n_refinement_steps
                 )
