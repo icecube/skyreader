@@ -579,6 +579,7 @@ class SkyScanPlotter:
                     refinement_level,
                     change_level,
             ):
+                LOGGER.info(f"Heyo, {refinement_level}")
                 if different_status and change_level:
                     if refinement_level == refinement_steps[-1]:
                         LOGGER.info(f"Hi, {refinement_level}")
@@ -607,6 +608,7 @@ class SkyScanPlotter:
                     new_area_toosmall = (
                         contour_areas[index] < nufloor_areas[index]
                     )
+                    LOGGER.info(f"Hwaa, {refinement_levels[index]}")
                     (
                         refinement_levels[index],
                         change_levels[index],
@@ -615,6 +617,7 @@ class SkyScanPlotter:
                         refinement_levels[index],
                         change_levels[index],
                     )
+                    LOGGER.info(f"Hwaa, {refinement_levels[index]}")
                     areas_toosmall[index] = new_area_toosmall
                     print(change_levels)
 
