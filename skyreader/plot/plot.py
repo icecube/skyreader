@@ -545,10 +545,10 @@ class SkyScanPlotter:
 
         # In case it is requested, check if neutrino floor must be applied
         if neutrino_floor:
-            radius_list = [
+            radius_list = np.array([
                 self.SIGMA_TO_CONTOUR50,
                 self.SIGMA_TO_CONTOUR90,
-            ]
+            ])
             nufloor_areas = np.array(
                 np.pi * (self.NEUTRINOFLOOR_SIGMA * radius_list)**2
             )
