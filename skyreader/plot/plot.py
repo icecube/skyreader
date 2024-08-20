@@ -564,7 +564,7 @@ class SkyScanPlotter:
             width_btw_steps = 10
             refinement_steps = np.array([
                 ((-1)**step_num) * first_refinement_step / (
-                    (step_num + 1) * width_btw_steps
+                    width_btw_steps ** step_num
                 ) for step_num in range(
                     n_refinement_steps
                 )
@@ -580,12 +580,12 @@ class SkyScanPlotter:
                     change_level,
             ):
                 if different_status and change_level:
-                    ref_index = np.where(
-                        refinement_steps == refinement_level
-                    )[0]
-                    if ref_index == refinement_steps[-1]:
+                    if refinement_level == refinement_steps[-1]:
                         change_level = False
                     else:
+                        ref_index = np.where(
+                            refinement_steps == refinement_level
+                        )[0]
                         refinement_level = refinement_steps[ref_index + 1]
                 return refinement_level, change_level
             
