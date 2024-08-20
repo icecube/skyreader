@@ -588,9 +588,6 @@ class SkyScanPlotter:
                     if refinement_level == refinement_steps[-1]:
                         LOGGER.info(f"Hi, {refinement_level}")
                         change_level = False
-                    if refinement_level == refinement_steps[1]:
-                        LOGGER.info(f"Hi, {refinement_level}")
-                        change_level = False
                     else:
                         ref_index = np.where(
                             refinement_steps == refinement_level
@@ -610,6 +607,7 @@ class SkyScanPlotter:
                     grid_value,
                     contour_levels,
                 )
+                LOGGER.info(contours_by_level)
                 contour_areas = get_contour_areas(contours_by_level, min_ra)
                 LOGGER.info(f"New areas: {contour_areas}")
                 for index in range(len(nufloor_areas)):
