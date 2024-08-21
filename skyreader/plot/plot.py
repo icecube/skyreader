@@ -573,7 +573,6 @@ class SkyScanPlotter:
                     n_refinement_steps
                 )
             ])
-            print(refinement_steps)
             refinement_levels = [
                 first_refinement_step for _ in range(len(nufloor_areas))
             ]
@@ -592,20 +591,18 @@ class SkyScanPlotter:
                         )[0][0]
                         refinement_level = refinement_steps[ref_index + 1]
                 return refinement_level, change_level
-            
-            while np.sum(change_levels) > 0:
+            if np.sum(change_levels) > 0:
                 LOGGER.info("Contour too small, applying neutrino floor...")
+            while np.sum(change_levels) > 0:
                 for j, change_level in enumerate(change_levels):
                     if change_level:
                         contour_levels[j] += refinement_levels[j]
-                LOGGER.info(f"New levels: {contour_levels}")
                 contours_by_level = meander.spherical_contours(
                     sample_points,
                     grid_value,
                     contour_levels,
                 )
                 contour_areas = get_contour_areas(contours_by_level, min_ra)
-                LOGGER.info(f"New areas: {contour_areas}")
                 for index in range(len(nufloor_areas)):
                     new_area_toosmall = (
                         contour_areas[index] < nufloor_areas[index]
@@ -707,16 +704,23 @@ class SkyScanPlotter:
         for (
             contour_area_sqdeg,
             contour_label,
+            contour_level,
             contour_color,
             contours
         ) in zip(
             contour_areas,
             contour_labels,
+            contour_levels,
             contour_colors,
             contours_by_level
         ):
+            if neutrino_floor:
+                contour_label + r' ($\Delta$llh level: {0.2f})'.format(
+                    contour_level
+                )
             contour_label = contour_label + ' - area: {0:.2f} sqdeg'.format(
-                contour_area_sqdeg)
+                contour_area_sqdeg
+                )
             first = True
             for contour in contours:
                 theta, phi = contour.T
@@ -779,6 +783,9 @@ class SkyScanPlotter:
                               ra, ra_plus, np.abs(ra_minus)) + " \n" + \
                           "\t Dec = {0:.2f} + {1:.2f} - {2:.2f}".format(
                               dec, dec_plus, np.abs(dec_minus))
+            if neutrino_floor:
+                contain_txt += percentages[l_index] + r"% $\Delta$llh " + \
+                    "level: {0.2f}".format(contour_levels[l_index])
             # This is actually an output and not a logging info.
             # TODO: we should wrap this in an object, return and log at
             # the higher level.
