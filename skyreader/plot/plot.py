@@ -553,6 +553,7 @@ class SkyScanPlotter:
             nufloor_areas = np.array(
                 np.pi * (self.NEUTRINOFLOOR_SIGMA * radius_list)**2
             )
+            # Check dimensions of the areas
             areas_toosmall = [
                 cont_area < floor_area for cont_area, floor_area in zip(
                     contour_areas[:len(nufloor_areas)],
@@ -567,17 +568,28 @@ class SkyScanPlotter:
                 )
             ]
             if np.sum(change_levels) > 0:
-                LOGGER.info("Contour too small, applying neutrino floor...")
+                LOGGER.info("Contours too small, applying neutrino floor...")
+            else:
+                LOGGER.info(
+                    "Contours already large enough. "
+                    "No need to apply the neutrino floor."
+                )
+            # Loop until the new contour levels for the minimal required
+            # area are found.
             while np.sum(change_levels) > 0:
+                # If necessary, change llh levels
                 for j, change_level in enumerate(change_levels):
                     if change_level:
                         contour_levels[j] += refinement_levels[j]
+                # Reelaborate contours
                 contours_by_level = meander.spherical_contours(
                     sample_points,
                     grid_value,
                     contour_levels,
                 )
+                # Recalculate contour areas
                 contour_areas = get_contour_areas(contours_by_level, min_ra)
+                # Estimate how to further modify the llh levels
                 for index in range(len(nufloor_areas)):
                     new_area_toosmall = (
                         contour_areas[index] < nufloor_areas[index]

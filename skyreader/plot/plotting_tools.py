@@ -17,40 +17,6 @@ from typing import List
 
 matplotlib.use('agg')
 
-class LlhLevelsUpdater:
-    
-    FIRST_REFINEMENT_STEP = 5.0
-    N_REFINEMENT_STEPS = 5
-    WIDTH_BTW_STEPS = 5
-
-    def __init__(self):
-        self.refinement_steps = np.array([
-            round(
-                ((-1)**step_num) * type(self).FIRST_REFINEMENT_STEP / (
-                    type(self).WIDTH_BTW_STEPS ** step_num
-                ),
-                2,
-            ) for step_num in range(
-                type(self).N_REFINEMENT_STEPS
-            )
-        ])
-
-    def update_refinement_level(
-            self,
-            different_status,
-            refinement_level,
-            change_level,
-    ):
-        if different_status and change_level:
-            if refinement_level == self.refinement_steps[-1]:
-                change_level = False
-            else:
-                ref_index = np.where(
-                    self.refinement_steps == refinement_level
-                )[0][0]
-                refinement_level = self.refinement_steps[ref_index + 1]
-        return refinement_level, change_level
-
 def format_fits_header(
         event_id_tuple,
         mjd,
@@ -233,6 +199,54 @@ def get_space_angles(
     space_angle = np.rad2deg(np.arccos(cos_space_angle))
 
     return [space_angle, ang_dist_grid]
+
+class LlhLevelsUpdater:
+    """
+    Class to update llh levels when applying the neutrino floor
+    """
+
+    FIRST_REFINEMENT_STEP = 5.0
+    N_REFINEMENT_STEPS = 5
+    WIDTH_BTW_STEPS = 5
+
+    def __init__(self):
+        self.refinement_steps = np.array([
+            round(
+                ((-1)**step_num) * type(self).FIRST_REFINEMENT_STEP / (
+                    type(self).WIDTH_BTW_STEPS ** step_num
+                ),
+                2,
+            ) for step_num in range(
+                type(self).N_REFINEMENT_STEPS
+            )
+        ])
+
+    def update_refinement_level(
+            self,
+            different_status,
+            refinement_level,
+            change_level,
+    ):
+        """
+        different_status: 
+            True if af the last step of update of llh levels
+            the area became bigger than the required amount or
+            viceversa
+        refinement_level:
+            float value which specifies at which degrees are the
+            llh levels now being updated
+        change_level:
+            True if the llh levels still need further refinement.
+        """
+        if different_status and change_level:
+            if refinement_level == self.refinement_steps[-1]:
+                change_level = False
+            else:
+                ref_index = np.where(
+                    self.refinement_steps == refinement_level
+                )[0][0]
+                refinement_level = self.refinement_steps[ref_index + 1]
+        return refinement_level, change_level
 
 ##
 # Mollweide axes with phi axis flipped and in hours from 24 to 0 instead of
