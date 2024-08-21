@@ -715,7 +715,7 @@ class SkyScanPlotter:
             contours_by_level
         ):
             if neutrino_floor:
-                contour_label + r' ($\Delta$llh level: {0.2f})'.format(
+                contour_label + r' ($\Delta$llh' + ' level: {0:.2f})'.format(
                     contour_level
                 )
             contour_label = contour_label + ' - area: {0:.2f} sqdeg'.format(
@@ -785,7 +785,7 @@ class SkyScanPlotter:
                               dec, dec_plus, np.abs(dec_minus))
             if neutrino_floor:
                 contain_txt += percentages[l_index] + r"% $\Delta$llh " + \
-                    "level: {0.2f}".format(contour_levels[l_index])
+                    "level: {0:.2f}".format(contour_levels[l_index])
             # This is actually an output and not a logging info.
             # TODO: we should wrap this in an object, return and log at
             # the higher level.
