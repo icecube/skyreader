@@ -17,10 +17,24 @@ from typing import List
 
 matplotlib.use('agg')
 
-def format_fits_header(event_id_tuple, mjd, ra, dec, uncertainty):
+def format_fits_header(
+        event_id_tuple,
+        mjd,
+        ra,
+        dec,
+        uncertainty,
+        contour_levels,
+        neutrino_floor,
+    ):
     """Prepare some of the relevant event information for a fits file
     header."""
     run_id, event_id, event_type = event_id_tuple
+
+    if neutrino_floor:
+        header_comment = "Lowest -2 delta-LLH values " + \
+            "containing the minimum required area"
+    else:
+        header_comment = "Change in 2LLH based on Wilks theorem"
 
     header = [
         ('RUNID', run_id),
@@ -38,8 +52,12 @@ def format_fits_header(event_id_tuple, mjd, ra, dec, uncertainty):
             '90% containment error high'),
         ('DEC_ERR_MINUS', np.round(np.abs(uncertainty[1][0]),2),
             '90% containment error low'),
+        ('50_LLH', round(contour_levels[0],2),
+            '-2 delta-llh value with 50% coverage'),
+        ('90_LLH', round(contour_levels[1],2),
+            '-2 delta-llh value with 90% coverage'),
         ('COMMENTS', '50%(90%) uncertainty location' \
-            + ' => Change in 2LLH based on Wilks theorem'),
+            + ' => ' + header_comment),
         ('NOTE', 'Please ignore pixels with infinite or NaN values.' \
             + ' They are rare cases of the minimizer failing to converge')
         ]

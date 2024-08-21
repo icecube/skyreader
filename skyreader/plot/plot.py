@@ -715,7 +715,7 @@ class SkyScanPlotter:
             contours_by_level
         ):
             if neutrino_floor:
-                contour_label += r' ($\Delta$llh' + \
+                contour_label += r' (-2$\Delta$llh' + \
                     ' level: {0:.2f})'.format(contour_level)
             contour_label = contour_label + ' - area: {0:.2f} sqdeg'.format(
                 contour_area_sqdeg
@@ -784,7 +784,7 @@ class SkyScanPlotter:
                               dec, dec_plus, np.abs(dec_minus))
             if neutrino_floor:
                 contain_txt += "\n\t " + percentages[l_index] + \
-                    "% Delta-llh level: {0:.2f}".format(
+                    "% - 2 delta-llh level: {0:.2f}".format(
                         contour_levels[l_index]
                     )
             # This is actually an output and not a logging info.
@@ -886,6 +886,8 @@ class SkyScanPlotter:
             np.degrees(min_ra),
             np.degrees(min_dec),
             uncertainty,
+            contour_levels,
+            neutrino_floor,
         )
         mmap_nside = healpy.get_nside(equatorial_map)
 
