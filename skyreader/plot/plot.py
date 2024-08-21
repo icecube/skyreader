@@ -20,6 +20,7 @@ from matplotlib import text
 from matplotlib.projections import projection_registry  # type: ignore[import]
 
 from .plotting_tools import (
+    LlhLevelsUpdater,
     AstroMollweideAxes,
     DecFormatter,
     format_fits_header,
@@ -520,9 +521,9 @@ class SkyScanPlotter:
             # Wilks
             contour_levels = (
                 np.array([1.39, 4.61])+min_value
-            )[:3]
-            contour_labels = [r'50%', r'90%'][:3]
-            contour_colors = ['k', 'r'][:3]
+            )
+            contour_labels = [r'50%', r'90%']
+            contour_colors = ['k', 'r']
         else:
             # Wilks
             contour_levels = (
@@ -559,37 +560,12 @@ class SkyScanPlotter:
                 )
             ]
             change_levels = copy.copy(areas_toosmall)
-            first_refinement_step = 5.0
-            n_refinement_steps = 5
-            width_btw_steps = 5
-            refinement_steps = np.array([
-                round(
-                    ((-1)**step_num) * first_refinement_step / (
-                        width_btw_steps ** step_num
-                    ),
-                    2,
-                ) for step_num in range(
-                    n_refinement_steps
-                )
-            ])
+            levels_refiner = LlhLevelsUpdater()
             refinement_levels = [
-                first_refinement_step for _ in range(len(nufloor_areas))
+                levels_refiner.FIRST_REFINEMENT_STEP for _ in range(
+                    len(nufloor_areas)
+                )
             ]
-
-            def update_refinement_level(
-                    different_status,
-                    refinement_level,
-                    change_level,
-            ):
-                if different_status and change_level:
-                    if refinement_level == refinement_steps[-1]:
-                        change_level = False
-                    else:
-                        ref_index = np.where(
-                            refinement_steps == refinement_level
-                        )[0][0]
-                        refinement_level = refinement_steps[ref_index + 1]
-                return refinement_level, change_level
             if np.sum(change_levels) > 0:
                 LOGGER.info("Contour too small, applying neutrino floor...")
             while np.sum(change_levels) > 0:
@@ -609,7 +585,7 @@ class SkyScanPlotter:
                     (
                         refinement_levels[index],
                         change_levels[index],
-                    ) = update_refinement_level(
+                    ) = levels_refiner.update_refinement_level(
                         new_area_toosmall != areas_toosmall[index],
                         refinement_levels[index],
                         change_levels[index],
