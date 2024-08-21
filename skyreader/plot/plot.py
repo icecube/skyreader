@@ -567,7 +567,8 @@ class SkyScanPlotter:
                     len(nufloor_areas)
                 )
             ]
-            if np.sum(change_levels) > 0:
+            levels_changed = np.sum(change_levels) > 0
+            if levels_changed:
                 LOGGER.info("Contours too small, applying neutrino floor...")
             else:
                 LOGGER.info(
@@ -771,7 +772,7 @@ class SkyScanPlotter:
                               dec, dec_plus, np.abs(dec_minus))
             if neutrino_floor:
                 contain_txt += "\n\t " + percentages[l_index] + \
-                    "% - 2 delta-llh level: {0:.2f}".format(
+                    "% -2 delta-llh level: {0:.2f}".format(
                         contour_levels[l_index]
                 )
             # This is actually an output and not a logging info.
@@ -874,7 +875,7 @@ class SkyScanPlotter:
             np.degrees(min_dec),
             uncertainty,
             contour_levels,
-            neutrino_floor,
+            levels_changed,
         )
         mmap_nside = healpy.get_nside(equatorial_map)
 
