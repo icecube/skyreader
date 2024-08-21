@@ -92,7 +92,7 @@ requests==2.32.3
     #   wipac-rest-tools
 requests-futures==1.0.1
     # via wipac-rest-tools
-scipy==1.14.0
+scipy==1.14.1
     # via icecube-skyreader (setup.py)
 six==1.16.0
     # via python-dateutil

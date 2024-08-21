@@ -62,7 +62,7 @@ pyyaml==6.0.2
     # via astropy
 requests==2.32.3
     # via wipac-dev-tools
-scipy==1.14.0
+scipy==1.14.1
     # via icecube-skyreader (setup.py)
 six==1.16.0
     # via python-dateutil
