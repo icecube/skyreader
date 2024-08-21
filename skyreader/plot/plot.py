@@ -783,8 +783,8 @@ class SkyScanPlotter:
                           "\t Dec = {0:.2f} + {1:.2f} - {2:.2f}".format(
                               dec, dec_plus, np.abs(dec_minus))
             if neutrino_floor:
-                contain_txt += "\n" + percentages[l_index] + \
-                    "% $\Delta$llh level: {0:.2f}".format(
+                contain_txt += "\n\t " + percentages[l_index] + \
+                    "% Delta-llh level: {0:.2f}".format(
                         contour_levels[l_index]
                     )
             # This is actually an output and not a logging info.
