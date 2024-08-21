@@ -718,7 +718,7 @@ class SkyScanPlotter:
                     ' level: {0:.2f})'.format(contour_level)
             contour_label = contour_label + ' - area: {0:.2f} sqdeg'.format(
                 contour_area_sqdeg
-                )
+            )
             first = True
             for contour in contours:
                 theta, phi = contour.T
@@ -785,7 +785,7 @@ class SkyScanPlotter:
                 contain_txt += "\n\t " + percentages[l_index] + \
                     "% - 2 delta-llh level: {0:.2f}".format(
                         contour_levels[l_index]
-                    )
+                )
             # This is actually an output and not a logging info.
             # TODO: we should wrap this in an object, return and log at
             # the higher level.
