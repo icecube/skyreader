@@ -502,6 +502,7 @@ class SkyScanPlotter:
         # convert to probability
         grid_value = np.exp(-1. * grid_value)
         grid_value = grid_value / np.sum(grid_value)
+        sorted_values = list(reversed(list(sorted(grid_value))))
 
         # Do same for the healpy map
         equatorial_map[np.isinf(equatorial_map)] = np.nan
@@ -510,7 +511,6 @@ class SkyScanPlotter:
         # Convert to probability
         equatorial_map = np.exp(-1. * equatorial_map)
         equatorial_map = equatorial_map / np.sum(equatorial_map)
-        print(equatorial_map)
 
         # Calculate the contours
         if systematics:
@@ -524,7 +524,7 @@ class SkyScanPlotter:
             contour_colors = ['k', 'r']
         else:
             # Wilks
-            contour_levels = (
+            probability_levels = (
                 np.array([0.5, 0.9, 1.35e-3, 2.87e-7])+min_value
             )[:3]
             contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
@@ -532,6 +532,14 @@ class SkyScanPlotter:
 
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
 
+        contour_levels = list()
+        for prob in probability_levels:
+            level_index = (
+                np.cumsum(sorted_values) > prob
+            ).tolist().index(True)
+            level = sorted_values[level_index]
+            contour_levels.append(level)
+            
         # Get contours from healpix map
         contours_by_level = meander.spherical_contours(
             sample_points,
