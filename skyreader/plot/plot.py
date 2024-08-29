@@ -44,7 +44,7 @@ class SkyScanPlotter:
     PLOT_SIZE_X_IN: float = 6
     PLOT_DPI_STANDARD = 150
     PLOT_DPI_ZOOMED = 1200
-    PLOT_COLORMAP = matplotlib.colormaps['plasma_r']
+    PLOT_COLORMAP = matplotlib.colormaps['plasma']
     SIGMA_TO_CONTOUR90 = 2.146
     NEUTRINOFLOOR_SIGMA = 0.2
 
