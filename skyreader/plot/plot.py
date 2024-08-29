@@ -499,18 +499,23 @@ class SkyScanPlotter:
         grid_value = grid_value - min_value
         min_value = 0.
 
-        # show 2 * delta_LLH
-        grid_value = grid_value * 2.
+        # convert to probability
+        grid_value = np.exp(-1. * grid_value)
+        grid_value = grid_value / np.sum(grid_value)
 
         # Do same for the healpy map
         equatorial_map[np.isinf(equatorial_map)] = np.nan
         equatorial_map -= np.nanmin(equatorial_map)
-        equatorial_map *= 2.
+
+        # Convert to probability
+        equatorial_map = np.exp(-1. * equatorial_map)
+        equatorial_map = equatorial_map / np.sum(equatorial_map)
 
         # Calculate the contours
         if systematics:
             # from Pan-Starrs event 127852
             # these are values determined from MC by Will on the TS (2*LLH)
+            # Not clear yet how to translate this for the probability map
             contour_levels = (np.array([22.2, 64.2])+min_value)
             contour_labels = [
                 r'50% (IC160427A syst.)', r'90% (IC160427A syst.)'
@@ -519,7 +524,7 @@ class SkyScanPlotter:
         else:
             # Wilks
             contour_levels = (
-                np.array([1.39, 4.61, 11.83, 28.74])+min_value
+                np.array([0.5, 0.9, 1.35e-3, 2.87e-7])+min_value
             )[:3]
             contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
             contour_colors = ['k', 'r', 'g', 'b'][:3]
