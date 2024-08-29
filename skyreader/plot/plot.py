@@ -500,7 +500,7 @@ class SkyScanPlotter:
         min_value = 0.
 
         # convert to probability
-        grid_value = np.exp(-1. * grid_value / 2.)
+        grid_value = np.exp(-1. * grid_value)
         grid_value = grid_value / np.nansum(grid_value)
         sorted_values = list(reversed(list(sorted(grid_value))))
 
@@ -509,7 +509,7 @@ class SkyScanPlotter:
         equatorial_map -= np.nanmin(equatorial_map)
 
         # Convert to probability
-        equatorial_map = np.exp(-1. * equatorial_map / 2.)
+        equatorial_map = np.exp(-1. * equatorial_map)
         equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
         # Calculate the contours
@@ -525,7 +525,7 @@ class SkyScanPlotter:
         else:
             # Wilks
             probability_levels = (
-                np.array([0.5, 0.9, 1.35e-3, 2.87e-7])+min_value
+                np.array([0.5, 0.9, 1-1.35e-3, 1-2.87e-7])+min_value
             )[:3]
             contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
             contour_colors = ['k', 'r', 'g', 'b'][:3]
