@@ -510,6 +510,7 @@ class SkyScanPlotter:
         # Convert to probability
         equatorial_map = np.exp(-1. * equatorial_map)
         equatorial_map = equatorial_map / np.sum(equatorial_map)
+        print(equatorial_map)
 
         # Calculate the contours
         if systematics:
