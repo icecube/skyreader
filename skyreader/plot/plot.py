@@ -537,7 +537,11 @@ class SkyScanPlotter:
             level_index = (
                 np.cumsum(sorted_values) > prob
             ).tolist().index(True)
-            level = sorted_values[level_index]
+            level = (
+                sorted_values[level_index] + (
+                    sorted_values[level_index+1] if level_index+1<len(prob_map) else 0
+                )
+            )/2.0
             contour_levels.append(level)
 
         # Get contours from healpix map
