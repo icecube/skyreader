@@ -501,8 +501,8 @@ class SkyScanPlotter:
 
         # convert to probability
         grid_value = np.exp(-1. * grid_value)
-        grid_value = np.where(grid_value > 1e-12, grid_value, 0.0)
-        grid_value = grid_value / np.nansum(grid_value)
+        #grid_value = np.where(grid_value > 1e-12, grid_value, 0.0)
+        #grid_value = grid_value / np.nansum(grid_value)
         sorted_values = list(reversed(list(sorted(grid_value))))
 
         # Do same for the healpy map
@@ -511,10 +511,10 @@ class SkyScanPlotter:
 
         # Convert to probability
         equatorial_map = np.exp(-1. * equatorial_map)
-        equatorial_map = np.where(
-            equatorial_map > 1e-12, equatorial_map, 0.0
-        )
-        equatorial_map = equatorial_map / np.nansum(equatorial_map)
+        #equatorial_map = np.where(
+        #    equatorial_map > 1e-12, equatorial_map, 0.0
+        #)
+        #equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
         # Calculate the contours
         if systematics:
@@ -539,7 +539,7 @@ class SkyScanPlotter:
         contour_levels = list()
         for prob in probability_levels:
             level_index = (
-                np.cumsum(sorted_values) > prob
+                sorted_values < prob
             ).tolist().index(True)
             level = (
                 sorted_values[level_index] + (
