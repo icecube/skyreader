@@ -500,7 +500,7 @@ class SkyScanPlotter:
         min_value = 0.
 
         # convert to probability
-        grid_value = np.exp(-1. * grid_value)
+        grid_value = np.exp(-1. * grid_value / 2.)
         grid_value = grid_value / np.nansum(grid_value)
         sorted_values = list(reversed(list(sorted(grid_value))))
 
@@ -509,7 +509,7 @@ class SkyScanPlotter:
         equatorial_map -= np.nanmin(equatorial_map)
 
         # Convert to probability
-        equatorial_map = np.exp(-1. * equatorial_map)
+        equatorial_map = np.exp(-1. * equatorial_map / 2.)
         equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
         # Calculate the contours
