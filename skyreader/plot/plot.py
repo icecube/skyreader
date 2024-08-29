@@ -529,7 +529,7 @@ class SkyScanPlotter:
         else:
             # Wilks
             probability_levels = (
-                np.array([0.5, 0.9, 1-1.35e-3, 1-2.87e-7])+min_value
+                np.array([0.5, 0.1, 1.35e-3, 2.87e-7])+min_value
             )[:3]
             contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
             contour_colors = ['k', 'r', 'g', 'b'][:3]
