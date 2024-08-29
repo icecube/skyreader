@@ -501,6 +501,7 @@ class SkyScanPlotter:
 
         # convert to probability
         grid_value = np.exp(-1. * grid_value)
+        grid_value = np.where(grid_value > 1e-12, grid_value, 0.0)
         grid_value = grid_value / np.nansum(grid_value)
         sorted_values = list(reversed(list(sorted(grid_value))))
 
@@ -510,6 +511,9 @@ class SkyScanPlotter:
 
         # Convert to probability
         equatorial_map = np.exp(-1. * equatorial_map)
+        equatorial_map = np.where(
+            equatorial_map > 1e-12, equatorial_map, 0.0
+        )
         equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
         # Calculate the contours
@@ -539,7 +543,9 @@ class SkyScanPlotter:
             ).tolist().index(True)
             level = (
                 sorted_values[level_index] + (
-                    sorted_values[level_index+1] if level_index+1<len(sorted_values) else 0
+                    sorted_values[level_index+1] if level_index+1<len(
+                        sorted_values
+                    ) else 0
                 )
             )/2.0
             contour_levels.append(level)
