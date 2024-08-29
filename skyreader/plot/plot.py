@@ -539,7 +539,7 @@ class SkyScanPlotter:
             ).tolist().index(True)
             level = sorted_values[level_index]
             contour_levels.append(level)
-            
+
         # Get contours from healpix map
         contours_by_level = meander.spherical_contours(
             sample_points,
@@ -648,14 +648,14 @@ class SkyScanPlotter:
             map=equatorial_map,
             title=plot_title,
             min=0.,  # min 2DeltaLLH value for colorscale
-            max=40.,  # max 2DeltaLLH value for colorscale
+            max=max(equatorial_map),  # max 2DeltaLLH value for colorscale
             rot=(lon, lat, 0.),
             cmap=cmap,
             hold=True,
             cbar=None,
             lonra=lonra,
             latra=latra,
-            unit=r"$-2 \Delta \ln (L)$",
+            unit="Probability",
         )
 
         fig = plt.gcf()
