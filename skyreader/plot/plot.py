@@ -539,7 +539,7 @@ class SkyScanPlotter:
             ).tolist().index(True)
             level = (
                 sorted_values[level_index] + (
-                    sorted_values[level_index+1] if level_index+1<len(prob_map) else 0
+                    sorted_values[level_index+1] if level_index+1<len(sorted_values) else 0
                 )
             )/2.0
             contour_levels.append(level)
