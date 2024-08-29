@@ -674,8 +674,14 @@ class SkyScanPlotter:
         ax = plt.gca()
         image = ax.get_images()[0]
         # Place colorbar by hand
-        cb = fig.colorbar(image, ax=ax, orientation='horizontal', aspect=50)
-        cb.ax.xaxis.set_label_text(r"$-2 \Delta \ln (L)$")
+        cb = fig.colorbar(
+            image,
+            ax=ax,
+            orientation='horizontal',
+            aspect=50,
+            spacing="proportional",
+        )
+        cb.ax.xaxis.set_label_text("Probability")
 
         # Plot the best-fit location
         # This requires some more coordinate transformations
