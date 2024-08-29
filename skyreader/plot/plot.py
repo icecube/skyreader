@@ -679,7 +679,9 @@ class SkyScanPlotter:
             ax=ax,
             orientation='horizontal',
             aspect=50,
-            spacing="proportional",
+            ticks = [
+                1e-5, 1e-4, 1e-3, 1e-2, 1e-1, max(equatorial_map)
+            ],
         )
         cb.ax.xaxis.set_label_text("Probability")
 
