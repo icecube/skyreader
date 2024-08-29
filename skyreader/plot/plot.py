@@ -690,6 +690,7 @@ class SkyScanPlotter:
                 min_prob*(max_prob/min_prob)**(4/5),
                 max_prob
             ],
+            format="{x:.2e}"
         )
         cb.ax.xaxis.set_label_text("Probability")
 
