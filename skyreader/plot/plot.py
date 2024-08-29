@@ -512,8 +512,9 @@ class SkyScanPlotter:
         #equatorial_map = np.where(
         #    equatorial_map > 1e-12, equatorial_map, 0.0
         #)
-        equatorial_map = equatorial_map / np.nansum(equatorial_map)
-        grid_value = grid_value / np.nansum(equatorial_map)
+        normalization = np.nansum(equatorial_map)
+        equatorial_map = equatorial_map / normalization
+        grid_value = grid_value / normalization
         sorted_values = list(reversed(list(sorted(equatorial_map))))
 
         # Calculate the contours
