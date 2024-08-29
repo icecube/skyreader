@@ -658,7 +658,7 @@ class SkyScanPlotter:
         healpy.cartview(
             map=equatorial_map,
             title=plot_title,
-            min=0.,  # min 2DeltaLLH value for colorscale
+            min=1e-5,  # min 2DeltaLLH value for colorscale
             max=max(equatorial_map),  # max 2DeltaLLH value for colorscale
             rot=(lon, lat, 0.),
             cmap=cmap,
@@ -666,6 +666,7 @@ class SkyScanPlotter:
             cbar=None,
             lonra=lonra,
             latra=latra,
+            norm='log',
             unit="Probability",
         )
 
