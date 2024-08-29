@@ -39,6 +39,11 @@ def log_gauss(x, sigma):
     return (x/sigma)**2
 
 
+# Survival function of the rayleigh distribution
+def rayleigh_the_survivor(x, sigma):
+    return np.exp(-0.5*(x/sigma)**2)
+
+
 class SkyScanPlotter:
     PLOT_SIZE_Y_IN: float = 3.85
     PLOT_SIZE_X_IN: float = 6
@@ -509,6 +514,21 @@ class SkyScanPlotter:
 
         # Convert to probability
         equatorial_map = np.exp(-1. * equatorial_map)
+
+        # Get ang dist to convolute the Gaussian
+        min_index = np.nanargmin(equatorial_map)
+
+        space_angle, ang_dist_grid = get_space_angles(
+            min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
+        )
+        grid_value += rayleigh_the_survivor(
+            ang_dist_grid,
+            self.NEUTRINOFLOOR_SIGMA
+        )
+        equatorial_map += rayleigh_the_survivor(
+            space_angle,
+            self.NEUTRINOFLOOR_SIGMA
+        )
         #equatorial_map = np.where(
         #    equatorial_map > 1e-12, equatorial_map, 0.0
         #)
@@ -690,7 +710,7 @@ class SkyScanPlotter:
                 min_prob*(max_prob/min_prob)**(4/5),
                 max_prob
             ],
-            format="{x:.2e}"
+            format="{x:.1e}"
         )
         cb.ax.xaxis.set_label_text("Probability")
 
