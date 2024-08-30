@@ -525,6 +525,30 @@ class SkyScanPlotter:
             ang_dist_grid,
             self.NEUTRINOFLOOR_SIGMA
         )
+        for nside in nsides:
+            LOGGER.info(f"constructing map for nside {nside}...")
+            npix = healpy.nside2npix(nside)
+            #values = map_data['llh']
+            this_map = np.full(npix, np.nan)
+            for pixel_data in result.result[f"nside-{nside}"]:
+                pixel = pixel_data['index']
+                value = pixel_data['llh']
+                if np.isfinite(value) and not np.isnan(value):
+                    tmp_theta, tmp_phi = healpy.pix2ang(nside, pixel)
+                    tmp_dec = np.pi/2 - tmp_theta
+                    tmp_ra = tmp_phi
+                    value_index = np.where(
+                        np.logical_and(
+                            grid_ra == tmp_ra,
+                            grid_dec == tmp_dec
+                        )
+                    )[0]
+                    this_map[pixel] = grid_value[value_index]
+            if nside < max_nside:
+                this_map = healpy.ud_grade(this_map, max_nside)
+            mask = np.logical_and(~np.isnan(this_map), np.isfinite(this_map))
+            equatorial_map[mask] = this_map[mask]
+            LOGGER.info(f"done with map for nside {nside}...")
         #equatorial_map += rayleigh_the_survivor(
         #    space_angle,
         #    self.NEUTRINOFLOOR_SIGMA
