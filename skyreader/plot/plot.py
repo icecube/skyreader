@@ -536,9 +536,9 @@ class SkyScanPlotter:
         equatorial_map = equatorial_map / normalization
         print(np.nanmax(equatorial_map))
         print(np.nanmax(np.sort(equatorial_map)))
-        print(reversed(list(np.sort(equatorial_map))))
+        print(np.nanmax(np.sort(equatorial_map)[::-1]))
         grid_value = grid_value / normalization
-        sorted_values = list(reversed(list(np.sort(equatorial_map))))
+        sorted_values = np.sort(equatorial_map)[::-1]
 
         # Calculate the contours
         if systematics:
