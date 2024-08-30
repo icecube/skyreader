@@ -44,6 +44,11 @@ def rayleigh_the_survivor(x, sigma):
     return np.exp(-0.5*(x/sigma)**2)
 
 
+# Survival function of the rayleigh distribution
+def rayleigh(x, sigma):
+    return (x/(sigma)**2)*np.exp(-0.5*(x/sigma)**2)
+
+
 class SkyScanPlotter:
     PLOT_SIZE_Y_IN: float = 3.85
     PLOT_SIZE_X_IN: float = 6
@@ -517,11 +522,12 @@ class SkyScanPlotter:
 
         # Convert to probability
         equatorial_map = np.exp(-1. * equatorial_map)
+        equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
         space_angle, ang_dist_grid = get_space_angles(
             min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
         )
-        equatorial_map += rayleigh_the_survivor(
+        equatorial_map += rayleigh(
             space_angle,
             self.NEUTRINOFLOOR_SIGMA
         )
