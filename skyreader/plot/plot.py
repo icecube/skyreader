@@ -553,7 +553,11 @@ class SkyScanPlotter:
 
         theta, grid_ra = healpy.pix2ang(
             max_nside,
-            np.arange(healpy.nside2npix(max_nside))
+            healpy.query_disc(
+                max_nside,
+                healpy.pix2vec(max_nside, min_index),
+                np.deg2rad(4.),
+            )
         )
         grid_dec = np.pi/2. - theta
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
