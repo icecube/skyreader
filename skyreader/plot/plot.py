@@ -543,6 +543,7 @@ class SkyScanPlotter:
             equatorial_map, np.pi/2 - grid_dec, grid_ra
         )
         sorted_values = np.sort(equatorial_map)[::-1]
+        print(sorted_values)
 
         # Calculate the contours
         if systematics:
