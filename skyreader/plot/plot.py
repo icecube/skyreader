@@ -7,7 +7,6 @@ import logging
 import pickle
 from pathlib import Path
 from typing import List
-import copy
 
 import healpy  # type: ignore[import]
 import matplotlib  # type: ignore[import]
@@ -530,13 +529,13 @@ class SkyScanPlotter:
             space_angle,
             self.NEUTRINOFLOOR_SIGMA
         )
-        #equatorial_map = np.where(
-        #    equatorial_map > 1e-12, equatorial_map, 0.0
-        #)
+        equatorial_map = np.where(
+            equatorial_map > 1e-12, equatorial_map, 0.0
+        )
         normalization = np.nansum(equatorial_map)
         equatorial_map = equatorial_map / normalization
         grid_value = grid_value / normalization
-        sorted_values = np.sort(copy.copy(equatorial_map))[::-1]
+        sorted_values = np.sort(equatorial_map)[::-1]
 
         # Calculate the contours
         if systematics:
