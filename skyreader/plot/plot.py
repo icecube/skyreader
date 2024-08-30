@@ -512,11 +512,11 @@ class SkyScanPlotter:
         equatorial_map[np.isinf(equatorial_map)] = np.nan
         equatorial_map -= np.nanmin(equatorial_map)
 
-        # Get ang dist to convolute the Gaussian
-        min_index = np.nanargmin(equatorial_map)
-
         # Convert to probability
         equatorial_map = np.exp(-1. * equatorial_map)
+
+        # Get ang dist to convolute the Gaussian
+        min_index = np.nanargmin(equatorial_map)
 
         space_angle, ang_dist_grid = get_space_angles(
             min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
@@ -530,7 +530,9 @@ class SkyScanPlotter:
         #)
         normalization = np.nansum(equatorial_map)
         equatorial_map = equatorial_map / normalization
-        grid_value = grid_value / normalization
+        grid_value = healpy.get_interp_val(
+            equatorial_map, np.pi/2 - grid_dec, grid_ra
+        )
         sorted_values = np.sort(equatorial_map)[::-1]
 
         # Calculate the contours
@@ -551,14 +553,6 @@ class SkyScanPlotter:
             contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
             contour_colors = ['k', 'r', 'g', 'b'][:3]
 
-        grid_dec, grid_ra = healpy.pix2ang(
-            max_nside,
-            healpy.query_disc(
-                max_nside,
-                healpy.pix2vec(max_nside, min_index),
-                np.deg2rad(4.),
-            )
-        )
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
 
         contour_levels = list()
@@ -579,7 +573,7 @@ class SkyScanPlotter:
         # Get contours from healpix map
         contours_by_level = meander.spherical_contours(
             sample_points,
-            np.log(equatorial_map),
+            np.log(grid_value),
             np.log(contour_levels),
         )
 
