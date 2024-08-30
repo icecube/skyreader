@@ -46,7 +46,7 @@ def rayleigh_the_survivor(x, sigma):
 
 # Survival function of the rayleigh distribution
 def rayleigh(x, sigma):
-    return (x/(sigma)**2)*np.exp(-0.5*(x/sigma)**2)
+    return (1./(2*np.pi*sigma**2))*np.exp(-0.5*(x/sigma)**2)
 
 
 class SkyScanPlotter:
