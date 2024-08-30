@@ -7,6 +7,7 @@ import logging
 import pickle
 from pathlib import Path
 from typing import List
+import copy
 
 import healpy  # type: ignore[import]
 import matplotlib  # type: ignore[import]
@@ -535,7 +536,7 @@ class SkyScanPlotter:
         normalization = np.nansum(equatorial_map)
         equatorial_map = equatorial_map / normalization
         grid_value = grid_value / normalization
-        sorted_values = np.sort(equatorial_map)[::-1]
+        sorted_values = np.sort(copy.copy(equatorial_map))[::-1]
 
         # Calculate the contours
         if systematics:
@@ -682,17 +683,17 @@ class SkyScanPlotter:
         else:
             min_prob = max_prob/1e8
         healpy.cartview(
-            map=np.log(equatorial_map),
+            map=equatorial_map,
             title=plot_title,
-            min=np.log(min_prob),  # min 2DeltaLLH value for colorscale
-            max=np.log(max_prob),  # max 2DeltaLLH value for colorscale
+            min=min_prob,  # min 2DeltaLLH value for colorscale
+            max=max_prob,  # max 2DeltaLLH value for colorscale
             rot=(lon, lat, 0.),
             cmap=cmap,
             hold=True,
             cbar=None,
             lonra=lonra,
             latra=latra,
-            #norm='log',
+            norm='log',
             unit="Probability",
         )
 
@@ -705,14 +706,14 @@ class SkyScanPlotter:
             ax=ax,
             orientation='horizontal',
             aspect=50,
-            ticks = np.log(np.array([
+            ticks = [
                 min_prob,
                 min_prob*(max_prob/min_prob)**(1/5),
                 min_prob*(max_prob/min_prob)**(2/5),
                 min_prob*(max_prob/min_prob)**(3/5),
                 min_prob*(max_prob/min_prob)**(4/5),
                 max_prob
-            ])),
+            ],
             format="{x:.1e}"
         )
         cb.ax.xaxis.set_label_text("Probability")
