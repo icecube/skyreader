@@ -535,6 +535,8 @@ class SkyScanPlotter:
         normalization = np.nansum(equatorial_map)
         equatorial_map = equatorial_map / normalization
         print(np.nanmax(equatorial_map))
+        print(np.nanmax(np.argsort(equatorial_map)))
+        print(reversed(list(np.argsort(equatorial_map))))
         grid_value = grid_value / normalization
         sorted_values = list(reversed(list(np.argsort(equatorial_map))))
 
