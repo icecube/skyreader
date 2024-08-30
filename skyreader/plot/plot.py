@@ -525,13 +525,13 @@ class SkyScanPlotter:
             ang_dist_grid,
             self.NEUTRINOFLOOR_SIGMA
         )
-        equatorial_map += rayleigh_the_survivor(
-            space_angle,
-            self.NEUTRINOFLOOR_SIGMA
-        )
-        equatorial_map = np.where(
-            equatorial_map > 1e-12, equatorial_map, 0.0
-        )
+        #equatorial_map += rayleigh_the_survivor(
+        #    space_angle,
+        #    self.NEUTRINOFLOOR_SIGMA
+        #)
+        #equatorial_map = np.where(
+        #    equatorial_map > 1e-12, equatorial_map, 0.0
+        #)
         normalization = np.nansum(equatorial_map)
         equatorial_map = equatorial_map / normalization
         grid_value = grid_value / normalization
