@@ -680,8 +680,8 @@ class SkyScanPlotter:
         # Rotate into healpy coordinates
         lon, lat = np.degrees(min_ra), np.degrees(min_dec)
         max_prob = max(equatorial_map)
-        log_max_prob = np.log(max_prob)
-        min_prob = 1e-5
+        order_of_mags_depth = 2
+        min_prob = max_prob/(10**order_of_mags_depth)
         healpy.cartview(
             map=equatorial_map,
             title=plot_title,
