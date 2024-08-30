@@ -676,23 +676,23 @@ class SkyScanPlotter:
         plt.clf()
         # Rotate into healpy coordinates
         lon, lat = np.degrees(min_ra), np.degrees(min_dec)
-        max_prob = max(equatorial_map)
+        max_prob = np.nanmax(equatorial_map)
         if len(contour_levels) >= 3:
             min_prob = contour_levels[2]
         else:
             min_prob = max_prob/1e8
         healpy.cartview(
-            map=equatorial_map,
+            map=np.log(equatorial_map),
             title=plot_title,
-            min=min_prob,  # min 2DeltaLLH value for colorscale
-            max=max_prob,  # max 2DeltaLLH value for colorscale
+            min=np.log(min_prob),  # min 2DeltaLLH value for colorscale
+            max=np.log(max_prob),  # max 2DeltaLLH value for colorscale
             rot=(lon, lat, 0.),
             cmap=cmap,
             hold=True,
             cbar=None,
             lonra=lonra,
             latra=latra,
-            norm='log',
+            #norm='log',
             unit="Probability",
         )
 
@@ -705,14 +705,14 @@ class SkyScanPlotter:
             ax=ax,
             orientation='horizontal',
             aspect=50,
-            ticks = [
+            ticks = np.log(np.array([
                 min_prob,
                 min_prob*(max_prob/min_prob)**(1/5),
                 min_prob*(max_prob/min_prob)**(2/5),
                 min_prob*(max_prob/min_prob)**(3/5),
                 min_prob*(max_prob/min_prob)**(4/5),
                 max_prob
-            ],
+            ])),
             format="{x:.1e}"
         )
         cb.ax.xaxis.set_label_text("Probability")
