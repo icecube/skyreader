@@ -12,7 +12,7 @@ astropy-iers-data==0.2024.8.27.10.28.29
     # via astropy
 cachetools==5.5.0
     # via wipac-rest-tools
-certifi==2024.7.4
+certifi==2024.8.30
     # via requests
 cffi==1.17.0
     # via cryptography

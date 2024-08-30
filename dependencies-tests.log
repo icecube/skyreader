@@ -10,7 +10,7 @@ astropy==6.1.2
     #   icecube-skyreader (setup.py)
 astropy-iers-data==0.2024.8.27.10.28.29
     # via astropy
-certifi==2024.7.4
+certifi==2024.8.30
     # via requests
 charset-normalizer==3.3.2
     # via requests
