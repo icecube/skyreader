@@ -534,9 +534,6 @@ class SkyScanPlotter:
         #)
         normalization = np.nansum(equatorial_map)
         equatorial_map = equatorial_map / normalization
-        print(np.nanmax(equatorial_map))
-        print(np.nanmax(np.sort(equatorial_map)))
-        print(np.nanmax(np.sort(equatorial_map)[::-1]))
         grid_value = grid_value / normalization
         sorted_values = np.sort(equatorial_map)[::-1]
 
@@ -562,7 +559,6 @@ class SkyScanPlotter:
 
         contour_levels = list()
         for prob in probability_levels:
-            print(np.nancumsum(sorted_values))
             level_index = (
                 np.nancumsum(sorted_values) > prob
             ).tolist().index(True)
@@ -680,7 +676,7 @@ class SkyScanPlotter:
         # Rotate into healpy coordinates
         lon, lat = np.degrees(min_ra), np.degrees(min_dec)
         max_prob = max(equatorial_map)
-        order_of_mags_depth = 2
+        order_of_mags_depth = 8
         min_prob = max_prob/(10**order_of_mags_depth)
         healpy.cartview(
             map=equatorial_map,
