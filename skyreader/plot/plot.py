@@ -570,6 +570,7 @@ class SkyScanPlotter:
                 )
             )/2.0
             contour_levels.append(level)
+        print(contour_levels)
 
         # Get contours from healpix map
         contours_by_level = meander.spherical_contours(
