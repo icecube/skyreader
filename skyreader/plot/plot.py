@@ -521,38 +521,10 @@ class SkyScanPlotter:
         space_angle, ang_dist_grid = get_space_angles(
             min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
         )
-        grid_value += rayleigh_the_survivor(
-            ang_dist_grid,
+        equatorial_map += rayleigh_the_survivor(
+            space_angle,
             self.NEUTRINOFLOOR_SIGMA
         )
-        for nside in nsides:
-            LOGGER.info(f"constructing map for nside {nside}...")
-            npix = healpy.nside2npix(nside)
-            #values = map_data['llh']
-            this_map = np.full(npix, np.nan)
-            for pixel_data in result.result[f"nside-{nside}"]:
-                pixel = pixel_data['index']
-                value = pixel_data['llh']
-                if np.isfinite(value) and not np.isnan(value):
-                    tmp_theta, tmp_phi = healpy.pix2ang(nside, pixel)
-                    tmp_dec = np.pi/2 - tmp_theta
-                    tmp_ra = tmp_phi
-                    value_index = np.where(
-                        np.logical_and(
-                            grid_ra == tmp_ra,
-                            grid_dec == tmp_dec
-                        )
-                    )[0]
-                    this_map[pixel] = grid_value[value_index]
-            if nside < max_nside:
-                this_map = healpy.ud_grade(this_map, max_nside)
-            mask = np.logical_and(~np.isnan(this_map), np.isfinite(this_map))
-            equatorial_map[mask] = this_map[mask]
-            LOGGER.info(f"done with map for nside {nside}...")
-        #equatorial_map += rayleigh_the_survivor(
-        #    space_angle,
-        #    self.NEUTRINOFLOOR_SIGMA
-        #)
         #equatorial_map = np.where(
         #    equatorial_map > 1e-12, equatorial_map, 0.0
         #)
@@ -579,6 +551,8 @@ class SkyScanPlotter:
             contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
             contour_colors = ['k', 'r', 'g', 'b'][:3]
 
+        theta, grid_ra = hp.pix2ang(256, np.arange(hp.nside2npix(256)))
+        grid_dec = np.pi/2. - theta
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
 
         contour_levels = list()
@@ -599,7 +573,7 @@ class SkyScanPlotter:
         # Get contours from healpix map
         contours_by_level = meander.spherical_contours(
             sample_points,
-            np.log(grid_value),
+            np.log(equatorial_map),
             np.log(contour_levels),
         )
 
