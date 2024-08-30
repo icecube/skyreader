@@ -551,7 +551,7 @@ class SkyScanPlotter:
             contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
             contour_colors = ['k', 'r', 'g', 'b'][:3]
 
-        theta, grid_ra = hp.pix2ang(256, np.arange(hp.nside2npix(256)))
+        theta, grid_ra = healpy.pix2ang(256, np.arange(hp.nside2npix(256)))
         grid_dec = np.pi/2. - theta
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
 
