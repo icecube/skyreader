@@ -512,11 +512,11 @@ class SkyScanPlotter:
         equatorial_map[np.isinf(equatorial_map)] = np.nan
         equatorial_map -= np.nanmin(equatorial_map)
 
-        # Convert to probability
-        equatorial_map = np.exp(-1. * equatorial_map)
-
         # Get ang dist to convolute the Gaussian
         min_index = np.nanargmin(equatorial_map)
+
+        # Convert to probability
+        equatorial_map = np.exp(-1. * equatorial_map)
 
         space_angle, ang_dist_grid = get_space_angles(
             min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
