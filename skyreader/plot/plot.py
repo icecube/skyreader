@@ -562,9 +562,9 @@ class SkyScanPlotter:
 
         contour_levels = list()
         for prob in probability_levels:
-            print(np.cumsum(sorted_values))
+            print(np.nancumsum(sorted_values))
             level_index = (
-                np.cumsum(sorted_values) > prob
+                np.nancumsum(sorted_values) > prob
             ).tolist().index(True)
             level = (
                 sorted_values[level_index] + (
