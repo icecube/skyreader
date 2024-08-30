@@ -535,7 +535,8 @@ class SkyScanPlotter:
         gauss_values = gauss_values / np.nansum(gauss_values)
         equatorial_map = healpy.smoothing(
             equatorial_map,
-            sigma=np.deg2rad(self.NEUTRINOFLOOR_SIGMA)
+            sigma=np.deg2rad(self.NEUTRINOFLOOR_SIGMA),
+            iter=1
         )
         #equatorial_map = np.where(
         #    equatorial_map > 1e-12, equatorial_map, 0.0
