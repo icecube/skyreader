@@ -551,7 +551,7 @@ class SkyScanPlotter:
             contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
             contour_colors = ['k', 'r', 'g', 'b'][:3]
 
-        theta, grid_ra = healpy.pix2ang(
+        grid_dec, grid_ra = healpy.pix2ang(
             max_nside,
             healpy.query_disc(
                 max_nside,
