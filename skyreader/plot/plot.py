@@ -559,7 +559,6 @@ class SkyScanPlotter:
                 np.deg2rad(4.),
             )
         )
-        grid_dec = np.pi/2. - theta
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
 
         contour_levels = list()
