@@ -574,8 +574,8 @@ class SkyScanPlotter:
         # Get contours from healpix map
         contours_by_level = meander.spherical_contours(
             sample_points,
-            grid_value,
-            contour_levels,
+            np.log(grid_value),
+            np.log(contour_levels),
         )
 
         # Calculate areas using Gauss-Green's theorem for a spherical space
