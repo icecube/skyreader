@@ -533,7 +533,7 @@ class SkyScanPlotter:
             self.NEUTRINOFLOOR_SIGMA
         )
         gauss_values = gauss_values / np.nansum(gauss_values)
-        equatorial_map = fftconvolve(equatorial_map, gauss_values)
+        equatorial_map = fftconvolve(equatorial_map, gauss_values, mode='same')
         #equatorial_map = np.where(
         #    equatorial_map > 1e-12, equatorial_map, 0.0
         #)
