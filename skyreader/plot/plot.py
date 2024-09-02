@@ -973,7 +973,7 @@ class SkyScanPlotter:
 
         healpy.write_map(
             f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
-            equatorial_map,
+            np.log(equatorial_map),
             coord='C',
             column_names=['2LLH'],
             extra_header=fits_header,
