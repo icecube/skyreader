@@ -525,22 +525,22 @@ class SkyScanPlotter:
         equatorial_map = np.exp(-1. * equatorial_map)
         equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
-        space_angle, ang_dist_grid = get_space_angles(
-            min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
+        equatorial_map = np.where(
+            equatorial_map > 1e-12, equatorial_map, 0.0
         )
-        gauss_values = rayleigh(
-            space_angle,
-            self.NEUTRINOFLOOR_SIGMA
-        )
-        gauss_values = gauss_values / np.nansum(gauss_values)
+        #space_angle, ang_dist_grid = get_space_angles(
+        #    min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
+        #)
+        #gauss_values = rayleigh(
+        #    space_angle,
+        #    self.NEUTRINOFLOOR_SIGMA
+        #)
+        #gauss_values = gauss_values / np.nansum(gauss_values)
         equatorial_map[np.isnan(equatorial_map)] = 0.
         equatorial_map = healpy.smoothing(
             equatorial_map,
             sigma=np.deg2rad(self.NEUTRINOFLOOR_SIGMA),
         )
-        #equatorial_map = np.where(
-        #    equatorial_map > 1e-12, equatorial_map, 0.0
-        #)
         normalization = np.nansum(equatorial_map)
         equatorial_map = equatorial_map / normalization
         grid_value = healpy.get_interp_val(
