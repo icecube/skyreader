@@ -540,6 +540,7 @@ class SkyScanPlotter:
         equatorial_map = healpy.smoothing(
             equatorial_map,
             sigma=np.deg2rad(self.NEUTRINOFLOOR_SIGMA),
+            iter=0,
         )
         normalization = np.nansum(equatorial_map)
         equatorial_map = equatorial_map / normalization
