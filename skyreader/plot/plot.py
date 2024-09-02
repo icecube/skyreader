@@ -526,7 +526,7 @@ class SkyScanPlotter:
         equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
         equatorial_map = np.where(
-            equatorial_map > 1e-12, equatorial_map, 0.0
+            equatorial_map > 1e-9, equatorial_map, 0.0
         )
         #space_angle, ang_dist_grid = get_space_angles(
         #    min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
