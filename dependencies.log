@@ -24,13 +24,13 @@ healpy==1.17.3
     # via icecube-skyreader (setup.py)
 idna==3.8
     # via requests
-kiwisolver==1.4.5
+kiwisolver==1.4.7
     # via matplotlib
 matplotlib==3.9.2
     # via icecube-skyreader (setup.py)
 meander==0.0.3
     # via icecube-skyreader (setup.py)
-numpy==2.1.0
+numpy==2.1.1
     # via
     #   astropy
     #   contourpy
