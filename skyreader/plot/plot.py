@@ -541,7 +541,8 @@ class SkyScanPlotter:
             equatorial_map,
             sigma=np.deg2rad(self.NEUTRINOFLOOR_SIGMA),
         )
-        equatorial_map = healpy.ud_grade(equatorial_map, 512)
+        equatorial_map[np.isnan(equatorial_map)] = 1e-16
+        #equatorial_map = healpy.ud_grade(equatorial_map, 512)
         normalization = np.nansum(equatorial_map)
         equatorial_map = equatorial_map / normalization
         grid_value = healpy.get_interp_val(
@@ -973,7 +974,7 @@ class SkyScanPlotter:
 
         healpy.write_map(
             f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
-            np.log(equatorial_map),
+            equatorial_map,
             coord='C',
             column_names=['2LLH'],
             extra_header=fits_header,
