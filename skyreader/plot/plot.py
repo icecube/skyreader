@@ -546,7 +546,7 @@ class SkyScanPlotter:
         #equatorial_map = healpy.ud_grade(equatorial_map, 512)
         normalization = np.nansum(equatorial_map)
         equatorial_map = equatorial_map / normalization
-        equatorial_map.clip(1.e-12, None).astype('float32')
+        equatorial_map = equatorial_map.clip(1.e-12, None).astype('float32')
         grid_value = healpy.get_interp_val(
             equatorial_map, np.pi/2 - grid_dec, grid_ra
         )
