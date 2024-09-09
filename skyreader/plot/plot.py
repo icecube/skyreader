@@ -200,6 +200,7 @@ class SkyScanPlotter:
             #grid_map,
             vmin=min_prob,
             vmax=max_prob,
+            norm="log",
             #vmin=min_llh,
             #vmax=max_llh,
             rasterized=True,
