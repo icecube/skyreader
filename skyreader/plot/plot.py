@@ -510,48 +510,38 @@ class SkyScanPlotter:
         grid_value = grid_value - min_value
         min_value = 0.
 
-        # convert to probability
-        grid_value = np.exp(-1. * grid_value)
-        #grid_value = np.where(grid_value > 1e-12, grid_value, 0.0)
-
-        # Do same for the healpy map
+        # renormalize
         equatorial_map[np.isinf(equatorial_map)] = np.nan
         equatorial_map -= np.nanmin(equatorial_map)
-
-        # Get ang dist to convolute the Gaussian
-        min_index = np.nanargmin(equatorial_map)
 
         # Convert to probability
         equatorial_map = np.exp(-1. * equatorial_map)
         equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
-        equatorial_map = np.where(
-            equatorial_map > 1e-16, equatorial_map, 1e-16
-        )
-        #space_angle, ang_dist_grid = get_space_angles(
-        #    min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
-        #)
-        #gauss_values = rayleigh(
-        #    space_angle,
-        #    self.NEUTRINOFLOOR_SIGMA
-        #)
-        #gauss_values = gauss_values / np.nansum(gauss_values)
-        equatorial_map[np.isnan(equatorial_map)] = 1e-16
-        equatorial_map = healpy.smoothing(
-            equatorial_map,
-            sigma=np.deg2rad(self.NEUTRINOFLOOR_SIGMA),
-        )
-        equatorial_map[np.isnan(equatorial_map)] = 1e-16
-        equatorial_map.clip(0., None)
-        #equatorial_map = healpy.ud_grade(equatorial_map, 512)
-        normalization = np.nansum(equatorial_map)
-        equatorial_map = equatorial_map / normalization
+        # nan values are a problem for the convolution
+        equatorial_map[np.isnan(equatorial_map)] = 0.
+
+        if neutrino_floor:
+            # convolute with a gaussian with 0.2 deg as sigma
+            equatorial_map = healpy.smoothing(
+                equatorial_map,
+                sigma=np.deg2rad(self.NEUTRINOFLOOR_SIGMA),
+            )
+
+            # normalize map
+            equatorial_map[np.isnan(equatorial_map)] = 0.
+            equatorial_map = equatorial_map.clip(0., None)
+            normalization = np.nansum(equatorial_map)
+            equatorial_map = equatorial_map / normalization
+
+        # avoid excessively heavy data format
         equatorial_map = equatorial_map.clip(1.e-12, None).astype('float32')
+
+        # obtain values for grid map
         grid_value = healpy.get_interp_val(
             equatorial_map, np.pi/2 - grid_dec, grid_ra
         )
         sorted_values = np.sort(equatorial_map)[::-1]
-        print(sorted_values)
 
         # Calculate the contours
         if systematics:
