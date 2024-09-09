@@ -17,7 +17,7 @@ from matplotlib import patheffects
 from matplotlib import pyplot as plt
 from matplotlib import text
 from matplotlib.projections import projection_registry  # type: ignore[import]
-from scipy.signal import fftconvolve
+import copy
 
 from .plotting_tools import (
     AstroMollweideAxes,
@@ -160,9 +160,13 @@ class SkyScanPlotter:
         # renormalize
         if dozoom:
             grid_map = grid_map - min_llh
-            # max_value = max_value - min_value
-            min_llh = 0.
-            max_llh = 50
+            prob_map = np.exp(-copy.copy(grid_map))
+            #min_llh = 0.
+            #max_llh = 50
+            min_prob = 1.e-12
+            max_prob = np.nanmax(prob_map)
+            prob_map = prob_map.clip(min_prob, None).astype('float32')
+
 
         grid_map = np.ma.masked_invalid(grid_map)
 
@@ -191,9 +195,12 @@ class SkyScanPlotter:
         image = ax.pcolormesh(
             ra,
             dec,
-            grid_map,
-            vmin=min_llh,
-            vmax=max_llh,
+            prob_map,
+            #grid_map,
+            vmin=min_prob,
+            vmax=max_prob,
+            #vmin=min_llh,
+            #vmax=max_llh,
             rasterized=True,
             cmap=cmap
         )
@@ -223,7 +230,9 @@ class SkyScanPlotter:
                 orientation='horizontal',
                 shrink=.6,
                 pad=0.05,
-                ticks=[min_llh, max_llh]
+                #ticks=[min_llh, max_llh]
+                ticks=[min_prob, max_prob],
+                norm="log",
             )
             cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
         else:
@@ -556,7 +565,7 @@ class SkyScanPlotter:
         else:
             # Wilks
             probability_levels = (
-                np.array([0.5, 0.9, 1-1.35e-3, 1-2.87e-7])+min_value
+                np.array([0.5, 0.9, 1-1.35e-3, 1-2.87e-7])
             )[:3]
             contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
             contour_colors = ['k', 'r', 'g', 'b'][:3]
