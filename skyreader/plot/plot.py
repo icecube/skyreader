@@ -160,12 +160,13 @@ class SkyScanPlotter:
         # renormalize
         if dozoom:
             grid_map = grid_map - min_llh
-            prob_map = np.exp(-copy.copy(grid_map))
-            #min_llh = 0.
-            #max_llh = 50
-            min_prob = 1.e-12
-            max_prob = np.nanmax(prob_map)
-            prob_map = prob_map.clip(min_prob, None).astype('float32')
+            min_llh = 0.
+            max_llh = 50
+        prob_map = copy.copy(grid_map) - min_llh
+        prob_map = np.exp(-prob_map)
+        min_prob = 1.e-12
+        max_prob = np.nanmax(prob_map)
+        prob_map = prob_map.clip(min_prob, None).astype('float32')
 
 
         grid_map = np.ma.masked_invalid(grid_map)
