@@ -535,7 +535,7 @@ class SkyScanPlotter:
             equatorial_map = equatorial_map / normalization
 
         # avoid excessively heavy data format
-        #equatorial_map = equatorial_map.clip(0., None).astype('float32')
+        equatorial_map = equatorial_map.clip(0., None).astype('float32')
 
         # obtain values for grid map
         grid_value = healpy.get_interp_val(
@@ -566,7 +566,7 @@ class SkyScanPlotter:
         contour_levels = list()
         for prob in probability_levels:
             level_index = (
-                np.nancumsum(sorted_values) > prob
+                np.nancumsum(sorted_values) >= prob
             ).tolist().index(True)
             level = (
                 sorted_values[level_index] + (
@@ -576,7 +576,6 @@ class SkyScanPlotter:
                 )
             )/2.0
             contour_levels.append(level)
-        print(contour_levels)
 
         # Get contours from healpix map
         contours_by_level = meander.spherical_contours(
@@ -816,8 +815,8 @@ class SkyScanPlotter:
             # the higher level.
             print(contain_txt)
 
-        print("Contour Area (50%):", contour_areas[0], "degrees (scaled)")
-        print("Contour Area (90%):", contour_areas[1], "degrees (scaled)")
+        print("Contour Area (50%):", contour_areas[0], "square degrees (scaled)")
+        print("Contour Area (90%):", contour_areas[1], "square degrees (scaled)")
 
         if plot_bounding_box:
             bounding_ras_list, bounding_decs_list = [], []
