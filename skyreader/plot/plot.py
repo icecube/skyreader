@@ -166,8 +166,6 @@ class SkyScanPlotter:
         prob_map = -prob_map*np.log10(np.exp(1))
         min_prob = np.nanmin(prob_map)
         max_prob = np.nanmax(prob_map)
-        print(min_prob, max_prob)
-        #prob_map = prob_map.clip(min_prob, None).astype('float32')
 
         prob_map = np.ma.masked_invalid(prob_map)
         grid_map = np.ma.masked_invalid(grid_map)
@@ -546,7 +544,8 @@ class SkyScanPlotter:
             equatorial_map = equatorial_map / normalization
 
         # avoid excessively heavy data format
-        equatorial_map = equatorial_map.clip(1.e-12, None).astype('float32')
+        equatorial_map = equatorial_map.clip(1.e-200, None).astype('float32')
+        print(np.nanmin(equatorial_map))
 
         # obtain values for grid map
         grid_value = healpy.get_interp_val(
