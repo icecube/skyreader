@@ -544,11 +544,9 @@ class SkyScanPlotter:
             equatorial_map = equatorial_map / normalization
 
         # avoid excessively heavy data format
-        no_zero_map = equatorial_map[equatorial_map != 0.]
-        minimum_prob = np.nanmin(no_zero_map)
         equatorial_map = equatorial_map.clip(
-            minimum_prob, None
-        ).astype('float64')
+            1.e-12, None
+        ).astype('float32')
 
         # obtain values for grid map
         grid_value = healpy.get_interp_val(
