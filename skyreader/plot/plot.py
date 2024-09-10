@@ -164,7 +164,7 @@ class SkyScanPlotter:
             max_llh = 50
         prob_map = copy.copy(grid_map) - min_llh
         prob_map = np.exp(-prob_map)
-        min_prob = 1e-32
+        min_prob = 1e-64
         max_prob = np.nanmax(prob_map)
         prob_map = prob_map.clip(min_prob, None).astype('float32')
 
