@@ -235,15 +235,15 @@ class SkyScanPlotter:
                 #ticks=[min_llh, max_llh]
                 ticks=[min_prob, max_prob],
             )
-            cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
+            #cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
+            cb.ax.xaxis.set_label_text(r"log10$(p)$")
         else:
             ax.set_xlabel('right ascension')
             ax.set_ylabel('declination')
             cb = fig.colorbar(
                 image, orientation='horizontal', shrink=.6, pad=0.13
             )
-            #cb.ax.xaxis.set_label_text(r"$-2 \Delta \ln (L)$")
-            cb.ax.xaxis.set_label_text(r"log10$(p)$")
+            cb.ax.xaxis.set_label_text(r"$-2 \Delta \ln (L)$")
 
             leg_labels = []
             for i in range(len(contour_labels)):
