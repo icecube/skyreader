@@ -549,7 +549,6 @@ class SkyScanPlotter:
         equatorial_map = equatorial_map.clip(
             minimum_prob, None
         ).astype('float64')
-        print(np.nanmin(equatorial_map[equatorial_map]))
 
         # obtain values for grid map
         grid_value = healpy.get_interp_val(
