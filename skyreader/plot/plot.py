@@ -169,7 +169,7 @@ class SkyScanPlotter:
         print(min_prob, max_prob)
         #prob_map = prob_map.clip(min_prob, None).astype('float32')
 
-
+        prob_map = np.ma.masked_invalid(prob_map)
         grid_map = np.ma.masked_invalid(grid_map)
 
         LOGGER.info(f"Preparing plot: {plot_filename}...")
