@@ -162,7 +162,7 @@ class SkyScanPlotter:
             grid_map = grid_map - min_llh
             min_llh = 0.
             max_llh = 50
-        prob_map = copy.copy(grid_map) - min_llh
+        prob_map = (copy.copy(grid_map) - min_llh)/2.
         prob_map = -prob_map*np.log10(np.exp(1))
         min_prob = np.nanmin(prob_map)
         max_prob = np.nanmax(prob_map)
@@ -234,7 +234,6 @@ class SkyScanPlotter:
                 pad=0.05,
                 #ticks=[min_llh, max_llh]
                 ticks=[min_prob, max_prob],
-                norm="log",
             )
             cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
         else:
@@ -243,7 +242,8 @@ class SkyScanPlotter:
             cb = fig.colorbar(
                 image, orientation='horizontal', shrink=.6, pad=0.13
             )
-            cb.ax.xaxis.set_label_text(r"$-2 \Delta \ln (L)$")
+            #cb.ax.xaxis.set_label_text(r"$-2 \Delta \ln (L)$")
+            cb.ax.xaxis.set_label_text(r"log10$(p)$")
 
             leg_labels = []
             for i in range(len(contour_labels)):
