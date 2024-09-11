@@ -542,11 +542,14 @@ class SkyScanPlotter:
             equatorial_map = equatorial_map.clip(0., None)
             normalization = np.nansum(equatorial_map)
             equatorial_map = equatorial_map / normalization
+            print(np.nansum(equatorial_map))
 
         # avoid excessively heavy data format
         equatorial_map = equatorial_map.clip(
             1.e-16, None
         ).astype('float32')
+        # renormalize
+        equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
 
         # obtain values for grid map
