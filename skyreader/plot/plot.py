@@ -547,7 +547,7 @@ class SkyScanPlotter:
         # avoid excessively heavy data format
         equatorial_map = equatorial_map.clip(
             1.e-16, None
-        ).astype('float32')
+        ).astype('float64')
         # renormalize
         equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
