@@ -8,7 +8,7 @@ astropy==6.1.3
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
-astropy-iers-data==0.2024.9.2.0.33.23
+astropy-iers-data==0.2024.9.12.13.29.57
     # via astropy
 certifi==2024.8.30
     # via requests
@@ -56,7 +56,7 @@ python-dateutil==2.9.0.post0
     # via
     #   matplotlib
     #   pandas
-pytz==2024.1
+pytz==2024.2
     # via pandas
 pyyaml==6.0.2
     # via astropy
@@ -70,7 +70,7 @@ typing-extensions==4.12.2
     # via wipac-dev-tools
 tzdata==2024.1
     # via pandas
-urllib3==2.2.2
+urllib3==2.2.3
     # via requests
 wipac-dev-tools==1.12.0
     # via icecube-skyreader (setup.py)
