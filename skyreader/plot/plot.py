@@ -552,6 +552,8 @@ class SkyScanPlotter:
         grid_value = healpy.get_interp_val(
             equatorial_map, np.pi/2 - grid_dec, grid_ra
         )
+        grid_value[np.isnan(grid_value)]=0.0
+        grid_value = grid_value.clip(0.0, None)
         sorted_values = np.sort(equatorial_map)[::-1]
 
         # Calculate the contours
