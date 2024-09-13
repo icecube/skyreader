@@ -556,6 +556,8 @@ class SkyScanPlotter:
         grid_value = grid_value.clip(min_map, None)
         sorted_values = np.sort(equatorial_map)[::-1]
 
+        np.save("grid_array", [grid_value, grid_ra, grid_dec])
+
         # Calculate the contours
         if systematics:
             # from Pan-Starrs event 127852
