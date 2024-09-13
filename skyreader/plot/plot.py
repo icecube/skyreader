@@ -700,7 +700,7 @@ class SkyScanPlotter:
         else:
             min_prob = max_prob/1e8
         healpy.cartview(
-            map=equatorial_map.astype('float32'),
+            map=equatorial_map.clip(1e-12,None),
             title=plot_title,
             min=min_prob,  # min 2DeltaLLH value for colorscale
             max=max_prob,  # max 2DeltaLLH value for colorscale
