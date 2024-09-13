@@ -541,7 +541,7 @@ class SkyScanPlotter:
             )
 
             # normalize map
-            min_map = np.nanmin(equatorial_map)
+            min_map = np.nanmin(equatorial_map[equatorial_map>=0.0])
             equatorial_map[np.isnan(equatorial_map)] = min_map
             equatorial_map = equatorial_map.clip(min_map, None)
             normalization = np.nansum(equatorial_map)
@@ -978,9 +978,7 @@ class SkyScanPlotter:
 
         # save multiorder version of the map
         multiorder_map = mhealpy.HealpixMap(
-            healpy.rotator.Rotator(coord="C").rotate_map_alms(
-                equatorial_map
-            )
+            equatorial_map
         ).to_moc(max_value=max(equatorial_map))
         multiorder_map.write_map(
             f"{unique_id}.skymap_nside_{mmap_nside}.multiorder.fits.gz",
