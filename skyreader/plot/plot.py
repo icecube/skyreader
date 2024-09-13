@@ -543,14 +543,6 @@ class SkyScanPlotter:
             equatorial_map = equatorial_map.clip(0., None)
             normalization = np.nansum(equatorial_map)
             equatorial_map = equatorial_map / normalization
-            print(np.nansum(equatorial_map))
-
-        # avoid excessively heavy data format
-        equatorial_map = equatorial_map.clip(
-            1.e-16, None
-        ).astype('float64')
-        # renormalize
-        equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
 
         # obtain values for grid map
@@ -979,11 +971,31 @@ class SkyScanPlotter:
         with open(path, "wb") as f:
             pickle.dump(saving_contours, f)
 
+        # save multiorder version of the map
+        multiorder_map = mhealpy.HealpixMap(
+            equatorial_map
+        ).to_moc(max_value=max(equatorial_map))
+        multiorder_map.write_map(
+            f"{unique_id}.skymap_nside_{mmap_nside}.multiorder.fits.gz",
+            column_names=["PROBABILITY"],
+            extra_header=fits_header,
+            overwrite=True,
+        )
+
+        # avoid excessively heavy data format for the flattened map
+        equatorial_map = equatorial_map.clip(
+            1.e-16, None
+        ).astype('float64')
+        # renormalize
+        equatorial_map = equatorial_map / np.nansum(equatorial_map)
+
+        # save flattened map
         healpy.write_map(
             f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
             equatorial_map,
             coord='C',
-            column_names=['2LLH'],
+            #column_names=['2LLH'],
+            column_names=["PROBABILITY"],
             extra_header=fits_header,
             overwrite=True
         )
