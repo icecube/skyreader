@@ -491,7 +491,10 @@ class SkyScanPlotter:
                     tmp_dec = np.pi/2 - tmp_theta
                     tmp_ra = tmp_phi
                     grid_map[(tmp_dec, tmp_ra)] = value
-                    uniq = 4*nside*nside + pixel
+                    nested_pixel = healpy.ang2pix(
+                        nside, tmp_theta, tmp_phi, nest=True
+                    )
+                    uniq = 4*nside*nside + nested_pixel
                     uniq_map[(tmp_dec, tmp_ra)] = uniq
             LOGGER.info(f"done with map for nside {nside}...")
 
