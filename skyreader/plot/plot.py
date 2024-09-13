@@ -465,6 +465,7 @@ class SkyScanPlotter:
         LOGGER.info(f"available nsides: {nsides}")
 
         grid_map = dict()
+        uniq_map = dict()
         max_nside = max(nsides)
         equatorial_map = np.full(healpy.nside2npix(max_nside), np.nan)
 
@@ -490,6 +491,8 @@ class SkyScanPlotter:
                     tmp_dec = np.pi/2 - tmp_theta
                     tmp_ra = tmp_phi
                     grid_map[(tmp_dec, tmp_ra)] = value
+                    uniq = 4*nside*nside + pixel
+                    uniq_map[(tmp_dec, tmp_ra)] = uniq
             LOGGER.info(f"done with map for nside {nside}...")
 
         grid_dec_list, grid_ra_list, grid_value_list = [], [], []
@@ -530,7 +533,6 @@ class SkyScanPlotter:
 
         # nan values are a problem for the convolution and the contours
         min_map = np.nanmin(equatorial_map)
-        print(min_map)
         equatorial_map[np.isnan(equatorial_map)] = min_map
 
         if neutrino_floor:
@@ -557,6 +559,7 @@ class SkyScanPlotter:
         sorted_values = np.sort(equatorial_map)[::-1]
 
         np.save("grid_array", [grid_value, grid_ra, grid_dec])
+        np.save("uniq_map", uniq_map)
 
         # Calculate the contours
         if systematics:
