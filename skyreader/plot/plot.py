@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import List
 
 import healpy  # type: ignore[import]
+import mhealpy
 import matplotlib  # type: ignore[import]
 import meander  # type: ignore[import]
 import numpy as np
