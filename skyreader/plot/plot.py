@@ -529,7 +529,7 @@ class SkyScanPlotter:
         equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
         # nan values are a problem for the convolution and the contours
-        min_map = np.nanmin[equatorial_map]
+        min_map = np.nanmin(equatorial_map)
         equatorial_map[np.isnan(equatorial_map)] = min_map
 
         if neutrino_floor:
@@ -540,7 +540,7 @@ class SkyScanPlotter:
             )
 
             # normalize map
-            min_map = np.nanmin[equatorial_map]
+            min_map = np.nanmin(equatorial_map)
             equatorial_map[np.isnan(equatorial_map)] = min_map
             equatorial_map = equatorial_map.clip(min_map, None)
             normalization = np.nansum(equatorial_map)
