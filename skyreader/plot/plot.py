@@ -552,7 +552,7 @@ class SkyScanPlotter:
         grid_value = healpy.get_interp_val(
             equatorial_map, np.pi/2 - grid_dec, grid_ra
         )
-        grid_value[np.isnan(grid_value[grid_value])]=min_map
+        grid_value[np.isnan(grid_value)]=min_map
         grid_value = grid_value.clip(min_map, None)
         sorted_values = np.sort(equatorial_map)[::-1]
 
