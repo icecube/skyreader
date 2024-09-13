@@ -528,8 +528,9 @@ class SkyScanPlotter:
         equatorial_map = np.exp(-1. * equatorial_map)
         equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
-        # nan values are a problem for the convolution
-        equatorial_map[np.isnan(equatorial_map)] = 0.
+        # nan values are a problem for the convolution and the contours
+        min_map = np.nanmin[equatorial_map]
+        equatorial_map[np.isnan(equatorial_map)] = min_map
 
         if neutrino_floor:
             # convolute with a gaussian with 0.2 deg as sigma
@@ -539,8 +540,9 @@ class SkyScanPlotter:
             )
 
             # normalize map
-            equatorial_map[np.isnan(equatorial_map)] = 0.
-            equatorial_map = equatorial_map.clip(0., None)
+            min_map = np.nanmin[equatorial_map]
+            equatorial_map[np.isnan(equatorial_map)] = min_map
+            equatorial_map = equatorial_map.clip(min_map, None)
             normalization = np.nansum(equatorial_map)
             equatorial_map = equatorial_map / normalization
 
@@ -973,7 +975,9 @@ class SkyScanPlotter:
 
         # save multiorder version of the map
         multiorder_map = mhealpy.HealpixMap(
-            equatorial_map
+            healpy.rotator.Rotator(coord="C").rotate_map_alms(
+                equatorial_map
+            )
         ).to_moc(max_value=max(equatorial_map))
         multiorder_map.write_map(
             f"{unique_id}.skymap_nside_{mmap_nside}.multiorder.fits.gz",
