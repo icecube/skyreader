@@ -465,7 +465,7 @@ class SkyScanPlotter:
         LOGGER.info(f"available nsides: {nsides}")
 
         grid_map = dict()
-        uniq_map = dict()
+        uniq_list = list()
         max_nside = max(nsides)
         equatorial_map = np.full(healpy.nside2npix(max_nside), np.nan)
 
@@ -495,7 +495,7 @@ class SkyScanPlotter:
                         nside, tmp_theta, tmp_phi, nest=True
                     )
                     uniq = 4*nside*nside + nested_pixel
-                    uniq_map[(tmp_dec, tmp_ra)] = uniq
+                    uniq_list.append(uniq)
             LOGGER.info(f"done with map for nside {nside}...")
 
         grid_dec_list, grid_ra_list, grid_value_list = [], [], []
@@ -507,11 +507,13 @@ class SkyScanPlotter:
         grid_dec: np.ndarray = np.asarray(grid_dec_list)
         grid_ra: np.ndarray = np.asarray(grid_ra_list)
         grid_value: np.ndarray = np.asarray(grid_value_list)
+        uniq_array: np.ndarray = np.asarray(uniq_list)
 
         sorting_indices = np.argsort(grid_value)
         grid_value = grid_value[sorting_indices]
         grid_dec = grid_dec[sorting_indices]
         grid_ra = grid_ra[sorting_indices]
+        uniq_array = uniq_array[sorting_indices]
 
         min_value = grid_value[0]
         min_dec = grid_dec[0]
@@ -560,9 +562,6 @@ class SkyScanPlotter:
         grid_value[np.isnan(grid_value)]=min_map
         grid_value = grid_value.clip(min_map, None)
         sorted_values = np.sort(equatorial_map)[::-1]
-
-        np.save("grid_array", [grid_value, grid_ra, grid_dec])
-        np.save("uniq_map", uniq_map)
 
         # Calculate the contours
         if systematics:
@@ -986,8 +985,8 @@ class SkyScanPlotter:
 
         # save multiorder version of the map
         multiorder_map = mhealpy.HealpixMap(
-            equatorial_map
-        ).to_moc(max_value=max(equatorial_map))
+            grid_value, uniq_array
+        )
         multiorder_map.write_map(
             f"{unique_id}.skymap_nside_{mmap_nside}.multiorder.fits.gz",
             column_names=["PROBABILITY"],
