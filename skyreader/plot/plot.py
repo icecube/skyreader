@@ -552,7 +552,7 @@ class SkyScanPlotter:
         grid_value = healpy.get_interp_val(
             equatorial_map, np.pi/2 - grid_dec, grid_ra
         )
-        grid_value[np.isnan(grid_value)]=min_map
+        grid_value[np.isnan(grid_value[grid_value])]=min_map
         grid_value = grid_value.clip(min_map, None)
         sorted_values = np.sort(equatorial_map)[::-1]
 
@@ -700,7 +700,7 @@ class SkyScanPlotter:
         else:
             min_prob = max_prob/1e8
         healpy.cartview(
-            map=equatorial_map,
+            map=equatorial_map.astype('float32'),
             title=plot_title,
             min=min_prob,  # min 2DeltaLLH value for colorscale
             max=max_prob,  # max 2DeltaLLH value for colorscale
