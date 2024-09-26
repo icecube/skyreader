@@ -925,7 +925,7 @@ class SkyScanPlotter:
                 event_metadata.event_id,
                 event_metadata.event_type
             ),
-            0,
+            event_metadata.mjd,
             np.degrees(min_ra),
             np.degrees(min_dec),
             uncertainty,
