@@ -48,7 +48,12 @@ class SkyScanPlotter:
         self.output_dir = output_dir
         projection_registry.register(AstroMollweideAxes)
 
-    def create_plot(self, result: SkyScanResult, dozoom: bool = False) -> None:
+    def create_plot(
+            self,
+            result: SkyScanResult,
+            dozoom: bool = False,
+            llh_map: bool = False
+    ) -> None:
         """Creates a full-sky plot using a meshgrid at fixed resolution.
         Optionally creates a zoomed-in plot. Resolutions are defined in
         PLOT_DPI_STANDARD and PLOT_DPI_ZOOMED. Zoomed mode is very inefficient
@@ -145,12 +150,14 @@ class SkyScanPlotter:
             grid_map = grid_map - min_llh
             min_llh = 0.
             max_llh = 50
-        prob_map = (copy.copy(grid_map) - min_llh)/2.
-        prob_map = -prob_map*np.log10(np.exp(1))
-        min_prob = np.nanmin(prob_map)
-        max_prob = np.nanmax(prob_map)
-
-        prob_map = np.ma.masked_invalid(prob_map)
+        if llh_map:
+            cmap = matplotlib.colormaps['plasma_r']
+        else:
+            prob_map = (copy.copy(grid_map) - min_llh)/2.
+            prob_map = -prob_map*np.log10(np.exp(1))
+            min_prob = np.nanmin(prob_map)
+            max_prob = np.nanmax(prob_map)
+            prob_map = np.ma.masked_invalid(prob_map)
         grid_map = np.ma.masked_invalid(grid_map)
 
         LOGGER.info(f"Preparing plot: {plot_filename}...")
@@ -175,15 +182,20 @@ class SkyScanPlotter:
 
         # rasterized makes the map bitmap while the labels remain vectorial
         # flip longitude to the astro convention
+        if llh_map:
+            map_to_plot = grid_map
+            vmin = min_llh
+            vmax = max_llh
+        else:
+            map_to_plot = prob_map
+            vmin = min_prob
+            vmax = max_prob
         image = ax.pcolormesh(
             ra,
             dec,
-            prob_map,
-            #grid_map,
-            vmin=min_prob,
-            vmax=max_prob,
-            #vmin=min_llh,
-            #vmax=max_llh,
+            map_to_plot,
+            vmin=vmin,
+            vmax=vmax,
             rasterized=True,
             cmap=cmap
         )
@@ -213,8 +225,7 @@ class SkyScanPlotter:
                 orientation='horizontal',
                 shrink=.6,
                 pad=0.05,
-                #ticks=[min_llh, max_llh]
-                ticks=[min_prob, max_prob],
+                ticks=[vmin, vmax],
             )
             #cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
             cb.ax.xaxis.set_label_text(r"log10$(p)$")
