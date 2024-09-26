@@ -908,6 +908,7 @@ class SkyScanPlotter:
             np.degrees(min_ra),
             np.degrees(min_dec),
             uncertainty,
+            llh_map,
         )
         mmap_nside = healpy.get_nside(equatorial_map)
 
