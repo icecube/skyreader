@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List
 
 import healpy  # type: ignore[import]
-#import mhealpy
+# import mhealpy
 import matplotlib  # type: ignore[import]
 import meander  # type: ignore[import]
 import numpy as np
@@ -463,7 +463,7 @@ class SkyScanPlotter:
         LOGGER.info(f"available nsides: {nsides}")
 
         grid_map = dict()
-        #uniq_list = list()
+        # uniq_list = list()
         max_nside = max(nsides)
         equatorial_map = np.full(healpy.nside2npix(max_nside), np.nan)
 
@@ -489,11 +489,11 @@ class SkyScanPlotter:
                     tmp_dec = np.pi/2 - tmp_theta
                     tmp_ra = tmp_phi
                     grid_map[(tmp_dec, tmp_ra)] = value
-                    #nested_pixel = healpy.ang2pix(
-                    #    nside, tmp_theta, tmp_phi, nest=True
-                    #)
-                    #uniq = 4*nside*nside + nested_pixel
-                    #uniq_list.append(uniq)
+                    # nested_pixel = healpy.ang2pix(
+                    #     nside, tmp_theta, tmp_phi, nest=True
+                    # )
+                    # uniq = 4*nside*nside + nested_pixel
+                    # uniq_list.append(uniq)
             LOGGER.info(f"done with map for nside {nside}...")
 
         grid_dec_list, grid_ra_list, grid_value_list = [], [], []
@@ -505,13 +505,13 @@ class SkyScanPlotter:
         grid_dec: np.ndarray = np.asarray(grid_dec_list)
         grid_ra: np.ndarray = np.asarray(grid_ra_list)
         grid_value: np.ndarray = np.asarray(grid_value_list)
-        #uniq_array: np.ndarray = np.asarray(uniq_list)
+        # uniq_array: np.ndarray = np.asarray(uniq_list)
 
         sorting_indices = np.argsort(grid_value)
         grid_value = grid_value[sorting_indices]
         grid_dec = grid_dec[sorting_indices]
         grid_ra = grid_ra[sorting_indices]
-        #uniq_array = uniq_array[sorting_indices]
+        # uniq_array = uniq_array[sorting_indices]
 
         min_value = grid_value[0]
         min_dec = grid_dec[0]
@@ -551,7 +551,7 @@ class SkyScanPlotter:
                 )
 
                 # normalize map
-                min_map = np.nanmin(equatorial_map[equatorial_map>=0.0])
+                min_map = np.nanmin(equatorial_map[equatorial_map >= 0.0])
                 equatorial_map[np.isnan(equatorial_map)] = min_map
                 equatorial_map = equatorial_map.clip(min_map, None)
                 normalization = np.nansum(equatorial_map)
@@ -561,7 +561,7 @@ class SkyScanPlotter:
             grid_value = healpy.get_interp_val(
                 equatorial_map, np.pi/2 - grid_dec, grid_ra
             )
-            grid_value[np.isnan(grid_value)]=min_map
+            grid_value[np.isnan(grid_value)] = min_map
             grid_value = grid_value.clip(min_map, None)
             sorted_values = np.sort(equatorial_map)[::-1]
 
@@ -611,7 +611,6 @@ class SkyScanPlotter:
                 contour_levels_for_contours,
             )
 
-        
         LOGGER.info(f"saving plot to {plot_filename}")
         LOGGER.info(f"preparing plot: {plot_filename}...")
 
@@ -666,12 +665,18 @@ class SkyScanPlotter:
         # Rotate into healpy coordinates
         lon, lat = np.degrees(min_ra), np.degrees(min_dec)
         if llh_map:
-            healpy.cartview(map=equatorial_map, title=plot_title,
-            min=0., #min 2DeltaLLH value for colorscale
-            max=40., #max 2DeltaLLH value for colorscale
-            rot=(lon,lat,0.), cmap=cmap, hold=True,
-            cbar=None, lonra=lonra, latra=latra,
-            unit=r"$-2 \Delta \ln (L)$",
+            healpy.cartview(
+                map=equatorial_map,
+                title=plot_title,
+                min=0.,  # min 2DeltaLLH value for colorscale
+                max=40.,  # max 2DeltaLLH value for colorscale
+                rot=(lon, lat, 0.),
+                cmap=cmap,
+                hold=True,
+                cbar=None,
+                lonra=lonra,
+                latra=latra,
+                unit=r"$-2 \Delta \ln (L)$",
             )
             ticks = None
             format = None
@@ -683,7 +688,7 @@ class SkyScanPlotter:
             else:
                 min_prob = max_prob/1e8
             healpy.cartview(
-                map=equatorial_map.clip(1e-12,None),
+                map=equatorial_map.clip(1e-12, None),
                 title=plot_title,
                 min=min_prob,  # min 2DeltaLLH value for colorscale
                 max=max_prob,  # max 2DeltaLLH value for colorscale
@@ -814,8 +819,16 @@ class SkyScanPlotter:
             # the higher level.
             print(contain_txt)
 
-        print("Contour Area (50%):", contour_areas[0], "square degrees (scaled)")
-        print("Contour Area (90%):", contour_areas[1], "square degrees (scaled)")
+        print(
+            "Contour Area (50%):",
+            contour_areas[0],
+            "square degrees (scaled)"
+        )
+        print(
+            "Contour Area (90%):",
+            contour_areas[1],
+            "square degrees (scaled)"
+        )
 
         if plot_bounding_box:
             bounding_ras_list, bounding_decs_list = [], []
@@ -966,15 +979,15 @@ class SkyScanPlotter:
         # logic for multiordermaps -> for future developements
 
         # save multiorder version of the map
-        #multiorder_map = mhealpy.HealpixMap(
-        #    grid_value, uniq_array
-        #)
-        #multiorder_map.write_map(
-        #    f"{unique_id}.skymap_nside_{mmap_nside}.multiorder.fits.gz",
-        #    column_names=["PROBABILITY"],
-        #    extra_header=fits_header,
-        #    overwrite=True,
-        #)
+        # multiorder_map = mhealpy.HealpixMap(
+        #     grid_value, uniq_array
+        # )
+        # multiorder_map.write_map(
+        #     f"{unique_id}.skymap_nside_{mmap_nside}.multiorder.fits.gz",
+        #     column_names=["PROBABILITY"],
+        #     extra_header=fits_header,
+        #     overwrite=True,
+        # )
 
         if llh_map:
             column_names = ['2LLH']
