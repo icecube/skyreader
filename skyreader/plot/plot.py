@@ -25,8 +25,7 @@ from .plotting_tools import (
     DecFormatter,
     format_fits_header,
     hp_ticklabels,
-    plot_catalog,
-    get_space_angles,
+    plot_catalog
 )
 from .areas import calculate_area, get_contour_areas
 

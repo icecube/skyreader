@@ -149,38 +149,6 @@ def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec,
                 fontsize=6,
                 path_effects=pe)
     del fgl
- 
-# Returns the space angles for each pixel in the map
-def get_space_angles(
-        min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
-    ) -> List[np.ndarray]:
-
-    min_sra = np.sin(min_ra)
-    min_cra = np.cos(min_ra)
-    min_sdec = np.sin(min_dec)
-    min_cdec = np.cos(min_dec)
-    
-    grid_sra = np.sin(grid_ra)
-    grid_cra = np.cos(grid_ra)
-    grid_sdec = np.sin(grid_dec)
-    grid_cdec = np.cos(grid_dec)
-
-    scalar_prod = np.clip(
-        min_cdec*grid_cdec*(min_cra*grid_cra + min_sra*grid_sra) + (min_sdec*grid_sdec),
-        -1.,
-        1.,
-    )
-    ang_dist_grid = np.rad2deg(np.abs(np.arccos(scalar_prod)))
-
-    x0,y0,z0 = healpy.pix2vec(max_nside, min_index)
-    x1,y1,z1 = healpy.pix2vec(
-        max_nside, 
-        np.asarray(list(range(healpy.nside2npix(max_nside))))
-    )
-    cos_space_angle = np.clip(x0*x1 + y0*y1 + z0*z1, -1., 1.)
-    space_angle = np.rad2deg(np.arccos(cos_space_angle))
-
-    return [space_angle, ang_dist_grid]
 
 ##
 # Mollweide axes with phi axis flipped and in hours from 24 to 0 instead of
