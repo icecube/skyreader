@@ -465,7 +465,7 @@ class SkyScanPlotter:
         LOGGER.info(f"available nsides: {nsides}")
 
         grid_map = dict()
-        uniq_list = list()
+        #uniq_list = list()
         max_nside = max(nsides)
         equatorial_map = np.full(healpy.nside2npix(max_nside), np.nan)
 
@@ -491,11 +491,11 @@ class SkyScanPlotter:
                     tmp_dec = np.pi/2 - tmp_theta
                     tmp_ra = tmp_phi
                     grid_map[(tmp_dec, tmp_ra)] = value
-                    nested_pixel = healpy.ang2pix(
-                        nside, tmp_theta, tmp_phi, nest=True
-                    )
-                    uniq = 4*nside*nside + nested_pixel
-                    uniq_list.append(uniq)
+                    #nested_pixel = healpy.ang2pix(
+                    #    nside, tmp_theta, tmp_phi, nest=True
+                    #)
+                    #uniq = 4*nside*nside + nested_pixel
+                    #uniq_list.append(uniq)
             LOGGER.info(f"done with map for nside {nside}...")
 
         grid_dec_list, grid_ra_list, grid_value_list = [], [], []
@@ -507,13 +507,13 @@ class SkyScanPlotter:
         grid_dec: np.ndarray = np.asarray(grid_dec_list)
         grid_ra: np.ndarray = np.asarray(grid_ra_list)
         grid_value: np.ndarray = np.asarray(grid_value_list)
-        uniq_array: np.ndarray = np.asarray(uniq_list)
+        #uniq_array: np.ndarray = np.asarray(uniq_list)
 
         sorting_indices = np.argsort(grid_value)
         grid_value = grid_value[sorting_indices]
         grid_dec = grid_dec[sorting_indices]
         grid_ra = grid_ra[sorting_indices]
-        uniq_array = uniq_array[sorting_indices]
+        #uniq_array = uniq_array[sorting_indices]
 
         min_value = grid_value[0]
         min_dec = grid_dec[0]
@@ -983,16 +983,18 @@ class SkyScanPlotter:
         with open(path, "wb") as f:
             pickle.dump(saving_contours, f)
 
+        # logic for multiordermaps -> for future developements
+
         # save multiorder version of the map
-        multiorder_map = mhealpy.HealpixMap(
-            grid_value, uniq_array
-        )
-        multiorder_map.write_map(
-            f"{unique_id}.skymap_nside_{mmap_nside}.multiorder.fits.gz",
-            column_names=["PROBABILITY"],
-            extra_header=fits_header,
-            overwrite=True,
-        )
+        #multiorder_map = mhealpy.HealpixMap(
+        #    grid_value, uniq_array
+        #)
+        #multiorder_map.write_map(
+        #    f"{unique_id}.skymap_nside_{mmap_nside}.multiorder.fits.gz",
+        #    column_names=["PROBABILITY"],
+        #    extra_header=fits_header,
+        #    overwrite=True,
+        #)
 
         # avoid excessively heavy data format for the flattened map
         equatorial_map = equatorial_map.clip(
