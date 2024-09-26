@@ -689,7 +689,7 @@ class SkyScanPlotter:
                 min_prob*(max_prob/min_prob)**(3/5),
                 min_prob*(max_prob/min_prob)**(4/5),
                 max_prob
-            ],
+            ]
             format = "{x:.1e}"
             cb_label = "Probability"
 
