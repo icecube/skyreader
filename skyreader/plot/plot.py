@@ -398,18 +398,21 @@ class SkyScanPlotter:
         Phi[bins] = Phi[0]
         return Theta, Phi
 
-    def create_plot_zoomed(self,
-                           result: SkyScanResult,
-                           extra_ra=np.nan,
-                           extra_dec=np.nan,
-                           extra_radius=np.nan,
-                           systematics=False,
-                           plot_bounding_box=False,
-                           plot_4fgl=False,
-                           circular=False,
-                           circular_err50=0.2,
-                           circular_err90=0.7,
-                           neutrino_floor=False):
+    def create_plot_zoomed(
+            self,
+            result: SkyScanResult,
+            extra_ra=np.nan,
+            extra_dec=np.nan,
+            extra_radius=np.nan,
+            systematics=False,
+            plot_bounding_box=False,
+            plot_4fgl=False,
+            circular=False,
+            circular_err50=0.2,
+            circular_err90=0.7,
+            angular_error_floor=False,
+            llh_map=False
+    ):
         """Uses healpy to plot a map."""
 
         def bounding_box(ra, dec, theta, phi):
@@ -521,7 +524,7 @@ class SkyScanPlotter:
         min_map = np.nanmin(equatorial_map)
         equatorial_map[np.isnan(equatorial_map)] = min_map
 
-        if neutrino_floor:
+        if angular_error_floor:
             # convolute with a gaussian with 0.2 deg as sigma
             equatorial_map = healpy.smoothing(
                 equatorial_map,
