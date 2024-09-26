@@ -516,39 +516,43 @@ class SkyScanPlotter:
         equatorial_map[np.isinf(equatorial_map)] = np.nan
         equatorial_map -= np.nanmin(equatorial_map)
 
-        # Convert to probability
-        equatorial_map = np.exp(-1. * equatorial_map)
-        equatorial_map = equatorial_map / np.nansum(equatorial_map)
+        if llh_map:
+            # show 2 * delta_LLH
+            grid_value = grid_value * 2.
+            equatorial_map *= 2.
+        else:
+            # Convert to probability
+            equatorial_map = np.exp(-1. * equatorial_map)
+            equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
-        # nan values are a problem for the convolution and the contours
-        min_map = np.nanmin(equatorial_map)
-        equatorial_map[np.isnan(equatorial_map)] = min_map
-
-        if angular_error_floor:
-            # convolute with a gaussian with 0.2 deg as sigma
-            equatorial_map = healpy.smoothing(
-                equatorial_map,
-                sigma=np.deg2rad(self.NEUTRINOFLOOR_SIGMA),
-            )
-
-            # normalize map
-            min_map = np.nanmin(equatorial_map[equatorial_map>=0.0])
+            # nan values are a problem for the convolution and the contours
+            min_map = np.nanmin(equatorial_map)
             equatorial_map[np.isnan(equatorial_map)] = min_map
-            equatorial_map = equatorial_map.clip(min_map, None)
-            normalization = np.nansum(equatorial_map)
-            equatorial_map = equatorial_map / normalization
 
+            if angular_error_floor:
+                # convolute with a gaussian with 0.2 deg as sigma
+                equatorial_map = healpy.smoothing(
+                    equatorial_map,
+                    sigma=np.deg2rad(self.NEUTRINOFLOOR_SIGMA),
+                )
 
-        # obtain values for grid map
-        grid_value = healpy.get_interp_val(
-            equatorial_map, np.pi/2 - grid_dec, grid_ra
-        )
-        grid_value[np.isnan(grid_value)]=min_map
-        grid_value = grid_value.clip(min_map, None)
-        sorted_values = np.sort(equatorial_map)[::-1]
+                # normalize map
+                min_map = np.nanmin(equatorial_map[equatorial_map>=0.0])
+                equatorial_map[np.isnan(equatorial_map)] = min_map
+                equatorial_map = equatorial_map.clip(min_map, None)
+                normalization = np.nansum(equatorial_map)
+                equatorial_map = equatorial_map / normalization
+
+            # obtain values for grid map
+            grid_value = healpy.get_interp_val(
+                equatorial_map, np.pi/2 - grid_dec, grid_ra
+            )
+            grid_value[np.isnan(grid_value)]=min_map
+            grid_value = grid_value.clip(min_map, None)
+            sorted_values = np.sort(equatorial_map)[::-1]
 
         # Calculate the contours
-        if systematics:
+        if systematics and llh_map:
             # from Pan-Starrs event 127852
             # these are values determined from MC by Will on the TS (2*LLH)
             # Not clear yet how to translate this for the probability map
@@ -559,43 +563,48 @@ class SkyScanPlotter:
             contour_colors = ['k', 'r']
         else:
             # Wilks
-            probability_levels = (
-                np.array([0.5, 0.9, 1-1.35e-3, 1-2.87e-7])
-            )[:3]
+            if llh_map:
+                contour_levels = (
+                    np.array([1.39, 4.61, 11.83, 28.74])+min_value
+                )[:3]
+            else:
+                probability_levels = (
+                    np.array([0.5, 0.9, 1-1.35e-3, 1-2.87e-7])
+                )[:3]
+                contour_levels = list()
+                for prob in probability_levels:
+                    level_index = (
+                        np.nancumsum(sorted_values) >= prob
+                    ).tolist().index(True)
+                    level = sorted_values[level_index]
+                    contour_levels.append(level)
             contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
             contour_colors = ['k', 'r', 'g', 'b'][:3]
 
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
 
-        contour_levels = list()
-        for prob in probability_levels:
-            level_index = (
-                np.nancumsum(sorted_values) >= prob
-            ).tolist().index(True)
-            level = (
-                sorted_values[level_index] #+ (
-                    #sorted_values[level_index+1] if level_index+1<len(
-                    #    sorted_values
-                    #) else 0
+        if not circular:
+            if llh_map:
+                grid_values_for_contours = grid_value
+                contour_levels_for_contours = contour_levels
+            else:
+                grid_values_for_contours = np.log(grid_value)
+                contour_levels_for_contours = np.log(contour_levels)
+            # Get contours from healpix map
+            contours_by_level = meander.spherical_contours(
+                sample_points,
+                grid_values_for_contours,
+                contour_levels_for_contours,
             )
-            #)/2.0
-            contour_levels.append(level)
-
-        # Get contours from healpix map
-        contours_by_level = meander.spherical_contours(
-            sample_points,
-            np.log(grid_value),
-            np.log(contour_levels),
-        )
-
-        # Calculate areas using Gauss-Green's theorem for a spherical space
-        contour_areas = get_contour_areas(contours_by_level, min_ra)
 
         
         LOGGER.info(f"saving plot to {plot_filename}")
         LOGGER.info(f"preparing plot: {plot_filename}...")
 
-        cmap = self.PLOT_COLORMAP
+        if llh_map:
+            cmap = matplotlib.colormaps['plasma_r']
+        else:
+            cmap = self.PLOT_COLORMAP
         cmap.set_under('w')
         cmap.set_bad(alpha=1., color=(1., 0., 0.))  # make NaNs bright red
 
@@ -613,8 +622,8 @@ class SkyScanPlotter:
             contour90 = np.dstack((Theta90, Phi90))
             contours_by_level = [contour50, contour90]
 
-            # re-calculate areas
-            contour_areas = get_contour_areas(contours_by_level, min_ra)
+        # Calculate areas using Gauss-Green's theorem for a spherical space
+        contour_areas = get_contour_areas(contours_by_level, min_ra)
 
         # Check for RA values that are out of bounds
         for level in contours_by_level:
@@ -642,25 +651,47 @@ class SkyScanPlotter:
         plt.clf()
         # Rotate into healpy coordinates
         lon, lat = np.degrees(min_ra), np.degrees(min_dec)
-        max_prob = np.nanmax(equatorial_map)
-        if len(contour_levels) >= 3:
-            min_prob = contour_levels[2]
+        if llh_map:
+            healpy.cartview(map=equatorial_map, title=plot_title,
+            min=0., #min 2DeltaLLH value for colorscale
+            max=40., #max 2DeltaLLH value for colorscale
+            rot=(lon,lat,0.), cmap=cmap, hold=True,
+            cbar=None, lonra=lonra, latra=latra,
+            unit=r"$-2 \Delta \ln (L)$",
+            )
+            ticks = None
+            format = None
+            cb_label = r"$-2 \Delta \ln (L)$"
         else:
-            min_prob = max_prob/1e8
-        healpy.cartview(
-            map=equatorial_map.clip(1e-12,None),
-            title=plot_title,
-            min=min_prob,  # min 2DeltaLLH value for colorscale
-            max=max_prob,  # max 2DeltaLLH value for colorscale
-            rot=(lon, lat, 0.),
-            cmap=cmap,
-            hold=True,
-            cbar=None,
-            lonra=lonra,
-            latra=latra,
-            norm='log',
-            unit="Probability",
-        )
+            max_prob = np.nanmax(equatorial_map)
+            if len(contour_levels) >= 3:
+                min_prob = contour_levels[2]
+            else:
+                min_prob = max_prob/1e8
+            healpy.cartview(
+                map=equatorial_map.clip(1e-12,None),
+                title=plot_title,
+                min=min_prob,  # min 2DeltaLLH value for colorscale
+                max=max_prob,  # max 2DeltaLLH value for colorscale
+                rot=(lon, lat, 0.),
+                cmap=cmap,
+                hold=True,
+                cbar=None,
+                lonra=lonra,
+                latra=latra,
+                norm='log',
+                unit="Probability",
+            )
+            ticks = [
+                min_prob,
+                min_prob*(max_prob/min_prob)**(1/5),
+                min_prob*(max_prob/min_prob)**(2/5),
+                min_prob*(max_prob/min_prob)**(3/5),
+                min_prob*(max_prob/min_prob)**(4/5),
+                max_prob
+            ],
+            format = "{x:.1e}"
+            cb_label = "Probability"
 
         fig = plt.gcf()
         ax = plt.gca()
@@ -671,17 +702,10 @@ class SkyScanPlotter:
             ax=ax,
             orientation='horizontal',
             aspect=50,
-            ticks = [
-                min_prob,
-                min_prob*(max_prob/min_prob)**(1/5),
-                min_prob*(max_prob/min_prob)**(2/5),
-                min_prob*(max_prob/min_prob)**(3/5),
-                min_prob*(max_prob/min_prob)**(4/5),
-                max_prob
-            ],
-            format="{x:.1e}"
+            ticks=ticks,
+            format=format
         )
-        cb.ax.xaxis.set_label_text("Probability")
+        cb.ax.xaxis.set_label_text(cb_label)
 
         # Plot the best-fit location
         # This requires some more coordinate transformations
@@ -937,20 +961,23 @@ class SkyScanPlotter:
         #    overwrite=True,
         #)
 
-        # avoid excessively heavy data format for the flattened map
-        equatorial_map = equatorial_map.clip(
-            1.e-16, None
-        ).astype('float64')
-        # renormalize
-        equatorial_map = equatorial_map / np.nansum(equatorial_map)
+        if llh_map:
+            column_names = ['2LLH']
+        else:
+            # avoid excessively heavy data format for the flattened map
+            equatorial_map = equatorial_map.clip(
+                1.e-16, None
+            ).astype('float64')
+            # renormalize
+            equatorial_map = equatorial_map / np.nansum(equatorial_map)
+            column_names = ["PROBABILITY"]
 
         # save flattened map
         healpy.write_map(
             f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
             equatorial_map,
             coord='C',
-            #column_names=['2LLH'],
-            column_names=["PROBABILITY"],
+            column_names=column_names,
             extra_header=fits_header,
             overwrite=True
         )
