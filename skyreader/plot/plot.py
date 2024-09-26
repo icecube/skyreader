@@ -163,7 +163,8 @@ class SkyScanPlotter:
         # the color map to use
         if llh_map:
             cmap = matplotlib.colormaps['plasma_r']
-        cmap = self.PLOT_COLORMAP
+        else:
+            cmap = self.PLOT_COLORMAP
         cmap.set_under(alpha=0.)  # make underflows transparent
         cmap.set_bad(alpha=1., color=(1., 0., 0.))  # make NaNs bright red
 
