@@ -35,29 +35,12 @@ from ..result import SkyScanResult
 LOGGER = logging.getLogger("skyreader.plot")
 
 
-# Function to generate ts maps with a gaussian shape,
-# x is the angular distance in degrees
-def log_gauss(x, sigma):
-    return (x/sigma)**2
-
-
-# Survival function of the rayleigh distribution
-def rayleigh_the_survivor(x, sigma):
-    return np.exp(-0.5*(x/sigma)**2)
-
-
-# Survival function of the rayleigh distribution
-def rayleigh(x, sigma):
-    return (1./(2*np.pi*sigma**2))*np.exp(-0.5*(x/sigma)**2)
-
-
 class SkyScanPlotter:
     PLOT_SIZE_Y_IN: float = 3.85
     PLOT_SIZE_X_IN: float = 6
     PLOT_DPI_STANDARD = 150
     PLOT_DPI_ZOOMED = 1200
     PLOT_COLORMAP = matplotlib.colormaps['plasma']
-    SIGMA_TO_CONTOUR90 = 2.146
     NEUTRINOFLOOR_SIGMA = 0.2
 
     def __init__(self, output_dir: Path = Path(".")):
@@ -427,7 +410,6 @@ class SkyScanPlotter:
                            circular=False,
                            circular_err50=0.2,
                            circular_err90=0.7,
-                           circularized_ts_map=False,
                            neutrino_floor=False):
         """Uses healpy to plot a map."""
 
@@ -607,51 +589,8 @@ class SkyScanPlotter:
         # Calculate areas using Gauss-Green's theorem for a spherical space
         contour_areas = get_contour_areas(contours_by_level, min_ra)
 
-        # In case it is requested, check if neutrino floor must be applied
-        if neutrino_floor:
-            neutrino_floor_90_area = np.pi * (
-                self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR90)**2
-            if circularized_ts_map:
-                compare_90_area = np.pi * circular_err90**2
-            else:
-                compare_90_area = contour_areas[1]
-            if compare_90_area < neutrino_floor_90_area:
-                circularized_ts_map = True
-                circular_err90 = (
-                    self.NEUTRINOFLOOR_SIGMA * self.SIGMA_TO_CONTOUR90
-                )
-                LOGGER.info("Contour too small, applying neutrino floor...")
-
-        if circularized_ts_map:
-            main_plot_filename = plot_filename.split(".pdf")[-2]
-            plot_filename = main_plot_filename + "_circularized_ts.pdf"
-
+        
         LOGGER.info(f"saving plot to {plot_filename}")
-
-        # In case it is requested, generate a mock ts map with a gaussian shape
-        # around the best fit direction
-        if circularized_ts_map:
-
-            LOGGER.info("Generating a circularized ts map...")
-
-            min_index = np.nanargmin(equatorial_map)
-
-            space_angle, ang_dist_grid = get_space_angles(
-                min_ra, min_dec, grid_ra, grid_dec, max_nside, min_index
-            )
-
-            event_sigma = circular_err90/self.SIGMA_TO_CONTOUR90
-            equatorial_map = log_gauss(space_angle, event_sigma)
-            grid_value = log_gauss(ang_dist_grid, event_sigma)
-
-            # re-calculate areas
-            contours_by_level = meander.spherical_contours(
-                sample_points,
-                grid_value,
-                contour_levels
-            )
-            contour_areas = get_contour_areas(contours_by_level, min_ra)
-
         LOGGER.info(f"preparing plot: {plot_filename}...")
 
         cmap = self.PLOT_COLORMAP
