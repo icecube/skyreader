@@ -150,9 +150,7 @@ class SkyScanPlotter:
             grid_map = grid_map - min_llh
             min_llh = 0.
             max_llh = 50
-        if llh_map:
-            cmap = matplotlib.colormaps['plasma_r']
-        else:
+        if not llh_map:
             prob_map = (copy.copy(grid_map) - min_llh)/2.
             prob_map = -prob_map*np.log10(np.exp(1))
             min_prob = np.nanmin(prob_map)
@@ -163,6 +161,8 @@ class SkyScanPlotter:
         LOGGER.info(f"Preparing plot: {plot_filename}...")
 
         # the color map to use
+        if llh_map:
+            cmap = matplotlib.colormaps['plasma_r']
         cmap = self.PLOT_COLORMAP
         cmap.set_under(alpha=0.)  # make underflows transparent
         cmap.set_bad(alpha=1., color=(1., 0., 0.))  # make NaNs bright red
@@ -227,8 +227,10 @@ class SkyScanPlotter:
                 pad=0.05,
                 ticks=[vmin, vmax],
             )
-            #cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
-            cb.ax.xaxis.set_label_text(r"log10$(p)$")
+            if llh_map:
+                cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
+            else:
+                cb.ax.xaxis.set_label_text(r"log10$(p)$")
         else:
             ax.set_xlabel('right ascension')
             ax.set_ylabel('declination')
