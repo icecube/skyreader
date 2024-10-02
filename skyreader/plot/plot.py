@@ -1007,16 +1007,16 @@ class SkyScanPlotter:
             column_names = ['2DLLH']
         else:
             # avoid excessively heavy data format for the flattened map
-            # equatorial_map = equatorial_map.clip(
-            #     1.e-16, None
-            # ).astype('float64')
-            # renormalize
+            equatorial_map = equatorial_map.clip(
+                1.e-16, None
+            ).astype('float64')
+            renormalize
             equatorial_map = equatorial_map / np.nansum(equatorial_map)
             column_names = ["PROBABILITY"]
 
         # save flattened map
         healpy.write_map(
-            f"{unique_id}.skymap_nside_{mmap_nside}.fits.zst",
+            f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
             equatorial_map,
             coord='C',
             column_names=column_names,
