@@ -27,8 +27,8 @@ from .plotting_tools import (
     hp_ticklabels,
     plot_catalog
 )
-from .areas import calculate_area, get_contour_areas
 
+from ..utils.areas import calculate_area, get_contour_areas
 from ..result import SkyScanResult
 
 LOGGER = logging.getLogger("skyreader.plot")
@@ -40,7 +40,6 @@ class SkyScanPlotter:
     PLOT_DPI_STANDARD = 150
     PLOT_DPI_ZOOMED = 1200
     PLOT_COLORMAP = matplotlib.colormaps['plasma']
-    NEUTRINOFLOOR_SIGMA = 0.2
 
     def __init__(self, output_dir: Path = Path(".")):
         # Set here plotting parameters and things that
@@ -52,7 +51,7 @@ class SkyScanPlotter:
             self,
             result: SkyScanResult,
             dozoom: bool = False,
-            llh_map: bool = False
+            llh_map: bool = True
     ) -> None:
         """Creates a full-sky plot using a meshgrid at fixed resolution.
         Optionally creates a zoomed-in plot. Resolutions are defined in
@@ -425,7 +424,8 @@ class SkyScanPlotter:
             circular_err50=0.2,
             circular_err90=0.7,
             angular_error_floor=False,
-            llh_map=False
+            llh_map=True,
+            neutrinofloor_sigma=0.2
     ):
         """Uses healpy to plot a map."""
 
@@ -547,7 +547,7 @@ class SkyScanPlotter:
                 # convolute with a gaussian with 0.2 deg as sigma
                 equatorial_map = healpy.smoothing(
                     equatorial_map,
-                    sigma=np.deg2rad(self.NEUTRINOFLOOR_SIGMA),
+                    sigma=np.deg2rad(neutrinofloor_sigma),
                 )
 
                 # normalize map
@@ -566,21 +566,30 @@ class SkyScanPlotter:
             sorted_values = np.sort(equatorial_map)[::-1]
 
         # Calculate the contours
-        if systematics and llh_map:
-            # from Pan-Starrs event 127852
-            # these are values determined from MC by Will on the TS (2*LLH)
-            # Not clear yet how to translate this for the probability map
-            contour_levels = (np.array([22.2, 64.2])+min_value)
-            contour_labels = [
-                r'50% (IC160427A syst.)', r'90% (IC160427A syst.)'
-            ]
-            contour_colors = ['k', 'r']
-        else:
+        if llh_map:  # likelihood map
+            if systematics:
+                # from Pan-Starrs event 127852
+                # these are values determined from MC by Will on the TS (2*LLH)
+                # Not clear yet how to translate this for the probability map
+                contour_levels = (np.array([22.2, 64.2])+min_value)
+                contour_labels = [
+                    r'50% (IC160427A syst.)', r'90% (IC160427A syst.)'
+                ]
+                contour_colors = ['k', 'r']
             # Wilks
-            if llh_map:
+            else:
                 contour_levels = (
                     np.array([1.39, 4.61, 11.83, 28.74])+min_value
                 )[:3]
+                contour_labels = [
+                    r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'
+                ][:3]
+                contour_colors = ['k', 'r', 'g', 'b'][:3]
+        else:  # probability map
+            if systematics:
+                raise AssertionError(
+                    "No corrected values for contours in probability maps"
+                )
             else:
                 probability_levels = (
                     np.array([0.5, 0.9, 1-1.35e-3, 1-2.87e-7])
@@ -592,8 +601,8 @@ class SkyScanPlotter:
                     ).tolist().index(True)
                     level = sorted_values[level_index]
                     contour_levels.append(level)
-            contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
-            contour_colors = ['k', 'r', 'g', 'b'][:3]
+                contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
+                contour_colors = ['k', 'r', 'g', 'b'][:3]
 
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
 
@@ -615,7 +624,7 @@ class SkyScanPlotter:
         LOGGER.info(f"preparing plot: {plot_filename}...")
 
         if llh_map:
-            cmap = matplotlib.colormaps['plasma_r']
+            cmap = f'{self.PLOT_COLORMAP}_r'
         else:
             cmap = self.PLOT_COLORMAP
         cmap.set_under('w')
@@ -990,7 +999,7 @@ class SkyScanPlotter:
         # )
 
         if llh_map:
-            column_names = ['2LLH']
+            column_names = ['2DLLH']
         else:
             # avoid excessively heavy data format for the flattened map
             equatorial_map = equatorial_map.clip(
