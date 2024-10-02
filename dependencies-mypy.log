@@ -4,11 +4,11 @@
 #
 #    pip-compile --extra=mypy --output-file=dependencies-mypy.log
 #
-astropy==6.1.3
+astropy==6.1.4
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
-astropy-iers-data==0.2024.9.23.0.31.43
+astropy-iers-data==0.2024.9.30.0.32.59
     # via astropy
 cachetools==5.5.0
     # via wipac-rest-tools
@@ -67,8 +67,6 @@ pyjwt[crypto]==2.9.0
     # via wipac-rest-tools
 pyparsing==3.1.4
     # via matplotlib
-pypng==0.20220715.0
-    # via qrcode
 pytest==8.3.3
     # via
     #   icecube-skyreader (setup.py)
@@ -83,7 +81,7 @@ pytz==2024.2
     # via pandas
 pyyaml==6.0.2
     # via astropy
-qrcode==7.4.2
+qrcode==8.0
     # via wipac-rest-tools
 requests==2.32.3
     # via
@@ -99,9 +97,7 @@ six==1.16.0
 tornado==6.4.1
     # via wipac-rest-tools
 typing-extensions==4.12.2
-    # via
-    #   qrcode
-    #   wipac-dev-tools
+    # via wipac-dev-tools
 tzdata==2024.2
     # via pandas
 urllib3==2.2.3
