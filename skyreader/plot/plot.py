@@ -161,7 +161,9 @@ class SkyScanPlotter:
 
         # the color map to use
         if llh_map:
-            cmap = matplotlib.colormaps['plasma_r']
+            cmap = matplotlib.colormaps[
+                f"{self.PLOT_COLORMAP.name}_r"
+            ]
         else:
             cmap = self.PLOT_COLORMAP
         cmap.set_under(alpha=0.)  # make underflows transparent
@@ -623,13 +625,6 @@ class SkyScanPlotter:
         LOGGER.info(f"saving plot to {plot_filename}")
         LOGGER.info(f"preparing plot: {plot_filename}...")
 
-        if llh_map:
-            cmap = f'{self.PLOT_COLORMAP}_r'
-        else:
-            cmap = self.PLOT_COLORMAP
-        cmap.set_under('w')
-        cmap.set_bad(alpha=1., color=(1., 0., 0.))  # make NaNs bright red
-
         # In case it is desired, just draw circular contours over the ts map
         if circular:
             sigma50 = np.deg2rad(circular_err50)
@@ -674,6 +669,12 @@ class SkyScanPlotter:
         # Rotate into healpy coordinates
         lon, lat = np.degrees(min_ra), np.degrees(min_dec)
         if llh_map:
+            cmap = matplotlib.colormaps[
+                f'{self.PLOT_COLORMAP.name}_r'
+            ]
+            cmap.set_under('w')
+            # make NaNs bright red
+            cmap.set_bad(alpha=1., color=(1., 0., 0.))
             healpy.cartview(
                 map=equatorial_map,
                 title=plot_title,
@@ -691,6 +692,10 @@ class SkyScanPlotter:
             format = None
             cb_label = r"$-2 \Delta \ln (L)$"
         else:
+            cmap = self.PLOT_COLORMAP
+            cmap.set_under('w')
+            # make NaNs bright red
+            cmap.set_bad(alpha=1., color=(1., 0., 0.))
             max_prob = np.nanmax(equatorial_map)
             if len(contour_levels) >= 3:
                 min_prob = contour_levels[2]
@@ -699,8 +704,8 @@ class SkyScanPlotter:
             healpy.cartview(
                 map=equatorial_map.clip(1e-12, None),
                 title=plot_title,
-                min=min_prob,  # min 2DeltaLLH value for colorscale
-                max=max_prob,  # max 2DeltaLLH value for colorscale
+                min=min_prob,  # min prob value for colorscale
+                max=max_prob,  # max prob value for colorscale
                 rot=(lon, lat, 0.),
                 cmap=cmap,
                 hold=True,
@@ -1002,16 +1007,16 @@ class SkyScanPlotter:
             column_names = ['2DLLH']
         else:
             # avoid excessively heavy data format for the flattened map
-            equatorial_map = equatorial_map.clip(
-                1.e-16, None
-            ).astype('float64')
+            # equatorial_map = equatorial_map.clip(
+            #     1.e-16, None
+            # ).astype('float64')
             # renormalize
             equatorial_map = equatorial_map / np.nansum(equatorial_map)
             column_names = ["PROBABILITY"]
 
         # save flattened map
         healpy.write_map(
-            f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
+            f"{unique_id}.skymap_nside_{mmap_nside}.fits.zst",
             equatorial_map,
             coord='C',
             column_names=column_names,
