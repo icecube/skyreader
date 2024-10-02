@@ -1010,7 +1010,7 @@ class SkyScanPlotter:
             equatorial_map = equatorial_map.clip(
                 1.e-16, None
             ).astype('float64')
-            renormalize
+            # renormalize
             equatorial_map = equatorial_map / np.nansum(equatorial_map)
             column_names = ["PROBABILITY"]
 
