@@ -1016,7 +1016,7 @@ class SkyScanPlotter:
 
         # save flattened map
         healpy.write_map(
-            f"{unique_id}.skymap_nside_{mmap_nside}.fits.zstd",
+            f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
             equatorial_map,
             coord='C',
             column_names=column_names,
