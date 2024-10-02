@@ -1015,8 +1015,12 @@ class SkyScanPlotter:
             column_names = ["PROBABILITY"]
 
         # save flattened map
+        if llh_map:
+            type_map = "llh"
+        else:
+            type_map = "probability"
         healpy.write_map(
-            f"{unique_id}.skymap_nside_{mmap_nside}.fits.gz",
+            f"{unique_id}.skymap_nside_{mmap_nside}_{type_map}.fits.gz",
             equatorial_map,
             coord='C',
             column_names=column_names,
