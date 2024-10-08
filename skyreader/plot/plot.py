@@ -39,7 +39,7 @@ class SkyScanPlotter:
     PLOT_SIZE_X_IN: float = 6
     PLOT_DPI_STANDARD = 150
     PLOT_DPI_ZOOMED = 1200
-    PLOT_COLORMAP = matplotlib.colormaps['plasma']
+    PLOT_COLORMAP = matplotlib.colormaps['plasma_r']
 
     def __init__(self, output_dir: Path = Path(".")):
         # Set here plotting parameters and things that
@@ -161,11 +161,11 @@ class SkyScanPlotter:
 
         # the color map to use
         if llh_map:
+            cmap = self.PLOT_COLORMAP
+        else:
             cmap = matplotlib.colormaps[
                 f"{self.PLOT_COLORMAP.name}_r"
             ]
-        else:
-            cmap = self.PLOT_COLORMAP
         cmap.set_under(alpha=0.)  # make underflows transparent
         cmap.set_bad(alpha=1., color=(1., 0., 0.))  # make NaNs bright red
 
@@ -669,9 +669,7 @@ class SkyScanPlotter:
         # Rotate into healpy coordinates
         lon, lat = np.degrees(min_ra), np.degrees(min_dec)
         if llh_map:
-            cmap = matplotlib.colormaps[
-                f'{self.PLOT_COLORMAP.name}_r'
-            ]
+            cmap = self.PLOT_COLORMAP
             cmap.set_under('w')
             # make NaNs bright red
             cmap.set_bad(alpha=1., color=(1., 0., 0.))
@@ -692,7 +690,9 @@ class SkyScanPlotter:
             format = None
             cb_label = r"$-2 \Delta \ln (L)$"
         else:
-            cmap = self.PLOT_COLORMAP
+            cmap = matplotlib.colormaps[
+                f'{self.PLOT_COLORMAP.name}_r'
+            ]
             cmap.set_under('w')
             # make NaNs bright red
             cmap.set_bad(alpha=1., color=(1., 0., 0.))
