@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.12 (2024-10-04)
+
+### Other
+
+* Bump min Python to 3.9 ([#38](https://github.com/icecube/skyreader/issues/38)) ([`93bd67f`](https://github.com/icecube/skyreader/commit/93bd67fab0bacfe3ecfae4020379bd4d4a52ccd4))
+
 ## v1.2.11 (2024-08-02)
 
 ### Other

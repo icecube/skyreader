@@ -8,7 +8,7 @@ astropy==6.1.4
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
-astropy-iers-data==0.2024.10.7.0.32.46
+astropy-iers-data==0.2024.9.30.0.32.59
     # via astropy
 cachetools==5.5.0
     # via wipac-rest-tools
@@ -38,7 +38,7 @@ matplotlib==3.9.2
     # via icecube-skyreader (setup.py)
 meander==0.0.3
     # via icecube-skyreader (setup.py)
-numpy==2.1.2
+numpy==2.1.1
     # via
     #   astropy
     #   contourpy
