@@ -1010,7 +1010,7 @@ class SkyScanPlotter:
             equatorial_map[
                 equatorial_map < 1e-16
             ] = np.mean(
-                    equatorial_map[equatorial_map < 1e-16]
+                equatorial_map[equatorial_map < 1e-16]
             )
             column_names = ["PROBABILITY"]
 
