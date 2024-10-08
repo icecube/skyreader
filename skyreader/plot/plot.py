@@ -1007,11 +1007,11 @@ class SkyScanPlotter:
             column_names = ['2DLLH']
         else:
             # avoid excessively heavy data format for the flattened map
-            equatorial_map = equatorial_map.clip(
-                1.e-16, None
-            ).astype('float64')
-            # renormalize
-            equatorial_map = equatorial_map / np.nansum(equatorial_map)
+            equatorial_map[
+                equatorial_map < 1e-16
+            ] = np.mean(
+                    equatorial_map[equatorial_map < 1e-16]
+            )
             column_names = ["PROBABILITY"]
 
         # save flattened map
