@@ -162,10 +162,16 @@ class SkyScanPlotter:
         # the color map to use
         if llh_map:
             cmap = self.PLOT_COLORMAP
+            map_to_plot = grid_map
+            vmin = min_llh
+            vmax = max_llh
         else:
             cmap = matplotlib.colormaps[
                 self.PLOT_COLORMAP.name.split('_')[0]
             ]
+            map_to_plot = prob_map
+            vmin = min_prob
+            vmax = max_prob
         cmap.set_under(alpha=0.)  # make underflows transparent
         cmap.set_bad(alpha=1., color=(1., 0., 0.))  # make NaNs bright red
 
@@ -184,14 +190,6 @@ class SkyScanPlotter:
 
         # rasterized makes the map bitmap while the labels remain vectorial
         # flip longitude to the astro convention
-        if llh_map:
-            map_to_plot = grid_map
-            vmin = min_llh
-            vmax = max_llh
-        else:
-            map_to_plot = prob_map
-            vmin = min_prob
-            vmax = max_prob
         image = ax.pcolormesh(
             ra,
             dec,
