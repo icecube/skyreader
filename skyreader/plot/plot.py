@@ -149,29 +149,28 @@ class SkyScanPlotter:
             grid_map = grid_map - min_llh
             min_llh = 0.
             max_llh = 50
-        if not llh_map:
-            prob_map = (copy.copy(grid_map) - min_llh)/2.
-            prob_map = -prob_map*np.log10(np.exp(1))
-            min_prob = np.nanmin(prob_map)
-            max_prob = np.nanmax(prob_map)
-            prob_map = np.ma.masked_invalid(prob_map)
-        grid_map = np.ma.masked_invalid(grid_map)
-
-        LOGGER.info(f"Preparing plot: {plot_filename}...")
-
-        # the color map to use
         if llh_map:
             cmap = self.PLOT_COLORMAP
             map_to_plot = grid_map
             vmin = min_llh
             vmax = max_llh
         else:
+            prob_map = (copy.copy(grid_map) - min_llh)/2.
+            prob_map = -prob_map*np.log10(np.exp(1))
+            min_prob = np.nanmin(prob_map)
+            max_prob = np.nanmax(prob_map)
+            prob_map = np.ma.masked_invalid(prob_map)
             cmap = matplotlib.colormaps[
                 self.PLOT_COLORMAP.name.split('_')[0]
             ]
             map_to_plot = prob_map
             vmin = min_prob
             vmax = max_prob
+        grid_map = np.ma.masked_invalid(grid_map)
+
+        LOGGER.info(f"Preparing plot: {plot_filename}...")
+
+        # features of the color map to use
         cmap.set_under(alpha=0.)  # make underflows transparent
         cmap.set_bad(alpha=1., color=(1., 0., 0.))  # make NaNs bright red
 
