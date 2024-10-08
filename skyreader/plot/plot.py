@@ -164,7 +164,7 @@ class SkyScanPlotter:
             cmap = self.PLOT_COLORMAP
         else:
             cmap = matplotlib.colormaps[
-                f"{self.PLOT_COLORMAP.name}_r"
+                self.PLOT_COLORMAP.name.split('_')[0]
             ]
         cmap.set_under(alpha=0.)  # make underflows transparent
         cmap.set_bad(alpha=1., color=(1., 0., 0.))  # make NaNs bright red
@@ -691,7 +691,7 @@ class SkyScanPlotter:
             cb_label = r"$-2 \Delta \ln (L)$"
         else:
             cmap = matplotlib.colormaps[
-                f'{self.PLOT_COLORMAP.name}_r'
+                self.PLOT_COLORMAP.name.split('_')[0]
             ]
             cmap.set_under('w')
             # make NaNs bright red
