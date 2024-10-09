@@ -72,5 +72,5 @@ tzdata==2024.2
     # via pandas
 urllib3==2.2.3
     # via requests
-wipac-dev-tools==1.12.1
+wipac-dev-tools==1.13.0
     # via icecube-skyreader (setup.py)
