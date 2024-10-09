@@ -154,6 +154,7 @@ class SkyScanPlotter:
             map_to_plot = grid_map
             vmin = min_llh
             vmax = max_llh
+            text_colorbar = r"$-2 \ln(L)$"
         else:
             prob_map = (copy.copy(grid_map) - min_llh)/2.
             prob_map = -prob_map*np.log10(np.exp(1))
@@ -166,6 +167,7 @@ class SkyScanPlotter:
             map_to_plot = prob_map
             vmin = min_prob
             vmax = max_prob
+            text_colorbar = r"log10$(p)$"
         grid_map = np.ma.masked_invalid(grid_map)
 
         LOGGER.info(f"Preparing plot: {plot_filename}...")
@@ -226,10 +228,7 @@ class SkyScanPlotter:
                 pad=0.05,
                 ticks=[vmin, vmax],
             )
-            if llh_map:
-                cb.ax.xaxis.set_label_text(r"$-2 \ln(L)$")
-            else:
-                cb.ax.xaxis.set_label_text(r"log10$(p)$")
+            cb.ax.xaxis.set_label_text(text_colorbar)
         else:
             ax.set_xlabel('right ascension')
             ax.set_ylabel('declination')
