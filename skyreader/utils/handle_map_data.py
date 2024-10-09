@@ -89,6 +89,7 @@ def extract_map(
     min_value = grid_value[0]
 
     if remove_min_val or (not llh_map):
+        print(remove_min_val, not llh_map)
         # renormalize
         grid_value = grid_value - min_value
         min_value = 0.
