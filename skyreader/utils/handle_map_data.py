@@ -130,6 +130,7 @@ def extract_map(
 
     return grid_value, grid_ra, grid_dec, equatorial_map
 
+
 def get_contour_levels(
         equatorial_map: np.ndarray,
         llh_map: bool = True,
@@ -146,7 +147,7 @@ def get_contour_levels(
         - systematics: bool. Only for llh maps. If True include
             recalibrated llh values from Pan-Starrs event 127852
             (IC160427A syst.)
-    
+
     returns:
         - contour_levels, levels of the contours
         - contour_labels, respective labels for the contours
@@ -193,5 +194,5 @@ def get_contour_levels(
                 contour_levels.append(level)
             contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
             contour_colors = ['k', 'r', 'g', 'b'][:3]
-    
+
     return contour_levels, contour_labels, contour_colors

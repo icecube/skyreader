@@ -176,7 +176,7 @@ class SkyScanPlotter:
         (
             contour_levels, contour_labels, contour_colors
         ) = get_contour_levels(equatorial_map, llh_map, systematics)
-        
+
         leg_element = []
         cs_collections = []
         for level, color in zip(contour_levels, contour_colors):
@@ -433,8 +433,6 @@ class SkyScanPlotter:
         (
             grid_value, grid_ra, grid_dec, equatorial_map
         ) = extract_map(result, llh_map, angular_error_floor)
-        min_value = grid_value[0]  # for probability map, this is actually
-        # the max_value
         min_dec = grid_dec[0]
         min_ra = grid_ra[0]
 
@@ -442,7 +440,7 @@ class SkyScanPlotter:
             f"min  RA: {min_ra * 180./np.pi} deg, {min_ra*12./np.pi} hours."
         )
         LOGGER.info(f"min Dec: {min_dec * 180./np.pi} deg")
-        
+
         (
             contour_levels, contour_labels, contour_colors
         ) = get_contour_levels(equatorial_map, llh_map, systematics)
