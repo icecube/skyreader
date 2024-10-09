@@ -97,13 +97,14 @@ class SkyScanPlotter:
             grid_map, grid_ra, grid_dec, equatorial_map
         ) = extract_map(result, llh_map, angular_error_floor)
 
-        if grid_map is None:
+        #if grid_map is None:
             # create an "empty" map if there are no pixels at all
-            grid_pix = healpy.ang2pix(8, np.pi/2 - DEC, RA)
-            this_map = np.ones(healpy.nside2npix(8))*np.inf
-            grid_map = this_map[grid_pix]
-            del this_map
-            del grid_pix
+        grid_pix = healpy.ang2pix(8, np.pi/2 - DEC, RA)
+        this_map = np.ones(healpy.nside2npix(8))*np.inf
+        grid_map = this_map[grid_pix]
+        print(grid_pix, this_map, grid_map)
+        del this_map
+        del grid_pix
 
         min_value = grid_map[0]  # for probability map, this is actually
         # the max_value
