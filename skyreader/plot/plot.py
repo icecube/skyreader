@@ -18,7 +18,6 @@ from matplotlib import patheffects
 from matplotlib import pyplot as plt
 from matplotlib import text
 from matplotlib.projections import projection_registry  # type: ignore[import]
-import copy
 
 from .plotting_tools import (
     AstroMollweideAxes,
@@ -112,24 +111,29 @@ class SkyScanPlotter:
         )
         LOGGER.info(f"min Dec: {min_dec * 180./np.pi} deg")
 
-        vmin = np.min(equatorial_map)
-        vmax = np.max(equatorial_map)
         # renormalize
         if dozoom:
             plotting_map = plotting_map - min_value
             equatorial_map = equatorial_map - min_value
             vmin = 0.
             vmax = 50
+            map_to_plot = plotting_map
         if llh_map:
             cmap = self.PLOT_COLORMAP
             text_colorbar = r"$-2 \ln(L)$"
+            vmin = np.min(equatorial_map)
+            vmax = np.max(equatorial_map)
+            map_to_plot = plotting_map
         else:
             cmap = matplotlib.colormaps[
                 self.PLOT_COLORMAP.name.split('_')[0]
             ]
             text_colorbar = r"log10$(p)$"
-        plotting_map = np.ma.masked_invalid(plotting_map)
+            vmin = np.min(np.log10(equatorial_map))
+            vmax = np.max(np.log10(equatorial_map))
+            map_to_plot = np.log10(plotting_map)
         equatorial_map = np.ma.masked_invalid(equatorial_map)
+        map_to_plot = np.ma.masked_invalid(map_to_plot)
 
         LOGGER.info(f"Preparing plot: {plot_filename}...")
 
@@ -155,7 +159,7 @@ class SkyScanPlotter:
         image = ax.pcolormesh(
             ra,
             dec,
-            plotting_map,
+            map_to_plot,
             vmin=vmin,
             vmax=vmax,
             rasterized=False,
@@ -170,8 +174,10 @@ class SkyScanPlotter:
         leg_element = []
         cs_collections = []
         for level, color in zip(contour_levels, contour_colors):
+            if not llh_map:
+                level = np.log10(level)
             contour_set = ax.contour(
-                ra, dec, plotting_map, levels=[level], colors=[color]
+                ra, dec, map_to_plot, levels=[level], colors=[color]
             )
             cs_collections.append(contour_set.collections[0])
             e, _ = contour_set.legend_elements()
