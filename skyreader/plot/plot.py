@@ -421,9 +421,9 @@ class SkyScanPlotter:
             circular=False,
             circular_err50=0.2,
             circular_err90=0.7,
-            angular_error_floor=False,
-            llh_map=True,
-            neutrinofloor_sigma=0.2
+            angular_error_floor=None,  # if not None, sigma of the
+            # gaussian to convolute the map with in deg.
+            llh_map=True
     ):
         """Uses healpy to plot a map."""
 
@@ -541,11 +541,12 @@ class SkyScanPlotter:
             min_map = np.nanmin(equatorial_map)
             equatorial_map[np.isnan(equatorial_map)] = min_map
 
-            if angular_error_floor:
-                # convolute with a gaussian with 0.2 deg as sigma
+            if angular_error_floor is not None:
+                # convolute with a gaussian. angular_error_floor is the
+                # sigma in deg.
                 equatorial_map = healpy.smoothing(
                     equatorial_map,
-                    sigma=np.deg2rad(neutrinofloor_sigma),
+                    sigma=np.deg2rad(angular_error_floor),
                 )
 
                 # normalize map
