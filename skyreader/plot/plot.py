@@ -409,8 +409,8 @@ class SkyScanPlotter:
         Phi[bins] = Phi[0]
         return Theta, Phi
 
+    @staticmethod
     def extract_map(
-            self,
             result: SkyScanResult,
             llh_map: bool = True,
             angular_error_floor: Union[None, float] = None,
@@ -485,13 +485,6 @@ class SkyScanPlotter:
         # uniq_array = uniq_array[sorting_indices]
 
         min_value = grid_value[0]
-        min_dec = grid_dec[0]
-        min_ra = grid_ra[0]
-
-        LOGGER.info(
-            f"min  RA: {min_ra * 180./np.pi} deg, {min_ra*12./np.pi} hours."
-        )
-        LOGGER.info(f"min Dec: {min_dec * 180./np.pi} deg")
 
         # renormalize
         grid_value = grid_value - min_value
@@ -594,6 +587,11 @@ class SkyScanPlotter:
         # the max_value
         min_dec = grid_dec[0]
         min_ra = grid_ra[0]
+
+        LOGGER.info(
+            f"min  RA: {min_ra * 180./np.pi} deg, {min_ra*12./np.pi} hours."
+        )
+        LOGGER.info(f"min Dec: {min_dec * 180./np.pi} deg")
 
         # Calculate the contours
         if llh_map:  # likelihood map
