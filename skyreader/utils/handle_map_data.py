@@ -1,7 +1,7 @@
 from typing import Union
 import logging
 
-import healpy
+import healpy  # type: ignore[import]
 import numpy as np
 
 from ..result import SkyScanResult
@@ -129,3 +129,69 @@ def extract_map(
         grid_value = grid_value.clip(min_map, None)
 
     return grid_value, grid_ra, grid_dec, equatorial_map
+
+def get_contour_levels(
+        equatorial_map: np.ndarray,
+        llh_map: bool = True,
+        systematics: bool = False,
+):
+    """
+    get contour levels for the desired map
+
+    args:
+        - equatorial_map: np.ndarray. Necessary in case of
+            probability map.
+        - llh_map: bool. If True llh levels, otherwise probability
+            levels.
+        - systematics: bool. Only for llh maps. If True include
+            recalibrated llh values from Pan-Starrs event 127852
+            (IC160427A syst.)
+    
+    returns:
+        - contour_levels, levels of the contours
+        - contour_labels, respective labels for the contours
+        - contour_colors, respective colors for the contours
+    """
+
+    # Calculate the contour levels
+    if llh_map:  # likelihood map
+        min_value = np.min(equatorial_map)
+        if systematics:
+            # from Pan-Starrs event 127852
+            # these are values determined from MC by Will on the TS (2*LLH)
+            # Not clear yet how to translate this for the probability map
+            contour_levels = (np.array([22.2, 64.2])+min_value)
+            contour_labels = [
+                r'50% (IC160427A syst.)', r'90% (IC160427A syst.)'
+            ]
+            contour_colors = ['k', 'r']
+        # Wilks
+        else:
+            contour_levels = (
+                np.array([1.39, 4.61, 11.83, 28.74])+min_value
+            )[:3]
+            contour_labels = [
+                r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'
+            ][:3]
+            contour_colors = ['k', 'r', 'g', 'b'][:3]
+    else:  # probability map
+        if systematics:
+            raise AssertionError(
+                "No corrected values for contours in probability maps"
+            )
+        else:
+            sorted_values = np.sort(equatorial_map)[::-1]
+            probability_levels = (
+                np.array([0.5, 0.9, 1-1.35e-3, 1-2.87e-7])
+            )[:3]
+            contour_levels = list()
+            for prob in probability_levels:
+                level_index = (
+                    np.nancumsum(sorted_values) >= prob
+                ).tolist().index(True)
+                level = sorted_values[level_index]
+                contour_levels.append(level)
+            contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
+            contour_colors = ['k', 'r', 'g', 'b'][:3]
+    
+    return contour_levels, contour_labels, contour_colors

@@ -6,7 +6,7 @@
 import logging
 import pickle
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 import healpy  # type: ignore[import]
 # import mhealpy
@@ -29,7 +29,7 @@ from .plotting_tools import (
 )
 
 from ..utils.areas import calculate_area, get_contour_areas
-from ..utils.extract_map import extract_map
+from ..utils.handle_map_data import extract_map, get_contour_levels
 from ..result import SkyScanResult
 
 LOGGER = logging.getLogger("skyreader.plot")
@@ -52,7 +52,9 @@ class SkyScanPlotter:
             self,
             result: SkyScanResult,
             dozoom: bool = False,
-            llh_map: bool = True
+            systematics: bool = False,
+            llh_map: bool = True,
+            angular_error_floor: Union[None, float] = None,
     ) -> None:
         """Creates a full-sky plot using a meshgrid at fixed resolution.
         Optionally creates a zoomed-in plot. Resolutions are defined in
@@ -91,46 +93,9 @@ class SkyScanPlotter:
         plot_filename = f"{unique_id}.{addition_to_filename}pdf"
         LOGGER.info(f"saving plot to {plot_filename}")
 
-        min_llh, max_llh = np.nan, np.nan
-        min_ra, min_dec = 0., 0.
-        grid_map, grid_pix = None, None
-
-        # now plot maps above each other
-        for nside in nsides:
-            LOGGER.info(f"constructing map for nside {nside}...")
-            # grid_pix = healpy.ang2pix(nside, THETA, PHI)
-            grid_pix = healpy.ang2pix(nside, np.pi/2. - DEC, RA)
-            this_map = np.ones(healpy.nside2npix(nside))*np.inf
-
-            for pixel_data in result.result[f'nside-{nside}']:
-                pixel = pixel_data['index']
-                # show 2*delta_LLH
-                value = 2*pixel_data['llh']
-                if np.isfinite(value):
-                    if np.isnan(min_llh) or value < min_llh:
-                        minCoDec, min_ra = healpy.pix2ang(nside, pixel)
-                        min_dec = np.pi/2 - minCoDec
-                        min_llh = value
-                    if np.isnan(max_llh) or value > max_llh:
-                        max_llh = value
-                this_map[pixel] = value
-
-            if grid_map is None:
-                grid_map = this_map[grid_pix]
-            else:
-                grid_map = np.where(
-                    np.isfinite(this_map[grid_pix]),
-                    this_map[grid_pix],
-                    grid_map
-                )
-
-            del this_map
-
-            LOGGER.info(f"Completed map for nside {nside}.")
-
-        # clean up
-        if grid_pix is not None:
-            del grid_pix
+        (
+            grid_map, grid_ra, grid_dec, equatorial_map
+        ) = extract_map(result, llh_map, angular_error_floor)
 
         if grid_map is None:
             # create an "empty" map if there are no pixels at all
@@ -140,6 +105,11 @@ class SkyScanPlotter:
             del this_map
             del grid_pix
 
+        min_value = grid_map[0]  # for probability map, this is actually
+        # the max_value
+        min_dec = grid_dec[0]
+        min_ra = grid_ra[0]
+
         LOGGER.info(
             f"min  RA: {min_ra * 180./np.pi} deg, {min_ra*12./np.pi} hours."
         )
@@ -147,7 +117,7 @@ class SkyScanPlotter:
 
         # renormalize
         if dozoom:
-            grid_map = grid_map - min_llh
+            grid_map = grid_map - min_value
             min_llh = 0.
             max_llh = 50
         if llh_map:
@@ -157,7 +127,7 @@ class SkyScanPlotter:
             vmax = max_llh
             text_colorbar = r"$-2 \ln(L)$"
         else:
-            prob_map = (copy.copy(grid_map) - min_llh)/2.
+            prob_map = (copy.copy(grid_map) - min_value)/2.
             prob_map = -prob_map*np.log10(np.exp(1))
             min_prob = np.nanmin(prob_map)
             max_prob = np.nanmax(prob_map)
@@ -203,9 +173,10 @@ class SkyScanPlotter:
         )
         # ax.set_xlim(np.pi, -np.pi)
 
-        contour_levels = (np.array([1.39, 4.61, 11.83, 28.74])+min_llh)[:2]
-        contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:2]
-        contour_colors = ['k', 'r', 'g', 'b'][:2]
+        (
+            contour_levels, contour_labels, contour_colors
+        ) = get_contour_levels(equatorial_map, llh_map, systematics)
+        
         leg_element = []
         cs_collections = []
         for level, color in zip(contour_levels, contour_colors):
@@ -471,46 +442,10 @@ class SkyScanPlotter:
             f"min  RA: {min_ra * 180./np.pi} deg, {min_ra*12./np.pi} hours."
         )
         LOGGER.info(f"min Dec: {min_dec * 180./np.pi} deg")
-
-        # Calculate the contours
-        if llh_map:  # likelihood map
-            if systematics:
-                # from Pan-Starrs event 127852
-                # these are values determined from MC by Will on the TS (2*LLH)
-                # Not clear yet how to translate this for the probability map
-                contour_levels = (np.array([22.2, 64.2])+min_value)
-                contour_labels = [
-                    r'50% (IC160427A syst.)', r'90% (IC160427A syst.)'
-                ]
-                contour_colors = ['k', 'r']
-            # Wilks
-            else:
-                contour_levels = (
-                    np.array([1.39, 4.61, 11.83, 28.74])+min_value
-                )[:3]
-                contour_labels = [
-                    r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'
-                ][:3]
-                contour_colors = ['k', 'r', 'g', 'b'][:3]
-        else:  # probability map
-            if systematics:
-                raise AssertionError(
-                    "No corrected values for contours in probability maps"
-                )
-            else:
-                sorted_values = np.sort(equatorial_map)[::-1]
-                probability_levels = (
-                    np.array([0.5, 0.9, 1-1.35e-3, 1-2.87e-7])
-                )[:3]
-                contour_levels = list()
-                for prob in probability_levels:
-                    level_index = (
-                        np.nancumsum(sorted_values) >= prob
-                    ).tolist().index(True)
-                    level = sorted_values[level_index]
-                    contour_levels.append(level)
-                contour_labels = [r'50%', r'90%', r'3$\sigma$', r'5$\sigma$'][:3]
-                contour_colors = ['k', 'r', 'g', 'b'][:3]
+        
+        (
+            contour_levels, contour_labels, contour_colors
+        ) = get_contour_levels(equatorial_map, llh_map, systematics)
 
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
 
