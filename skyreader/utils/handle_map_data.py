@@ -121,6 +121,7 @@ def extract_map(
             # normalize map
             min_map = np.nanmin(equatorial_map[equatorial_map >= 0.0])
             equatorial_map[np.isnan(equatorial_map)] = min_map
+            print(min_map)
             equatorial_map = equatorial_map.clip(min_map, None)
             normalization = np.nansum(equatorial_map)
             equatorial_map = equatorial_map / normalization
