@@ -13,6 +13,7 @@ def extract_map(
         result: SkyScanResult,
         llh_map: bool = True,
         angular_error_floor: Union[None, float] = None,
+        remove_min_val: bool = True,
 ):
     """
     Extract from the output of skymap_scanner the healpy map
@@ -22,6 +23,8 @@ def extract_map(
             otherwise the probability
         - angular_error_floor: Union[None, float] = None. if not None,
             sigma of the gaussian to convolute the map with in deg.
+        - remove_min_val: bool = True. Remove minimum value from -llh
+          no effect if probability map.
 
     returns:
         - grid_value: value-per-scanned-pixel (pixels with
@@ -85,13 +88,14 @@ def extract_map(
 
     min_value = grid_value[0]
 
-    # renormalize
-    grid_value = grid_value - min_value
-    min_value = 0.
+    if remove_min_val or ( not llh_map ):
+        # renormalize
+        grid_value = grid_value - min_value
+        min_value = 0.
 
-    # renormalize
-    equatorial_map[np.isinf(equatorial_map)] = np.nan
-    equatorial_map -= np.nanmin(equatorial_map)
+        # renormalize
+        equatorial_map[np.isinf(equatorial_map)] = np.nan
+        equatorial_map -= np.nanmin(equatorial_map)
 
     if llh_map:
         # show 2 * delta_LLH

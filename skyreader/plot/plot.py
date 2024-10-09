@@ -95,7 +95,12 @@ class SkyScanPlotter:
 
         (
             grid_value, grid_ra, grid_dec, equatorial_map
-        ) = extract_map(result, llh_map, angular_error_floor)
+        ) = extract_map(
+            result, llh_map, angular_error_floor, remove_min_val=~llh_map
+        )
+
+        grid_pix = healpy.ang2pix(max(nsides), np.pi/2. - DEC, RA)
+        plotting_map = equatorial_map[grid_pix]
 
         min_value = grid_value[0]  # for probability map, this is actually
         # the max_value
@@ -107,31 +112,24 @@ class SkyScanPlotter:
         )
         LOGGER.info(f"min Dec: {min_dec * 180./np.pi} deg")
 
+        vmin = np.min(equatorial_map)
+        vmax = np.max(equatorial_map)
         # renormalize
         if dozoom:
-            grid_map = equatorial_map - min_value
-            min_llh = 0.
-            max_llh = 50
+            plotting_map = plotting_map - min_value
+            equatorial_map = equatorial_map - min_value
+            vmin = 0.
+            vmax = 50
         if llh_map:
             cmap = self.PLOT_COLORMAP
-            map_to_plot = equatorial_map
-            vmin = min_llh
-            vmax = max_llh
             text_colorbar = r"$-2 \ln(L)$"
         else:
-            prob_map = (copy.copy(equatorial_map) - min_value)/2.
-            prob_map = -prob_map*np.log10(np.exp(1))
-            min_prob = np.nanmin(prob_map)
-            max_prob = np.nanmax(prob_map)
-            prob_map = np.ma.masked_invalid(prob_map)
             cmap = matplotlib.colormaps[
                 self.PLOT_COLORMAP.name.split('_')[0]
             ]
-            map_to_plot = prob_map
-            vmin = min_prob
-            vmax = max_prob
             text_colorbar = r"log10$(p)$"
-        grid_map = np.ma.masked_invalid(equatorial_map)
+        plotting_map = np.ma.masked_invalid(plotting_map)
+        equatorial_map = np.ma.masked_invalid(equatorial_map)
 
         LOGGER.info(f"Preparing plot: {plot_filename}...")
 
@@ -157,7 +155,7 @@ class SkyScanPlotter:
         image = ax.pcolormesh(
             ra,
             dec,
-            map_to_plot,
+            plotting_map,
             vmin=vmin,
             vmax=vmax,
             rasterized=False,
@@ -173,7 +171,7 @@ class SkyScanPlotter:
         cs_collections = []
         for level, color in zip(contour_levels, contour_colors):
             contour_set = ax.contour(
-                ra, dec, grid_map, levels=[level], colors=[color]
+                ra, dec, plotting_map, levels=[level], colors=[color]
             )
             cs_collections.append(contour_set.collections[0])
             e, _ = contour_set.legend_elements()
