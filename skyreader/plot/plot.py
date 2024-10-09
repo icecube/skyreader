@@ -121,8 +121,8 @@ class SkyScanPlotter:
         if llh_map:
             cmap = self.PLOT_COLORMAP
             text_colorbar = r"$-2 \ln(L)$"
-            vmin = np.min(equatorial_map)
-            vmax = np.max(equatorial_map)
+            vmin = np.nanmin(equatorial_map)
+            vmax = np.nanmax(equatorial_map)
             map_to_plot = plotting_map
         else:
             cmap = matplotlib.colormaps[
