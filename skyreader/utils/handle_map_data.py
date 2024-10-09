@@ -89,7 +89,6 @@ def extract_map(
     min_value = grid_value[0]
 
     if remove_min_val or (not llh_map):
-        print(remove_min_val, not llh_map)
         # renormalize
         grid_value = grid_value - min_value
         min_value = 0.
@@ -122,7 +121,6 @@ def extract_map(
             # normalize map
             min_map = np.nanmin(equatorial_map[equatorial_map > 0.0])
             equatorial_map[np.isnan(equatorial_map)] = min_map
-            print(min_map)
             equatorial_map = equatorial_map.clip(min_map, None)
             normalization = np.nansum(equatorial_map)
             equatorial_map = equatorial_map / normalization
