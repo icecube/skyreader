@@ -6,7 +6,7 @@
 import logging
 import pickle
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 import healpy  # type: ignore[import]
 # import mhealpy
@@ -409,66 +409,39 @@ class SkyScanPlotter:
         Phi[bins] = Phi[0]
         return Theta, Phi
 
-    def create_plot_zoomed(
+    def extract_map(
             self,
             result: SkyScanResult,
-            extra_ra=np.nan,
-            extra_dec=np.nan,
-            extra_radius=np.nan,
-            systematics=False,
-            plot_bounding_box=False,
-            plot_4fgl=False,
-            circular=False,
-            circular_err50=0.2,
-            circular_err90=0.7,
-            angular_error_floor=None,  # if not None, sigma of the
-            # gaussian to convolute the map with in deg.
-            llh_map=True
+            llh_map: bool = True,
+            angular_error_floor: Union[None, float] = None,
     ):
-        """Uses healpy to plot a map."""
+        """
+        Extract from the output of skymap_scanner the healpy map
+        args:
+            - result: SkyScanResult. The output of the Skymap Scanner
+            - llh_map: bool = True. If True the likelihood will be plotted,
+              otherwise the probability
+            - angular_error_floor: Union[None, float] = None. if not None,
+              sigma of the gaussian to convolute the map with in deg.
 
-        def bounding_box(ra, dec, theta, phi):
-            shift = ra-180
-
-            ra_plus = np.max((np.degrees(phi)-shift) % 360) - 180
-            ra_minus = np.min((np.degrees(phi)-shift) % 360) - 180
-            dec_plus = (np.pi/2-np.min(theta))*180./np.pi - dec
-            dec_minus = (np.pi/2-np.max(theta))*180./np.pi - dec
-            return ra_plus, ra_minus, dec_plus, dec_minus
-
-        dpi = self.PLOT_DPI_ZOOMED
-
-        lonra = [-10., 10.]
-        latra = [-10., 10.]
-
-        event_metadata = result.get_event_metadata()
-        unique_id = f'{str(event_metadata)}_{result.get_nside_string()}'
-        run_str = f"Run: {event_metadata.run_id}"
-        evt_str = f"Event: {event_metadata.event_id}"
-        typ_str = f"Type: {event_metadata.event_type}"
-        mjd_str = f"MJD: {event_metadata.mjd}"
-        plot_title = f"{run_str} {evt_str} {typ_str} {mjd_str}"
-
-        nsides = result.nsides
-        LOGGER.info(f"available nsides: {nsides}")
-
-        if systematics is not True:
-            plot_filename = unique_id + ".plot_zoomed_wilks.pdf"
-        else:
-            plot_filename = unique_id + ".plot_zoomed.pdf"
-
-        nsides = result.nsides
-        LOGGER.info(f"available nsides: {nsides}")
+        returns:
+            - grid_value: value-per-scanned-pixel (pixels with
+              different nsides)
+            - grid_ra: right ascension for each pixel in grid_value
+            - grid_dec: declination for each pixel in grid_value
+            - equatorial_map: healpix map with maximum nside (all pixels
+              with same nside)
+        """
 
         grid_map = dict()
-        # uniq_list = list()
+
+        nsides = result.nsides
         max_nside = max(nsides)
         equatorial_map = np.full(healpy.nside2npix(max_nside), np.nan)
 
         for nside in nsides:
             LOGGER.info(f"constructing map for nside {nside}...")
             npix = healpy.nside2npix(nside)
-
             map_data = result.result[f'nside-{nside}']
             pixels = map_data['index']
             values = map_data['llh']
@@ -562,7 +535,65 @@ class SkyScanPlotter:
             )
             grid_value[np.isnan(grid_value)] = min_map
             grid_value = grid_value.clip(min_map, None)
-            sorted_values = np.sort(equatorial_map)[::-1]
+
+        return grid_value, grid_ra, grid_dec, equatorial_map
+
+    def create_plot_zoomed(
+            self,
+            result: SkyScanResult,
+            extra_ra=np.nan,
+            extra_dec=np.nan,
+            extra_radius=np.nan,
+            systematics=False,
+            plot_bounding_box=False,
+            plot_4fgl=False,
+            circular=False,
+            circular_err50=0.2,
+            circular_err90=0.7,
+            angular_error_floor=None,  # if not None, sigma of the
+            # gaussian to convolute the map with in deg.
+            llh_map=True
+    ):
+        """Uses healpy to plot a map."""
+
+        def bounding_box(ra, dec, theta, phi):
+            shift = ra-180
+
+            ra_plus = np.max((np.degrees(phi)-shift) % 360) - 180
+            ra_minus = np.min((np.degrees(phi)-shift) % 360) - 180
+            dec_plus = (np.pi/2-np.min(theta))*180./np.pi - dec
+            dec_minus = (np.pi/2-np.max(theta))*180./np.pi - dec
+            return ra_plus, ra_minus, dec_plus, dec_minus
+
+        dpi = self.PLOT_DPI_ZOOMED
+
+        lonra = [-10., 10.]
+        latra = [-10., 10.]
+
+        event_metadata = result.get_event_metadata()
+        unique_id = f'{str(event_metadata)}_{result.get_nside_string()}'
+        run_str = f"Run: {event_metadata.run_id}"
+        evt_str = f"Event: {event_metadata.event_id}"
+        typ_str = f"Type: {event_metadata.event_type}"
+        mjd_str = f"MJD: {event_metadata.mjd}"
+        plot_title = f"{run_str} {evt_str} {typ_str} {mjd_str}"
+
+        nsides = result.nsides
+        max_nside = max(nsides)
+        LOGGER.info(f"available nsides: {nsides}")
+
+        if systematics is not True:
+            plot_filename = unique_id + ".plot_zoomed_wilks.pdf"
+        else:
+            plot_filename = unique_id + ".plot_zoomed.pdf"
+
+        (
+            grid_value, grid_ra, grid_dec, equatorial_map
+        ) = self.extract_map(result, llh_map, angular_error_floor)
+        min_value = grid_value[0]  # for probability map, this is actually
+        # the max_value
+        min_dec = grid_dec[0]
+        min_ra = grid_ra[0]
 
         # Calculate the contours
         if llh_map:  # likelihood map
@@ -590,6 +621,7 @@ class SkyScanPlotter:
                     "No corrected values for contours in probability maps"
                 )
             else:
+                sorted_values = np.sort(equatorial_map)[::-1]
                 probability_levels = (
                     np.array([0.5, 0.9, 1-1.35e-3, 1-2.87e-7])
                 )[:3]
@@ -627,10 +659,10 @@ class SkyScanPlotter:
             sigma50 = np.deg2rad(circular_err50)
             sigma90 = np.deg2rad(circular_err90)
             Theta50, Phi50 = self.circular_contour(
-                min_ra, min_dec, sigma50, nside
+                min_ra, min_dec, sigma50, max_nside
             )
             Theta90, Phi90 = self.circular_contour(
-                min_ra, min_dec, sigma90, nside
+                min_ra, min_dec, sigma90, max_nside
             )
             contour50 = np.dstack((Theta50, Phi50))
             contour90 = np.dstack((Theta90, Phi90))
