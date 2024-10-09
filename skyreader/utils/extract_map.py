@@ -8,6 +8,7 @@ from ..result import SkyScanResult
 
 LOGGER = logging.getLogger("skyreader.extract_map")
 
+
 def extract_map(
         result: SkyScanResult,
         llh_map: bool = True,
