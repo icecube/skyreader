@@ -162,7 +162,7 @@ class SkyScanPlotter:
             map_to_plot,
             vmin=vmin,
             vmax=vmax,
-            rasterized=False,
+            rasterized=True,
             cmap=cmap
         )
         # ax.set_xlim(np.pi, -np.pi)
