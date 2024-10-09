@@ -94,17 +94,16 @@ class SkyScanPlotter:
         LOGGER.info(f"saving plot to {plot_filename}")
 
         (
-            grid_map, grid_ra, grid_dec, equatorial_map
+            grid_value, grid_ra, grid_dec, equatorial_map
         ) = extract_map(result, llh_map, angular_error_floor)
 
-        #if grid_map is None:
+        if grid_map is None:
             # create an "empty" map if there are no pixels at all
-        grid_pix = healpy.ang2pix(8, np.pi/2 - DEC, RA)
-        this_map = np.ones(healpy.nside2npix(8))*np.inf
-        grid_map = this_map[grid_pix]
-        print(grid_pix, this_map, grid_map)
-        del this_map
-        del grid_pix
+            grid_pix = healpy.ang2pix(8, np.pi/2 - DEC, RA)
+            this_map = np.ones(healpy.nside2npix(8))*np.inf
+            grid_map = this_map[grid_pix]
+            del this_map
+            del grid_pix
 
         min_value = grid_map[0]  # for probability map, this is actually
         # the max_value
@@ -118,17 +117,17 @@ class SkyScanPlotter:
 
         # renormalize
         if dozoom:
-            grid_map = grid_map - min_value
+            grid_map = equatorial_map - min_value
             min_llh = 0.
             max_llh = 50
         if llh_map:
             cmap = self.PLOT_COLORMAP
-            map_to_plot = grid_map
+            map_to_plot = equatorial_map
             vmin = min_llh
             vmax = max_llh
             text_colorbar = r"$-2 \ln(L)$"
         else:
-            prob_map = (copy.copy(grid_map) - min_value)/2.
+            prob_map = (copy.copy(equatorial_map) - min_value)/2.
             prob_map = -prob_map*np.log10(np.exp(1))
             min_prob = np.nanmin(prob_map)
             max_prob = np.nanmax(prob_map)
@@ -140,7 +139,7 @@ class SkyScanPlotter:
             vmin = min_prob
             vmax = max_prob
             text_colorbar = r"log10$(p)$"
-        grid_map = np.ma.masked_invalid(grid_map)
+        grid_map = np.ma.masked_invalid(equatorial_map)
 
         LOGGER.info(f"Preparing plot: {plot_filename}...")
 
@@ -169,7 +168,7 @@ class SkyScanPlotter:
             map_to_plot,
             vmin=vmin,
             vmax=vmax,
-            rasterized=True,
+            rasterized=False,
             cmap=cmap
         )
         # ax.set_xlim(np.pi, -np.pi)
