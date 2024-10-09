@@ -129,6 +129,11 @@ class SkyScanPlotter:
                 self.PLOT_COLORMAP.name.split('_')[0]
             ]
             text_colorbar = r"log10$(p)$"
+            print(
+                np.min(equatorial_map),
+                np.max(equatorial_map),
+                np.sum(np.isnan(equatorial_map))
+            )
             vmin = np.min(np.log10(equatorial_map))
             vmax = np.max(np.log10(equatorial_map))
             map_to_plot = np.log10(plotting_map)
