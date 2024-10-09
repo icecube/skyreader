@@ -48,12 +48,12 @@ class SkyScanPlotter:
         projection_registry.register(AstroMollweideAxes)
 
     def create_plot(
-            self,
-            result: SkyScanResult,
-            dozoom: bool = False,
-            systematics: bool = False,
-            llh_map: bool = True,
-            angular_error_floor: Union[None, float] = None,
+        self,
+        result: SkyScanResult,
+        dozoom: bool = False,
+        systematics: bool = False,
+        llh_map: bool = True,
+        angular_error_floor: Union[None, float] = None,
     ) -> None:
         """Creates a full-sky plot using a meshgrid at fixed resolution.
         Optionally creates a zoomed-in plot. Resolutions are defined in
