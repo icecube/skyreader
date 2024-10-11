@@ -126,7 +126,7 @@ class SkyScanPlotter:
             map_to_plot = plotting_map
         else:
             cmap = matplotlib.colormaps[
-                self.PLOT_COLORMAP.name.split('_')[0]
+                self.PLOT_COLORMAP.name.rstrip('_r')
             ]
             text_colorbar = r"log10$(p)$"
             vmin = np.min(np.log10(equatorial_map))
@@ -526,7 +526,7 @@ class SkyScanPlotter:
             cb_label = r"$-2 \Delta \ln (L)$"
         else:
             cmap = matplotlib.colormaps[
-                self.PLOT_COLORMAP.name.split('_')[0]
+                self.PLOT_COLORMAP.name.rstrip('_r')
             ]
             cmap.set_under('w')
             # make NaNs bright red
