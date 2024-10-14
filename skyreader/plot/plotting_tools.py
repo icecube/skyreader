@@ -10,17 +10,21 @@ import matplotlib.patheffects as path_effects  # type: ignore[import]
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes  # type: ignore[import]
-from matplotlib.projections import projection_registry  # type: ignore[import]
 from matplotlib.projections.geo import MollweideAxes  # type: ignore[import]
 from matplotlib.ticker import FixedLocator, Formatter  # type: ignore[import]
 from matplotlib.transforms import Affine2D  # type: ignore[import]
 
 matplotlib.use('agg')
 
-def format_fits_header(event_id_tuple, mjd, ra, dec, uncertainty):
+def format_fits_header(event_id_tuple, mjd, ra, dec, uncertainty, llh_map):
     """Prepare some of the relevant event information for a fits file
     header."""
     run_id, event_id, event_type = event_id_tuple
+
+    if llh_map:
+        uncertainty_comment = 'Change in 2LLH based on Wilks theorem'
+    else:
+        uncertainty_comment = 'Probability-per-pixel (all pixels with same area)'
 
     header = [
         ('RUNID', run_id),
@@ -39,7 +43,7 @@ def format_fits_header(event_id_tuple, mjd, ra, dec, uncertainty):
         ('DEC_ERR_MINUS', np.round(np.abs(uncertainty[1][0]),2),
             '90% containment error low'),
         ('COMMENTS', '50%(90%) uncertainty location' \
-            + ' => Change in 2LLH based on Wilks theorem'),
+            + ' => ' + uncertainty_comment),
         ('NOTE', 'Please ignore pixels with infinite or NaN values.' \
             + ' They are rare cases of the minimizer failing to converge')
         ]
@@ -111,7 +115,7 @@ def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec,
         cmap_min=0., cmap_max=250.):
     """"Plots the 4FGL catalog in a color that contrasts with the background
     healpix map."""
-    hdu = pyfits.open('/cvmfs/icecube.opensciencegrid.org/users/azegarelli/realtime/catalogs/gll_psc_v34.fit') ## LAT 14-year Source Catalog (4FGL-DR4 in FITS format) ; https://fermi.gsfc.nasa.gov/ssc/data/access/lat/14yr_catalog/
+    hdu = pyfits.open('/cvmfs/icecube.opensciencegrid.org/users/azegarelli/realtime/catalogs/gll_psc_v34.fit') ## LAT 14-year Source Catalog (4FGL-DR4 in FITS format) ; https://fermi.gsfc.nasa.gov/ssc/data/access/lat/14yr_catalog/')
     fgl = hdu[1]
     pe = [path_effects.Stroke(linewidth=0.5, foreground=cmap(0.0)),
         path_effects.Normal()]
@@ -149,7 +153,6 @@ def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec,
                 fontsize=6,
                 path_effects=pe)
     del fgl
-
 
 ##
 # Mollweide axes with phi axis flipped and in hours from 24 to 0 instead of
@@ -215,7 +218,7 @@ class AstroMollweideAxes(MollweideAxes):
             FixedLocator(
                 np.linspace(0, 2*np.pi, number, True)[1:-1]))
         self._longitude_degrees = degrees
-        self.xaxis.set_major_formatter(self.RaFormatter(degrees))
+        self.xaxis.set_major_formatter(self.RaFormatter(degrees)) 
 
     def _set_lim_and_transforms(self):
         # Copied from matplotlib.geo.GeoAxes._set_lim_and_transforms and modified
@@ -251,5 +254,3 @@ class AstroMollweideAxes(MollweideAxes):
         return Affine2D() \
             .scale(0.5 / xscale, 0.5 / yscale) \
             .translate(0.5, 0.5)
-
-projection_registry.register(AstroMollweideAxes)
