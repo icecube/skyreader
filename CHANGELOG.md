@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.0 (2024-10-14)
+
+### Other
+
+* <bot> update dependencies*.log files(s) ([`1d75b32`](https://github.com/icecube/skyreader/commit/1d75b3201679485c29102a10fa5f835b4e003142))
+
 ## v1.2.12 (2024-10-04)
 
 ### Other
