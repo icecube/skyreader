@@ -8,7 +8,7 @@ astropy==6.1.4
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
-astropy-iers-data==0.2024.10.7.0.32.46
+astropy-iers-data==0.2024.10.14.0.32.55
     # via astropy
 certifi==2024.8.30
     # via requests
@@ -55,7 +55,7 @@ pluggy==1.5.0
     # via pytest
 pyerfa==2.0.1.4
     # via astropy
-pyparsing==3.1.4
+pyparsing==3.2.0
     # via matplotlib
 pytest==8.3.3
     # via
