@@ -113,7 +113,7 @@ def extract_map(
         grid_value = grid_value.clip(None, max_map)
     else:
         # Convert to probability
-        equatorial_map = np.exp(-1. * equatorial_map)
+        equatorial_map = np.exp(-1. * equatorial_map, dtype='float128')
         equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
         # nan values are a problem for the convolution and the contours
