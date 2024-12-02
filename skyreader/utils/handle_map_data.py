@@ -15,6 +15,7 @@ def extract_map(
         llh_map: bool = True,
         angular_error_floor: Union[None, float] = None,
         remove_min_val: bool = True,
+        return_uniqs: bool = True,
 ):
     """
     Extract from the output of skymap_scanner the healpy map
@@ -26,6 +27,8 @@ def extract_map(
             sigma of the gaussian to convolute the map with in deg.
         - remove_min_val: bool = True. Remove minimum value from -llh
           no effect if probability map.
+        - return_uniqs: bool = True. Return the uniqs for each pixel
+            (useful for multiorder maps)
 
     returns:
         - grid_value: value-per-scanned-pixel (pixels with
@@ -34,6 +37,7 @@ def extract_map(
         - grid_dec: declination for each pixel in grid_value
         - equatorial_map: healpix map with maximum nside (all pixels
             with same nside)
+        - uniq_array: uniqs for all the pixels of the map (optional)
     """
 
     grid_map = dict()
@@ -138,7 +142,10 @@ def extract_map(
         grid_value[np.isnan(grid_value)] = min_map
         grid_value = grid_value.clip(min_map, None)
 
-    return grid_value, grid_ra, grid_dec, equatorial_map, uniq_array
+    if return_uniqs:
+        return grid_value, grid_ra, grid_dec, equatorial_map, uniq_array
+    else:
+        return grid_value, grid_ra, grid_dec, equatorial_map
 
 
 def get_contour_levels(

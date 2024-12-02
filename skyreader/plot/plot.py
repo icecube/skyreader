@@ -97,7 +97,11 @@ class SkyScanPlotter:
         (
             grid_value, grid_ra, grid_dec, equatorial_map
         ) = extract_map(
-            result, llh_map, angular_error_floor, remove_min_val=not llh_map
+            result,
+            llh_map,
+            angular_error_floor,
+            remove_min_val=not llh_map,
+            return_uniqs = False,
         )
 
         grid_pix = healpy.ang2pix(max(nsides), np.pi/2. - DEC, RA)
