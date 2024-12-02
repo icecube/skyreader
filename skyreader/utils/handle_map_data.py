@@ -118,6 +118,7 @@ def extract_map(
 
         # nan values are a problem for the convolution and the contours
         min_map = np.nanmin(equatorial_map)
+        print(f"the minimum of the map is {min_map}")
         equatorial_map[np.isnan(equatorial_map)] = min_map
 
         if angular_error_floor is not None:
