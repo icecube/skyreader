@@ -61,7 +61,7 @@ def extract_map(
             nested_pixel = healpy.ring2nest(nside, pixel)
             uniq = 4*nside*nside + nested_pixel
             uniq_list.append(uniq)
-            #if np.isfinite(value) and not np.isnan(value):
+            # if np.isfinite(value) and not np.isnan(value):
             tmp_theta, tmp_phi = healpy.pix2ang(nside, pixel)
             tmp_dec = np.pi/2 - tmp_theta
             tmp_ra = tmp_phi
