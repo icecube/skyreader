@@ -40,6 +40,7 @@ def extract_map(
     nsides = result.nsides
     max_nside = max(nsides)
     equatorial_map = np.full(healpy.nside2npix(max_nside), np.nan)
+    uniq_list = list()
 
     for nside in nsides:
         LOGGER.info(f"constructing map for nside {nside}...")
@@ -57,16 +58,14 @@ def extract_map(
         for pixel_data in result.result[f"nside-{nside}"]:
             pixel = pixel_data['index']
             value = pixel_data['llh']
-            if np.isfinite(value) and not np.isnan(value):
-                tmp_theta, tmp_phi = healpy.pix2ang(nside, pixel)
-                tmp_dec = np.pi/2 - tmp_theta
-                tmp_ra = tmp_phi
-                grid_map[(tmp_dec, tmp_ra)] = value
-                # nested_pixel = healpy.ang2pix(
-                #     nside, tmp_theta, tmp_phi, nest=True
-                # )
-                # uniq = 4*nside*nside + nested_pixel
-                # uniq_list.append(uniq)
+            nested_pixel = healpy.ring2nest(nside, pixel)
+            uniq = 4*nside*nside + nested_pixel
+            uniq_list.append(uniq)
+            #if np.isfinite(value) and not np.isnan(value):
+            tmp_theta, tmp_phi = healpy.pix2ang(nside, pixel)
+            tmp_dec = np.pi/2 - tmp_theta
+            tmp_ra = tmp_phi
+            grid_map[(tmp_dec, tmp_ra)] = value
         LOGGER.info(f"done with map for nside {nside}...")
 
     grid_dec_list, grid_ra_list, grid_value_list = [], [], []
