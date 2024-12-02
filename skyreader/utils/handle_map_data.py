@@ -2,6 +2,7 @@ from typing import Union
 import logging
 
 import healpy  # type: ignore[import]
+import mhealpy # type: ignore[import]
 import numpy as np
 
 from ..result import SkyScanResult
@@ -77,13 +78,13 @@ def extract_map(
     grid_dec: np.ndarray = np.asarray(grid_dec_list)
     grid_ra: np.ndarray = np.asarray(grid_ra_list)
     grid_value: np.ndarray = np.asarray(grid_value_list)
-    # uniq_array: np.ndarray = np.asarray(uniq_list)
+    uniq_array: np.ndarray = np.asarray(uniq_list)
 
     sorting_indices = np.argsort(grid_value)
     grid_value = grid_value[sorting_indices]
     grid_dec = grid_dec[sorting_indices]
     grid_ra = grid_ra[sorting_indices]
-    # uniq_array = uniq_array[sorting_indices]
+    uniq_array = uniq_array[sorting_indices]
 
     min_value = grid_value[0]
 
@@ -137,7 +138,7 @@ def extract_map(
         grid_value[np.isnan(grid_value)] = min_map
         grid_value = grid_value.clip(min_map, None)
 
-    return grid_value, grid_ra, grid_dec, equatorial_map
+    return grid_value, grid_ra, grid_dec, equatorial_map, uniq_array
 
 
 def get_contour_levels(
@@ -205,3 +206,126 @@ def get_contour_levels(
             contour_colors = ['k', 'r', 'g', 'b'][:3]
 
     return contour_levels, contour_labels, contour_colors
+
+def find_pixels_double_nside(
+        nside: int,
+        indexes: np.ndarray,
+    ):
+    """
+    Given indexes of pixels at a given nside, find which are
+    the pixels inside these pixels with a double nside
+
+    args:
+        - nside: int. nside of the pixels to investigate.
+        - indexes: np.ndarray. indexes on ring ordering of the pixels
+            to investigate.
+
+    returns:
+        - idxs_inside: np.ndarray, array containing an array for each
+            initial pixel which tells which are the pixels with double
+            nside inside that pixel. The pixels are in ring ordering.
+    """
+
+    vecs = healpy.boundaries(nside, indexes)
+    transposed_vecs = np.transpose(vecs, axes=(0,2,1))
+    idxs_inside = np.array(
+        [healpy.query_polygon(nside*2, vs) for vs in transposed_vecs]
+    )
+    return idxs_inside
+
+def already_filled_uniqs_for_nside(
+        nside: int,
+        next_nside: int,
+        uniqs: np.ndarray
+    ):
+    """
+    Check if among the input uniqs there are pixels at a finer nside
+    which are inside other pixels with a bigger nside
+
+    args:
+        -nside: int. nside of the pixels to see if there are finer pixels
+            inside.
+        -next_nside: int. nside of the finer pixes which we want to see
+            if they are inside the coarser pixels
+        -uniqs: np.ndarray. Uniqs for all the pixels in the map
+    
+    returns:
+        already_filled_uniqs: np.ndarray. Uniqs of the coarser pixels
+            which are already filled.
+    """
+    nside_per_pixel = mhealpy.uniq2nside(uniqs)
+    uniqs_nside = uniqs[nside_per_pixel == nside]
+    uniqs_next_nside = uniqs[nside_per_pixel == next_nside]
+    pixels_nside = healpy.nest2ring(
+        nside, mhealpy.uniq2nest(uniqs_nside)[1]
+    )
+    idxs_double_nside = find_pixels_double_nside(nside, pixels_nside)
+    already_filled_uniqs = list()
+    for uniq_original_nside, idxs_pixel in zip(
+        uniqs_nside, idxs_double_nside
+    ):
+        progressive_nside = nside*2
+        while progressive_nside != next_nside:
+            idxs_pixel = np.concatenate(
+                find_pixels_double_nside(progressive_nside, idxs_pixel)
+            )
+            progressive_nside *= 2
+        uniqs_pixel = mhealpy.nest2uniq(
+            next_nside, healpy.ring2nest(next_nside, idxs_pixel)
+        )
+        pixel_already_filled = False
+        for uniq in uniqs_next_nside:
+            if uniq in uniqs_pixel:
+                pixel_already_filled = True
+                continue
+        if pixel_already_filled:
+            already_filled_uniqs.append(uniq_original_nside)
+    return np.array(already_filled_uniqs)
+
+def find_filled_pixels(uniqs: np.ndarray):
+    """
+    given an array of uniqs, finds which pixels already have finer
+    pixels inside and returns array with the indeces of these pixels
+
+    args:
+        - uniqs: np.ndarray. Array of uniqs per each pixel of the map
+    
+    returns:
+        - already_filled_indeces: np.ndarray. Array with the indeces
+            of the already_filled_uniqs in the input array
+    """
+    nside_per_pixel = mhealpy.uniq2nside(uniqs)
+    nsides = np.unique(nside_per_pixel)
+    already_filled_uniqs = list()
+    for nside_index, nside in enumerate(nsides[:-1]):
+        next_nside = nsides[nside_index + 1]
+        already_filled_uniqs_nside = already_filled_uniqs_for_nside(
+            nside, next_nside, uniqs
+        )
+        already_filled_uniqs.append(already_filled_uniqs_nside)
+    already_filled_uniqs = np.concatenate(already_filled_uniqs)
+    already_filled_indeces = np.array(
+        [np.where(uniqs == uni)[0][0] for uni in already_filled_uniqs]
+    )
+    return already_filled_indeces
+
+def clean_data_multiorder_map(
+    grid_value: np.ndarray, uniqs: np.ndarray
+):
+    """
+    Clean a map from the pixels which have a finer scan inside
+
+    args:
+        - grid_value: np.ndarray. Value of probability (likelihood)
+            per each scanned pixel.
+        - uniqs: np.ndarray. Uniqs per each scanned pixel to univocally
+            identify them
+    
+    returns:
+        - grid_value: np.ndarray. Cleaned array
+        - uniqs: np.ndarray. Cleaned array
+    """
+    filled_indeces = find_filled_pixels(uniqs)
+    grid_value = np.delete(grid_value, filled_indeces)
+    uniqs = np.delete(uniqs, filled_indeces)
+    return grid_value, uniqs

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List, Union
 
 import healpy  # type: ignore[import]
-# import mhealpy
+import mhealpy
 import matplotlib  # type: ignore[import]
 import meander  # type: ignore[import]
 import numpy as np
@@ -28,7 +28,9 @@ from .plotting_tools import (
 )
 
 from ..utils.areas import calculate_area, get_contour_areas
-from ..utils.handle_map_data import extract_map, get_contour_levels
+from ..utils.handle_map_data import (
+    extract_map, get_contour_levels, clean_data_multiorder_map
+)
 from ..result import SkyScanResult
 
 LOGGER = logging.getLogger("skyreader.plot")
@@ -427,7 +429,7 @@ class SkyScanPlotter:
             plot_filename = unique_id + ".plot_zoomed.pdf"
 
         (
-            grid_value, grid_ra, grid_dec, equatorial_map
+            grid_value, grid_ra, grid_dec, equatorial_map, uniq_array
         ) = extract_map(result, llh_map, angular_error_floor)
         min_dec = grid_dec[0]
         min_ra = grid_ra[0]
@@ -825,19 +827,6 @@ class SkyScanPlotter:
         with open(path, "wb") as f:
             pickle.dump(saving_contours, f)
 
-        # logic for multiordermaps -> for future developements
-
-        # save multiorder version of the map
-        # multiorder_map = mhealpy.HealpixMap(
-        #     grid_value, uniq_array
-        # )
-        # multiorder_map.write_map(
-        #     f"{unique_id}.skymap_nside_{mmap_nside}.multiorder.fits.gz",
-        #     column_names=["PROBABILITY"],
-        #     extra_header=fits_header,
-        #     overwrite=True,
-        # )
-
         if llh_map:
             column_names = ['2DLLH']
         else:
@@ -861,6 +850,21 @@ class SkyScanPlotter:
             column_names=column_names,
             extra_header=fits_header,
             overwrite=True
+        )
+
+        # clean from redundant pixels
+        grid_value, uniq_array = clean_data_multiorder_map(
+            grid_value, uniq_array
+        )
+        # save multiorder version of the map
+        multiorder_map = mhealpy.HealpixMap(
+            grid_value, uniq_array
+        )
+        multiorder_map.write_map(
+            f"{unique_id}.skymap_nside_{mmap_nside}_{type_map}.multiorder.fits.gz",
+            column_names=["PROBABILITY"],
+            extra_header=fits_header,
+            overwrite=True,
         )
 
         # Save the figure
