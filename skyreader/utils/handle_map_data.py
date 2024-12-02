@@ -105,24 +105,24 @@ def extract_map(
         equatorial_map = np.exp(-1. * equatorial_map)
         equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
-        # nan values are a problem for the convolution and the contours
-        min_map = np.nanmin(equatorial_map)
+    # nan values are a problem for the convolution and the contours
+    min_map = np.nanmin(equatorial_map)
+    equatorial_map[np.isnan(equatorial_map)] = min_map
+
+    if angular_error_floor is not None and not llh_map:
+        # convolute with a gaussian. angular_error_floor is the
+        # sigma in deg.
+        equatorial_map = healpy.smoothing(
+            equatorial_map,
+            sigma=np.deg2rad(angular_error_floor),
+        )
+
+        # normalize map
+        min_map = np.nanmin(equatorial_map[equatorial_map > 0.0])
         equatorial_map[np.isnan(equatorial_map)] = min_map
-
-        if angular_error_floor is not None:
-            # convolute with a gaussian. angular_error_floor is the
-            # sigma in deg.
-            equatorial_map = healpy.smoothing(
-                equatorial_map,
-                sigma=np.deg2rad(angular_error_floor),
-            )
-
-            # normalize map
-            min_map = np.nanmin(equatorial_map[equatorial_map > 0.0])
-            equatorial_map[np.isnan(equatorial_map)] = min_map
-            equatorial_map = equatorial_map.clip(min_map, None)
-            normalization = np.nansum(equatorial_map)
-            equatorial_map = equatorial_map / normalization
+        equatorial_map = equatorial_map.clip(min_map, None)
+        normalization = np.nansum(equatorial_map)
+        equatorial_map = equatorial_map / normalization
 
         # obtain values for grid map
         grid_value = healpy.get_interp_val(
