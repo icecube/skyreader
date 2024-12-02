@@ -66,7 +66,6 @@ def extract_map(
             nested_pixel = healpy.ring2nest(nside, pixel)
             uniq = 4*nside*nside + nested_pixel
             uniq_list.append(uniq)
-            # if np.isfinite(value) and not np.isnan(value):
             tmp_theta, tmp_phi = healpy.pix2ang(nside, pixel)
             tmp_dec = np.pi/2 - tmp_theta
             tmp_ra = tmp_phi
@@ -113,12 +112,11 @@ def extract_map(
         grid_value = grid_value.clip(None, max_map)
     else:
         # Convert to probability
-        equatorial_map = np.exp(-1. * equatorial_map, dtype='float128')
+        equatorial_map = np.exp(-1. * equatorial_map)
         equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
         # nan values are a problem for the convolution and the contours
         min_map = np.nanmin(equatorial_map[equatorial_map > 0.])
-        print(f"the minimum of the map is {min_map}")
         equatorial_map[np.isnan(equatorial_map)] = min_map
         equatorial_map[equatorial_map == 0.] = min_map
 
