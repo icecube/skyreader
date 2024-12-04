@@ -75,10 +75,11 @@ def extract_map(
         if nside == nsides[0]:
             tot_npix = healpy.nside2npix(nside)
             if tot_npix < len(results_nside):
+                print(f"Filling nside {nside}")
                 ring_pixels = np.arange(tot_npix)
                 nest_pixels = healpy.ring2nest(nside, ring_pixels)
                 uniq_pixels = mhealpy.nest2uniq(nside, nest_pixels)
-                for uni, rin in zip(uniq_pixels, nest_pixels):
+                for uni, rin in zip(uniq_pixels, ring_pixels):
                     if uni not in uniq_list:
                         uniq_list.append(uni)
                         tmp_theta, tmp_phi = healpy.pix2ang(nside, rin)
