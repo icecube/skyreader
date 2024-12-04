@@ -862,11 +862,12 @@ class SkyScanPlotter:
         )
         # save multiorder version of the map
         multiorder_map = mhealpy.HealpixMap(
-            grid_value, uniq_array
+            grid_value / healpy.nside2pixarea(max_nside), uniq_array
         )
+        column_names = [f"{column_names[0]} DENSITY [deg-2]"]
         multiorder_map.write_map(
             f"{unique_id}.skymap_nside_{mmap_nside}_{type_map}.multiorder.fits.gz",
-            column_names=["PROBABILITY"],
+            column_names=column_names,
             extra_header=fits_header,
             overwrite=True,
         )
