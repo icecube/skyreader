@@ -74,8 +74,8 @@ def extract_map(
         
         if nside == nsides[0]:
             tot_npix = healpy.nside2npix(nside)
-            print(f"tot_npix: {tot_npix}\nlen(resuls_nside): {len(uniq_list)}")
-            if tot_npix < len(uniq_list):
+            print(f"tot_npix: {tot_npix}\nlen(resuls_nside): {len(results_nside)}")
+            if tot_npix > len(results_nside):
                 print(f"Filling nside {nside}")
                 ring_pixels = np.arange(tot_npix)
                 nest_pixels = healpy.ring2nest(nside, ring_pixels)
