@@ -72,11 +72,11 @@ def extract_map(
             tmp_ra = tmp_phi
             grid_map[(tmp_dec, tmp_ra)] = value
         
+        # In case of pointed scans, it helps filling the first nside
+        # with empty pixels (especially for saving the multiorder map)
         if nside == nsides[0]:
             tot_npix = healpy.nside2npix(nside)
-            print(f"tot_npix: {tot_npix}\nlen(resuls_nside): {len(results_nside)}")
             if tot_npix > len(results_nside):
-                print(f"Filling nside {nside}")
                 ring_pixels = np.arange(tot_npix)
                 nest_pixels = healpy.ring2nest(nside, ring_pixels)
                 uniq_pixels = mhealpy.nest2uniq(nside, nest_pixels)
