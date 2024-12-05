@@ -101,7 +101,7 @@ class SkyScanPlotter:
             llh_map,
             angular_error_floor,
             remove_min_val=not llh_map,
-            return_uniqs = False,
+            return_uniqs=False,
         )
 
         grid_pix = healpy.ang2pix(max(nsides), np.pi/2. - DEC, RA)
@@ -718,7 +718,6 @@ class SkyScanPlotter:
             # join end to beginning
             bounding_ras_list.append(bounding_ras_list[0])
             bounding_decs_list.append(bounding_decs_list[0])
-
             bounding_ras: np.ndarray = np.asarray(bounding_ras_list)
             bounding_decs: np.ndarray = np.asarray(bounding_decs_list)
             bounding_phi = np.radians(bounding_ras)
@@ -738,7 +737,6 @@ class SkyScanPlotter:
                 linestyle='dashed',
                 label=contour_label
             )
-
         # Output contours in RA, dec instead of theta, phi
         saving_contours: list = []
         for contours in contours_by_level:
@@ -750,7 +748,6 @@ class SkyScanPlotter:
                 decs = np.pi/2 - theta
                 for tmp_ra, tmp_dec in zip(ras, decs):
                     saving_contours[-1][-1].append([tmp_ra, tmp_dec])
-
         # Save the individual contours, send messages
         for i, val in enumerate(["50", "90"]):
             ras = list(np.asarray(saving_contours[i][0]).T[0])
@@ -782,18 +779,15 @@ class SkyScanPlotter:
 
         # Plot the original online reconstruction location
         if np.sum(np.isnan([extra_ra, extra_dec, extra_radius])) == 0:
-
             # dist = angular_distance(minRA, minDec, extra_ra * np.pi/180.,
             # extra_dec * np.pi/180.)
             # print("Millipede best fit is", dist /(np.pi *
             # extra_radius/(1.177 * 180.)), "sigma from reported best fit")
-
             extra_ra_rad = np.radians(extra_ra)
             extra_dec_rad = np.radians(extra_dec)
             extra_radius_rad = np.radians(extra_radius)
             extra_lon = extra_ra_rad
             extra_lat = extra_dec_rad
-
             healpy.projscatter(
                 np.degrees(extra_lon),
                 np.degrees(extra_lat),
@@ -822,9 +816,7 @@ class SkyScanPlotter:
                     color=cont_col,
                     linestyle=cont_sty
                 )
-
         plt.legend(fontsize=6, loc="lower left")
-
         # Dump the whole contour
         path = unique_id + ".contour.pkl"
         print("Saving contour to", path)
@@ -835,9 +827,7 @@ class SkyScanPlotter:
             column_names = ['2DLLH']
         else:
             # avoid excessively heavy data format for the flattened map
-            equatorial_map[
-                equatorial_map < 1e-16
-            ] = np.mean(
+            equatorial_map[equatorial_map < 1e-16] = np.mean(
                 equatorial_map[equatorial_map < 1e-16]
             )
             column_names = ["PROBABILITY"]

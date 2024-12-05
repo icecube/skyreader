@@ -2,7 +2,7 @@ from typing import Union
 import logging
 
 import healpy  # type: ignore[import]
-import mhealpy # type: ignore[import]
+import mhealpy  # type: ignore[import]
 import numpy as np
 
 from ..result import SkyScanResult
@@ -71,7 +71,7 @@ def extract_map(
             tmp_dec = np.pi/2 - tmp_theta
             tmp_ra = tmp_phi
             grid_map[(tmp_dec, tmp_ra)] = value
-        
+
         # In case of pointed scans, it helps filling the first nside
         # with empty pixels (especially for saving the multiorder map)
         if nside == nsides[0]:
@@ -232,10 +232,11 @@ def get_contour_levels(
 
     return contour_levels, contour_labels, contour_colors
 
+
 def find_pixels_double_nside(
-        nside: int,
-        indexes: np.ndarray,
-    ):
+    nside: int,
+    indexes: np.ndarray,
+):
     """
     Given indexes of pixels at a given nside, find which are
     the pixels inside these pixels with a double nside
@@ -258,11 +259,12 @@ def find_pixels_double_nside(
     )
     return idxs_inside
 
+
 def already_filled_uniqs_for_nside(
-        nside: int,
-        next_nside: int,
-        uniqs: np.ndarray
-    ):
+    nside: int,
+    next_nside: int,
+    uniqs: np.ndarray
+):
     """
     Check if among the input uniqs there are pixels at a finer nside
     which are inside other pixels with a bigger nside
@@ -273,7 +275,7 @@ def already_filled_uniqs_for_nside(
         -next_nside: int. nside of the finer pixes which we want to see
             if they are inside the coarser pixels
         -uniqs: np.ndarray. Uniqs for all the pixels in the map
-    
+
     returns:
         already_filled_uniqs: np.ndarray. Uniqs of the coarser pixels
             which are already filled.
@@ -307,6 +309,7 @@ def already_filled_uniqs_for_nside(
             already_filled_uniqs.append(uniq_original_nside)
     return np.array(already_filled_uniqs)
 
+
 def find_filled_pixels(uniqs: np.ndarray):
     """
     given an array of uniqs, finds which pixels already have finer
@@ -314,7 +317,7 @@ def find_filled_pixels(uniqs: np.ndarray):
 
     args:
         - uniqs: np.ndarray. Array of uniqs per each pixel of the map
-    
+
     returns:
         - already_filled_indeces: np.ndarray. Array with the indeces
             of the already_filled_uniqs in the input array
@@ -334,6 +337,7 @@ def find_filled_pixels(uniqs: np.ndarray):
     )
     return already_filled_indeces
 
+
 def clean_data_multiorder_map(
     grid_value: np.ndarray, uniqs: np.ndarray
 ):
@@ -345,7 +349,7 @@ def clean_data_multiorder_map(
             per each scanned pixel.
         - uniqs: np.ndarray. Uniqs per each scanned pixel to univocally
             identify them
-    
+
     returns:
         - grid_value: np.ndarray. Cleaned array
         - uniqs: np.ndarray. Cleaned array
