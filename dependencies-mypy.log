@@ -96,7 +96,7 @@ requests-futures==1.0.2
     # via wipac-rest-tools
 scipy==1.14.1
     # via icecube-skyreader (setup.py)
-six==1.16.0
+six==1.17.0
     # via python-dateutil
 tornado==6.4.2
     # via wipac-rest-tools
