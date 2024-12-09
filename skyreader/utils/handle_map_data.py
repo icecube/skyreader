@@ -45,7 +45,7 @@ def extract_map(
     nsides = result.nsides
     max_nside = max(nsides)
     equatorial_map = np.full(healpy.nside2npix(max_nside), np.nan)
-    uniq_list = list()
+    uniq_list = []
 
     for nside in nsides:
         LOGGER.info(f"constructing map for nside {nside}...")
