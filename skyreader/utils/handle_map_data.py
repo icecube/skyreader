@@ -234,7 +234,7 @@ def get_contour_levels(
             probability_levels = (
                 np.array([0.5, 0.9, 1-1.35e-3, 1-2.87e-7])
             )[:3]
-            contour_levels = list()
+            contour_levels = []
             for prob in probability_levels:
                 level_index = (
                     np.nancumsum(sorted_values) >= prob
@@ -301,7 +301,7 @@ def already_filled_uniqs_for_nside(
         nside, mhealpy.uniq2nest(uniqs_nside)[1]
     )
     idxs_double_nside = find_pixels_double_nside(nside, pixels_nside)
-    already_filled_uniqs = list()
+    already_filled_uniqs = []
     for uniq_original_nside, idxs_pixel in zip(
         uniqs_nside, idxs_double_nside
     ):
@@ -338,7 +338,7 @@ def find_filled_pixels(uniqs: np.ndarray):
     """
     nside_per_pixel = mhealpy.uniq2nside(uniqs)
     nsides = np.unique(nside_per_pixel)
-    already_filled_uniqs = list()
+    already_filled_uniqs = []
     for nside_index, nside in enumerate(nsides[:-1]):
         next_nside = nsides[nside_index + 1]
         already_filled_uniqs_nside = already_filled_uniqs_for_nside(
