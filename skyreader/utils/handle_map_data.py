@@ -74,18 +74,9 @@ def extract_map(
         # In case of pointed scans, it helps filling the first nside
         # with empty pixels (especially for saving the multiorder map)
         if nside == nsides[0]:
-            tot_npix = healpy.nside2npix(nside)
-            if tot_npix > len(result.get_results_per_nside(nside)):
-                ring_pixels = np.arange(tot_npix)
-                nest_pixels = healpy.ring2nest(nside, ring_pixels)
-                uniq_pixels = mhealpy.nest2uniq(nside, nest_pixels)
-                for uni, rin in zip(uniq_pixels, ring_pixels):
-                    if uni not in uniq_list:
-                        uniq_list.append(uni)
-                        tmp_theta, tmp_phi = healpy.pix2ang(nside, rin)
-                        tmp_dec = np.pi/2 - tmp_theta
-                        tmp_ra = tmp_phi
-                        grid_map[(tmp_dec, tmp_ra)] = np.nan
+            grid_map, uniq_list = _fill_first_nside_empty(
+                nside, result, grid_map, uniq_list
+            )
 
         LOGGER.info(f"done with map for nside {nside}...")
 
@@ -165,10 +156,34 @@ def extract_map(
         return grid_value, grid_ra, grid_dec, equatorial_map
 
 
+def _fill_first_nside_empty(
+    nside: int,
+    result: SkyScanResult,
+    grid_map: dict,
+    uniq_list: list,
+):
+    """
+    Fill the grid_map at the first nside with empty pixels
+    """
+    tot_npix = healpy.nside2npix(nside)
+    if tot_npix > result.get_results_per_nside(nside):
+        ring_pixels = np.arange(tot_npix)
+        nest_pixels = healpy.ring2nest(nside, ring_pixels)
+        uniq_pixels = mhealpy.nest2uniq(nside, nest_pixels)
+        for uni, rin in zip(uniq_pixels, ring_pixels):
+            if uni not in uniq_list:
+                uniq_list.append(uni)
+                tmp_theta, tmp_phi = healpy.pix2ang(nside, rin)
+                tmp_dec = np.pi/2 - tmp_theta
+                tmp_ra = tmp_phi
+                grid_map[(tmp_dec, tmp_ra)] = np.nan
+    return grid_map, uniq_list
+
+
 def get_contour_levels(
-        equatorial_map: np.ndarray,
-        llh_map: bool = True,
-        systematics: bool = False,
+    equatorial_map: np.ndarray,
+    llh_map: bool = True,
+    systematics: bool = False,
 ):
     """
     get contour levels for the desired map
