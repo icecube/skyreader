@@ -217,6 +217,10 @@ class SkyScanResult:
         else:
             self.logger.warning("Metadata doesn't seem to exist and will not be used for plotting.")
             return EventMetadata(0, 0, '', 0, False)
+        
+    def get_results_per_nside(self, nside: int) -> np.ndarray:
+        "get the results for the pixels at a given nside"
+        return self.result[f"nside-{nside}"]
 
     def isclose_nside(self,
         other: "SkyScanResult",

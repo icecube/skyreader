@@ -59,9 +59,8 @@ def extract_map(
             this_map = healpy.ud_grade(this_map, max_nside)
         mask = np.logical_and(~np.isnan(this_map), np.isfinite(this_map))
         equatorial_map[mask] = this_map[mask]
-        results_nside = result.result[f"nside-{nside}"]
 
-        for pixel_data in results_nside:
+        for pixel_data in result.get_results_per_nside(nside):
             pixel = pixel_data['index']
             value = pixel_data['llh']
             nested_pixel = healpy.ring2nest(nside, pixel)
@@ -76,7 +75,7 @@ def extract_map(
         # with empty pixels (especially for saving the multiorder map)
         if nside == nsides[0]:
             tot_npix = healpy.nside2npix(nside)
-            if tot_npix > len(results_nside):
+            if tot_npix > len(result.get_results_per_nside(nside)):
                 ring_pixels = np.arange(tot_npix)
                 nest_pixels = healpy.ring2nest(nside, ring_pixels)
                 uniq_pixels = mhealpy.nest2uniq(nside, nest_pixels)
