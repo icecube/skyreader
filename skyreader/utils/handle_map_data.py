@@ -50,7 +50,7 @@ def extract_map(
     for nside in nsides:
         LOGGER.info(f"constructing map for nside {nside}...")
         npix = healpy.nside2npix(nside)
-        map_data = result.result[f'nside-{nside}']
+        map_data = result.get_results_per_nside(nside)
         pixels = map_data['index']
         values = map_data['llh']
         this_map = np.full(npix, np.nan)
@@ -166,7 +166,7 @@ def _fill_first_nside_empty(
     Fill the grid_map at the first nside with empty pixels
     """
     tot_npix = healpy.nside2npix(nside)
-    if tot_npix > result.get_results_per_nside(nside):
+    if tot_npix > len(result.get_results_per_nside(nside)):
         ring_pixels = np.arange(tot_npix)
         nest_pixels = healpy.ring2nest(nside, ring_pixels)
         uniq_pixels = mhealpy.nest2uniq(nside, nest_pixels)
