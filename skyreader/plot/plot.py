@@ -94,9 +94,7 @@ class SkyScanPlotter:
         plot_filename = f"{unique_id}.{addition_to_filename}pdf"
         LOGGER.info(f"saving plot to {plot_filename}")
 
-        (
-            grid_value, grid_ra, grid_dec, equatorial_map
-        ) = extract_map(
+        grid_value, grid_ra, grid_dec, equatorial_map = extract_map(
             result,
             llh_map,
             angular_error_floor,
