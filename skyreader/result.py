@@ -392,7 +392,7 @@ class SkyScanResult:
         try:
             first = next(iter(self.result.values()))
         except StopIteration: # no results yet
-            np.savez(filename, **self.result)
+            np.savez(filename, **self.result)  # type: ignore
             return Path(filename)
 
         try:
@@ -409,9 +409,9 @@ class SkyScanResult:
                 ],
                 dtype=metadata_dtype,
             )
-            np.savez(filename, header=header, **self.result)
+            np.savez(filename, header=header, **self.result)  # type: ignore
         except (TypeError, AttributeError):
-            np.savez(filename, **self.result)
+            np.savez(filename, **self.result)  # type: ignore
 
         return Path(filename)
 
