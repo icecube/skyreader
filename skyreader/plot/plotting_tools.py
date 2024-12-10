@@ -26,7 +26,7 @@ def format_fits_header(
     if llh_map:
         uncertainty_comment = 'Change in 2LLH based on Wilks theorem'
     else:
-        uncertainty_comment = 'Area with 50%(90%) total probability'
+        uncertainty_comment = 'Highest posterior density 90% credible region'
 
     header = [
         ('RUNID', run_id),
@@ -44,7 +44,7 @@ def format_fits_header(
             '90% containment error high'),
         ('DEC_ERR_MINUS', np.round(np.abs(uncertainty[1][0]),2),
             '90% containment error low'),
-        ('COMMENTS', '50%(90%) uncertainty location' \
+        ('COMMENTS', '90% uncertainty location' \
             + ' => ' + uncertainty_comment),
         ('NOTE', 'Please ignore pixels with infinite or NaN values.' \
             + ' They are rare cases of the minimizer failing to converge')
