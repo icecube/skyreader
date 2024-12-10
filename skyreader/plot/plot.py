@@ -832,8 +832,9 @@ class SkyScanPlotter:
             column_names = ['2DLLH']
         else:
             # avoid excessively heavy data format for the flattened map
-            equatorial_map[np.isnan(equatorial_map)] = np.nanmin(
-                equatorial_map
+            min_prob = np.nanmin(equatorial_map)
+            equatorial_map[np.isnan(equatorial_map)] = np.min(
+                [min_prob, 1e-16]
             )
             equatorial_map[equatorial_map < 1e-16] = np.mean(
                 equatorial_map[equatorial_map < 1e-16]
