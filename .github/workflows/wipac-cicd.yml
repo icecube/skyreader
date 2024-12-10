@@ -30,7 +30,7 @@ jobs:
       - uses: WIPACrepo/wipac-dev-flake8-action@v1.2
         with:
           max-function-length: 400
-          max-complexity: 30
+          max-complexity: 25
 
   mypy:
     needs: [py-versions]
