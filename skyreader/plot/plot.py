@@ -449,16 +449,12 @@ class SkyScanPlotter:
 
         if not circular:
             if llh_map:
-                # get rid of nan values only for the contours and
-                # avoiding crashes during plotting
-                max_map = np.nanmax(equatorial_map)
+                # get rid of nan values only for the contours
+                # this avoids crashes during plotting
                 grid_values_for_contours = copy.copy(grid_value)
                 grid_values_for_contours[
                     np.isnan(grid_values_for_contours)
-                ] = max_map
-                #grid_values_for_contours = grid_values_for_contours.clip(
-                #    None, max_map
-                #)
+                ] = np.nanmax(equatorial_map)
                 contour_levels_for_contours = contour_levels
             else:
                 grid_values_for_contours = np.log(grid_value)

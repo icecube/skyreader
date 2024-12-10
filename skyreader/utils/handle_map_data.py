@@ -111,11 +111,6 @@ def extract_map(
         # show 2 * delta_LLH
         grid_value = grid_value * 2.
         equatorial_map *= 2.
-
-        #max_map = np.nanmax(equatorial_map)
-        #equatorial_map[np.isnan(equatorial_map)] = max_map
-        #grid_value[np.isnan(grid_value)] = max_map
-        #grid_value = grid_value.clip(None, max_map)
     else:
         # Convert to probability
         equatorial_map = np.exp(-1. * equatorial_map)
