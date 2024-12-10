@@ -10,7 +10,6 @@ from typing import List, Union
 
 import copy
 import healpy  # type: ignore[import]
-import mhealpy  # type: ignore[import]
 import matplotlib  # type: ignore[import]
 import meander  # type: ignore[import]
 import numpy as np
@@ -30,7 +29,10 @@ from .plotting_tools import (
 
 from ..utils.areas import calculate_area, get_contour_areas
 from ..utils.handle_map_data import (
-    extract_map, get_contour_levels, prepare_multiorder_map
+    extract_map,
+    get_contour_levels,
+    prepare_flattened_map,
+    prepare_multiorder_map,
 )
 from ..result import SkyScanResult
 
@@ -828,19 +830,10 @@ class SkyScanPlotter:
         with open(path, "wb") as f:
             pickle.dump(saving_contours, f)
 
-        if llh_map:
-            column_names = ['2DLLH']
-        else:
-            # avoid excessively heavy data format for the flattened map
-            min_prob = np.nanmin(equatorial_map)
-            equatorial_map[np.isnan(equatorial_map)] = np.min(
-                [min_prob, 1e-16]
-            )
-            equatorial_map[equatorial_map < 1e-16] = np.mean(
-                equatorial_map[equatorial_map < 1e-16]
-            )
-            column_names = ["PROBABILITY"]
         # save flattened map
+        equatorial_map, column_names = prepare_flattened_map(
+            equatorial_map, llh_map
+        )
         if llh_map:
             type_map = "llh"
         else:

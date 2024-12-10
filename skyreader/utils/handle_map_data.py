@@ -366,13 +366,39 @@ def clean_data_multiorder_map(
     return grid_value, uniqs
 
 
+def prepare_flattened_map(
+    equatorial_map: np.ndarray,
+    llh_map: bool,
+) -> Tuple[np.ndarray, List[str]]:
+    """
+    Create the healpix map that needs to be saved keeping
+    into account if it is a probability or a llh map
+    """
+    if llh_map:
+        column_names = ['2DLLH']
+    else:
+        # avoid excessively heavy data format for the flattened map
+        min_prob = np.nanmin(equatorial_map)
+        equatorial_map[np.isnan(equatorial_map)] = np.min(
+            [min_prob, 1e-16]
+        )
+        equatorial_map[equatorial_map < 1e-16] = np.mean(
+            equatorial_map[equatorial_map < 1e-16]
+        )
+        column_names = ["PROBABILITY"]
+    return equatorial_map, column_names
+
+
 def prepare_multiorder_map(
     grid_value: np.ndarray,
     uniq_array: np.ndarray,
     llh_map: bool,
     column_names: List[str]
 ) -> Tuple[mhealpy.HealpixMap, List[str]]:
-    
+    """
+    Create the mhealpix map that needs to be saved keeping
+    into account if it is a probability or a llh map
+    """
     # clean from redundant pixels
     grid_value, uniq_array = clean_data_multiorder_map(
         grid_value, uniq_array
