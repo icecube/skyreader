@@ -8,6 +8,7 @@ import pickle
 from pathlib import Path
 from typing import List, Union
 
+import copy
 import healpy  # type: ignore[import]
 import mhealpy  # type: ignore[import]
 import matplotlib  # type: ignore[import]
@@ -451,6 +452,7 @@ class SkyScanPlotter:
                 # get rid of nan values only for the contours and
                 # avoiding crashes during plotting
                 max_map = np.nanmax(equatorial_map)
+                grid_values_for_contours = copy.copy(grid_value)
                 grid_values_for_contours[
                     np.isnan(grid_values_for_contours)
                 ] = max_map
