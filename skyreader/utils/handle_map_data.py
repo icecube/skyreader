@@ -200,7 +200,7 @@ def get_contour_levels(
 
     # Calculate the contour levels
     if llh_map:  # likelihood map
-        min_value = np.min(equatorial_map)
+        min_value = np.nanmin(equatorial_map)
         if systematics:
             # from Pan-Starrs event 127852
             # these are values determined from MC by Will on the TS (2*LLH)
