@@ -1,4 +1,4 @@
-from typing import Union, Tuple
+from typing import Union, Tuple, List
 import logging
 
 import healpy  # type: ignore[import]
@@ -364,3 +364,29 @@ def clean_data_multiorder_map(
     grid_value = np.delete(grid_value, filled_indeces)
     uniqs = np.delete(uniqs, filled_indeces)
     return grid_value, uniqs
+
+
+def prepare_multiorder_map(
+    grid_value: np.ndarray,
+    uniq_array: np.ndarray,
+    llh_map: bool,
+    column_names: List[str]
+) -> Tuple[mhealpy.HealpixMap, List[str]]:
+    
+    # clean from redundant pixels
+    grid_value, uniq_array = clean_data_multiorder_map(
+        grid_value, uniq_array
+    )
+    # save multiorder version of the map
+    if llh_map:
+        multiorder_map = mhealpy.HealpixMap(grid_value, uniq_array)
+    else:
+        all_nsides = mhealpy.uniq2nside(uniq_array)
+        max_nside = np.max(all_nsides)
+        multiorder_map = mhealpy.HealpixMap(
+            grid_value / healpy.nside2pixarea(
+                max_nside, degrees=True,
+            ), uniq_array
+        )
+        column_names = [f"{column_names[0]} DENSITY [deg-2]"]
+    return multiorder_map, column_names

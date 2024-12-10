@@ -30,7 +30,7 @@ from .plotting_tools import (
 
 from ..utils.areas import calculate_area, get_contour_areas
 from ..utils.handle_map_data import (
-    extract_map, get_contour_levels, clean_data_multiorder_map
+    extract_map, get_contour_levels, prepare_multiorder_map
 )
 from ..result import SkyScanResult
 
@@ -845,31 +845,20 @@ class SkyScanPlotter:
             type_map = "llh"
         else:
             type_map = "probability"
+        filename_main = f"{unique_id}.skymap_nside_{mmap_nside}_{type_map}"
         healpy.write_map(
-            f"{unique_id}.skymap_nside_{mmap_nside}_{type_map}.fits.gz",
+            self.output_dir / f"{filename_main}.fits.gz",
             equatorial_map,
             coord='C',
             column_names=column_names,
             extra_header=fits_header,
             overwrite=True
         )
-
-        # clean from redundant pixels
-        grid_value, uniq_array = clean_data_multiorder_map(
-            grid_value, uniq_array
+        multiorder_map, column_names = prepare_multiorder_map(
+            grid_value, uniq_array, llh_map, column_names
         )
-        # save multiorder version of the map
-        if llh_map:
-            multiorder_map = mhealpy.HealpixMap(grid_value, uniq_array)
-        else:
-            multiorder_map = mhealpy.HealpixMap(
-                grid_value / healpy.nside2pixarea(
-                    max_nside, degrees=True,
-                ), uniq_array
-            )
-            column_names = [f"{column_names[0]} DENSITY [deg-2]"]
         multiorder_map.write_map(
-            f"{unique_id}.skymap_nside_{mmap_nside}_{type_map}.multiorder.fits.gz",
+            self.output_dir / f"{filename_main}.multiorder.fits.gz",
             column_names=column_names,
             extra_header=fits_header,
             overwrite=True,
