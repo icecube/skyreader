@@ -448,16 +448,21 @@ class SkyScanPlotter:
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
 
         if not circular:
+            grid_values_for_contours = copy.copy(grid_value)
             if llh_map:
                 # get rid of nan values only for the contours
                 # this avoids crashes during plotting
-                grid_values_for_contours = copy.copy(grid_value)
                 grid_values_for_contours[
                     np.isnan(grid_values_for_contours)
                 ] = np.nanmax(equatorial_map)
                 contour_levels_for_contours = contour_levels
             else:
-                grid_values_for_contours = np.log(grid_value)
+                grid_values_for_contours[
+                    np.isnan(grid_values_for_contours)
+                ] = np.nanmin(equatorial_map)
+                grid_values_for_contours = np.log(
+                    grid_values_for_contours
+                )
                 contour_levels_for_contours = np.log(contour_levels)
             # Get contours from healpix map
             contours_by_level = meander.spherical_contours(
@@ -827,6 +832,9 @@ class SkyScanPlotter:
             column_names = ['2DLLH']
         else:
             # avoid excessively heavy data format for the flattened map
+            equatorial_map[np.isnan(equatorial_map)] = np.nanmin(
+                equatorial_map
+            )
             equatorial_map[equatorial_map < 1e-16] = np.mean(
                 equatorial_map[equatorial_map < 1e-16]
             )

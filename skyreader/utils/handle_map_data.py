@@ -116,14 +116,16 @@ def extract_map(
         equatorial_map = np.exp(-1. * equatorial_map)
         equatorial_map = equatorial_map / np.nansum(equatorial_map)
 
-        # nan values are a problem for the convolution and the contours
+        # if the probability is less than ~1e-300 this is set to 0
+        # because of the float64 data format
         min_map = np.nanmin(equatorial_map[equatorial_map > 0.])
-        equatorial_map[np.isnan(equatorial_map)] = min_map
         equatorial_map[equatorial_map == 0.] = min_map
 
         if angular_error_floor is not None:
             # convolute with a gaussian. angular_error_floor is the
             # sigma in deg.
+            # nan values are a problem for the convolution and the contours
+            equatorial_map[np.isnan(equatorial_map)] = min_map
             equatorial_map = healpy.smoothing(
                 equatorial_map,
                 sigma=np.deg2rad(angular_error_floor),
@@ -140,7 +142,6 @@ def extract_map(
         grid_value = healpy.get_interp_val(
             equatorial_map, np.pi/2 - grid_dec, grid_ra
         )
-        grid_value[np.isnan(grid_value)] = min_map
         grid_value = grid_value.clip(min_map, None)
 
     return grid_value, grid_ra, grid_dec, equatorial_map, uniq_array
