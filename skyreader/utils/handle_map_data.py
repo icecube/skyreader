@@ -112,11 +112,10 @@ def extract_map(
         grid_value = grid_value * 2.
         equatorial_map *= 2.
 
-        # nan values are a problem for the convolution and the contours
-        max_map = np.nanmax(equatorial_map)
-        equatorial_map[np.isnan(equatorial_map)] = max_map
-        grid_value[np.isnan(grid_value)] = max_map
-        grid_value = grid_value.clip(None, max_map)
+        #max_map = np.nanmax(equatorial_map)
+        #equatorial_map[np.isnan(equatorial_map)] = max_map
+        #grid_value[np.isnan(grid_value)] = max_map
+        #grid_value = grid_value.clip(None, max_map)
     else:
         # Convert to probability
         equatorial_map = np.exp(-1. * equatorial_map)
