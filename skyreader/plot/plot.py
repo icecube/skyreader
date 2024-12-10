@@ -456,7 +456,9 @@ class SkyScanPlotter:
                 grid_values_for_contours[
                     np.isnan(grid_values_for_contours)
                 ] = max_map
-                grid_values_for_contours = grid_value.clip(None, max_map)
+                grid_values_for_contours = grid_values_for_contours.clip(
+                    None, max_map
+                )
                 contour_levels_for_contours = contour_levels
             else:
                 grid_values_for_contours = np.log(grid_value)
