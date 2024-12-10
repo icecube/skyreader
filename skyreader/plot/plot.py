@@ -381,20 +381,20 @@ class SkyScanPlotter:
         return Theta, Phi
 
     def create_plot_zoomed(
-            self,
-            result: SkyScanResult,
-            extra_ra=np.nan,
-            extra_dec=np.nan,
-            extra_radius=np.nan,
-            systematics=False,
-            plot_bounding_box=False,
-            plot_4fgl=False,
-            circular=False,
-            circular_err50=0.2,
-            circular_err90=0.7,
-            angular_error_floor=None,  # if not None, sigma of the
-            # gaussian to convolute the map with in deg.
-            llh_map=True
+        self,
+        result: SkyScanResult,
+        extra_ra=np.nan,
+        extra_dec=np.nan,
+        extra_radius=np.nan,
+        systematics=False,
+        plot_bounding_box=False,
+        plot_4fgl=False,
+        circular=False,
+        circular_err50=0.2,
+        circular_err90=0.7,
+        angular_error_floor=None,  # if not None, sigma of the
+        # gaussian to convolute the map with in deg.
+        llh_map=True
     ):
         """Uses healpy to plot a map."""
 
@@ -643,7 +643,6 @@ class SkyScanPlotter:
             rot=(lon, lat, 0),
             bounds=(lower_lon, upper_lon, lower_lat, upper_lat)
         )
-
         if plot_4fgl:
             # Overlay 4FGL sources
             plot_catalog(
@@ -672,13 +671,11 @@ class SkyScanPlotter:
             print(contain_txt)
 
         print(
-            "Contour Area (50%):",
-            contour_areas[0],
+            f"Contour Area (50%): {contour_areas[0]}",
             "square degrees (scaled)"
         )
         print(
-            "Contour Area (90%):",
-            contour_areas[1],
+            f"Contour Area (90%): {contour_areas[1]}",
             "square degrees (scaled)"
         )
 
@@ -828,7 +825,6 @@ class SkyScanPlotter:
                 equatorial_map[equatorial_map < 1e-16]
             )
             column_names = ["PROBABILITY"]
-
         # save flattened map
         if llh_map:
             type_map = "llh"
