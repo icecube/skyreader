@@ -115,12 +115,7 @@ def extract_map(
         # Convert to probability
         equatorial_map = np.exp(-1. * equatorial_map)
         equatorial_map = equatorial_map / np.nansum(equatorial_map)
-
-        # if the probability is less than ~1e-300 this is set to 0
-        # because of the float64 data format
         min_map = np.nanmin(equatorial_map)
-        # min_map = np.nanmin(equatorial_map[equatorial_map > 0.])
-        # equatorial_map[equatorial_map == 0.] = min_map
 
         if angular_error_floor is not None:
             # convolute with a gaussian. angular_error_floor is the
@@ -376,10 +371,6 @@ def prepare_flattened_map(
         column_names = ['2DLLH']
     else:
         # avoid excessively heavy data format for the flattened map
-        # min_prob = np.nanmin(equatorial_map)
-        # equatorial_map[np.isnan(equatorial_map)] = np.min(
-        #     [min_prob, 1e-16]
-        # )
         equatorial_map[equatorial_map < 1e-16] = np.nanmean(
             equatorial_map[equatorial_map < 1e-16]
         )
