@@ -16,7 +16,9 @@ from matplotlib.transforms import Affine2D  # type: ignore[import]
 
 matplotlib.use('agg')
 
-def format_fits_header(event_id_tuple, mjd, ra, dec, uncertainty, llh_map):
+def format_fits_header(
+    event_id_tuple, mjd, ra, dec, uncertainty, llh_map,
+):
     """Prepare some of the relevant event information for a fits file
     header."""
     run_id, event_id, event_type = event_id_tuple
@@ -24,7 +26,7 @@ def format_fits_header(event_id_tuple, mjd, ra, dec, uncertainty, llh_map):
     if llh_map:
         uncertainty_comment = 'Change in 2LLH based on Wilks theorem'
     else:
-        uncertainty_comment = 'Probability-per-pixel (all pixels with same area)'
+        uncertainty_comment = 'Highest posterior density 90% credible region'
 
     header = [
         ('RUNID', run_id),
@@ -42,7 +44,7 @@ def format_fits_header(event_id_tuple, mjd, ra, dec, uncertainty, llh_map):
             '90% containment error high'),
         ('DEC_ERR_MINUS', np.round(np.abs(uncertainty[1][0]),2),
             '90% containment error low'),
-        ('COMMENTS', '50%(90%) uncertainty location' \
+        ('COMMENTS', '90% uncertainty location' \
             + ' => ' + uncertainty_comment),
         ('NOTE', 'Please ignore pixels with infinite or NaN values.' \
             + ' They are rare cases of the minimizer failing to converge')

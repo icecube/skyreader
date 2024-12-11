@@ -8,8 +8,8 @@ import pickle
 from pathlib import Path
 from typing import List, Union
 
+import copy
 import healpy  # type: ignore[import]
-# import mhealpy
 import matplotlib  # type: ignore[import]
 import meander  # type: ignore[import]
 import numpy as np
@@ -28,7 +28,12 @@ from .plotting_tools import (
 )
 
 from ..utils.areas import calculate_area, get_contour_areas
-from ..utils.handle_map_data import extract_map, get_contour_levels
+from ..utils.handle_map_data import (
+    extract_map,
+    get_contour_levels,
+    prepare_flattened_map,
+    prepare_multiorder_map,
+)
 from ..result import SkyScanResult
 
 LOGGER = logging.getLogger("skyreader.plot")
@@ -92,10 +97,11 @@ class SkyScanPlotter:
         plot_filename = f"{unique_id}.{addition_to_filename}pdf"
         LOGGER.info(f"saving plot to {plot_filename}")
 
-        (
-            grid_value, grid_ra, grid_dec, equatorial_map
-        ) = extract_map(
-            result, llh_map, angular_error_floor, remove_min_val=not llh_map
+        grid_value, grid_ra, grid_dec, equatorial_map, _ = extract_map(
+            result,
+            llh_map,
+            angular_error_floor,
+            remove_min_val=not llh_map,
         )
 
         grid_pix = healpy.ang2pix(max(nsides), np.pi/2. - DEC, RA)
@@ -129,9 +135,17 @@ class SkyScanPlotter:
                 self.PLOT_COLORMAP.name.rstrip('_r')
             ]
             text_colorbar = r"log10$(p)$"
-            vmin = np.min(np.log10(equatorial_map))
-            vmax = np.max(np.log10(equatorial_map))
-            map_to_plot = np.log10(plotting_map)
+            vmin = np.nanmin(
+                np.log10(equatorial_map[equatorial_map != 0.])
+            )
+            vmax = np.nanmax(
+                np.log10(equatorial_map[equatorial_map != 0.])
+            )
+            map_to_plot = copy.copy(plotting_map)
+            map_to_plot[plotting_map != 0.] = np.log10(
+                plotting_map[plotting_map != 0.]
+            )
+            map_to_plot[plotting_map == 0.] = np.nan
         equatorial_map = np.ma.masked_invalid(equatorial_map)
         map_to_plot = np.ma.masked_invalid(map_to_plot)
 
@@ -378,20 +392,20 @@ class SkyScanPlotter:
         return Theta, Phi
 
     def create_plot_zoomed(
-            self,
-            result: SkyScanResult,
-            extra_ra=np.nan,
-            extra_dec=np.nan,
-            extra_radius=np.nan,
-            systematics=False,
-            plot_bounding_box=False,
-            plot_4fgl=False,
-            circular=False,
-            circular_err50=0.2,
-            circular_err90=0.7,
-            angular_error_floor=None,  # if not None, sigma of the
-            # gaussian to convolute the map with in deg.
-            llh_map=True
+        self,
+        result: SkyScanResult,
+        extra_ra=np.nan,
+        extra_dec=np.nan,
+        extra_radius=np.nan,
+        systematics=False,
+        plot_bounding_box=False,
+        plot_4fgl=False,
+        circular=False,
+        circular_err50=0.2,
+        circular_err90=0.7,
+        angular_error_floor=None,  # if not None, sigma of the
+        # gaussian to convolute the map with in deg.
+        llh_map=True
     ):
         """Uses healpy to plot a map."""
 
@@ -427,7 +441,7 @@ class SkyScanPlotter:
             plot_filename = unique_id + ".plot_zoomed.pdf"
 
         (
-            grid_value, grid_ra, grid_dec, equatorial_map
+            grid_value, grid_ra, grid_dec, equatorial_map, uniq_array
         ) = extract_map(result, llh_map, angular_error_floor)
         min_dec = grid_dec[0]
         min_ra = grid_ra[0]
@@ -444,11 +458,24 @@ class SkyScanPlotter:
         sample_points = np.array([np.pi/2 - grid_dec, grid_ra]).T
 
         if not circular:
+            grid_values_for_contours = copy.copy(grid_value)
             if llh_map:
-                grid_values_for_contours = grid_value
+                # get rid of nan values only for the contours
+                # this avoids crashes during plotting
+                grid_values_for_contours[
+                    np.isnan(grid_values_for_contours)
+                ] = np.nanmax(equatorial_map)
                 contour_levels_for_contours = contour_levels
             else:
-                grid_values_for_contours = np.log(grid_value)
+                grid_values_for_contours[
+                    np.logical_or(
+                        np.isnan(grid_values_for_contours),
+                        grid_values_for_contours == 0.
+                    )
+                ] = np.nanmin(equatorial_map[equatorial_map > 0.])
+                grid_values_for_contours = np.log(
+                    grid_values_for_contours
+                )
                 contour_levels_for_contours = np.log(contour_levels)
             # Get contours from healpix map
             contours_by_level = meander.spherical_contours(
@@ -640,7 +667,6 @@ class SkyScanPlotter:
             rot=(lon, lat, 0),
             bounds=(lower_lon, upper_lon, lower_lat, upper_lat)
         )
-
         if plot_4fgl:
             # Overlay 4FGL sources
             plot_catalog(
@@ -669,13 +695,11 @@ class SkyScanPlotter:
             print(contain_txt)
 
         print(
-            "Contour Area (50%):",
-            contour_areas[0],
+            f"Contour Area (50%): {contour_areas[0]}",
             "square degrees (scaled)"
         )
         print(
-            "Contour Area (90%):",
-            contour_areas[1],
+            f"Contour Area (90%): {contour_areas[1]}",
             "square degrees (scaled)"
         )
 
@@ -712,7 +736,6 @@ class SkyScanPlotter:
             # join end to beginning
             bounding_ras_list.append(bounding_ras_list[0])
             bounding_decs_list.append(bounding_decs_list[0])
-
             bounding_ras: np.ndarray = np.asarray(bounding_ras_list)
             bounding_decs: np.ndarray = np.asarray(bounding_decs_list)
             bounding_phi = np.radians(bounding_ras)
@@ -732,7 +755,6 @@ class SkyScanPlotter:
                 linestyle='dashed',
                 label=contour_label
             )
-
         # Output contours in RA, dec instead of theta, phi
         saving_contours: list = []
         for contours in contours_by_level:
@@ -744,7 +766,6 @@ class SkyScanPlotter:
                 decs = np.pi/2 - theta
                 for tmp_ra, tmp_dec in zip(ras, decs):
                     saving_contours[-1][-1].append([tmp_ra, tmp_dec])
-
         # Save the individual contours, send messages
         for i, val in enumerate(["50", "90"]):
             ras = list(np.asarray(saving_contours[i][0]).T[0])
@@ -776,18 +797,15 @@ class SkyScanPlotter:
 
         # Plot the original online reconstruction location
         if np.sum(np.isnan([extra_ra, extra_dec, extra_radius])) == 0:
-
             # dist = angular_distance(minRA, minDec, extra_ra * np.pi/180.,
             # extra_dec * np.pi/180.)
             # print("Millipede best fit is", dist /(np.pi *
             # extra_radius/(1.177 * 180.)), "sigma from reported best fit")
-
             extra_ra_rad = np.radians(extra_ra)
             extra_dec_rad = np.radians(extra_dec)
             extra_radius_rad = np.radians(extra_radius)
             extra_lon = extra_ra_rad
             extra_lat = extra_dec_rad
-
             healpy.projscatter(
                 np.degrees(extra_lon),
                 np.degrees(extra_lat),
@@ -816,51 +834,38 @@ class SkyScanPlotter:
                     color=cont_col,
                     linestyle=cont_sty
                 )
-
         plt.legend(fontsize=6, loc="lower left")
-
         # Dump the whole contour
         path = unique_id + ".contour.pkl"
         print("Saving contour to", path)
         with open(path, "wb") as f:
             pickle.dump(saving_contours, f)
 
-        # logic for multiordermaps -> for future developements
-
-        # save multiorder version of the map
-        # multiorder_map = mhealpy.HealpixMap(
-        #     grid_value, uniq_array
-        # )
-        # multiorder_map.write_map(
-        #     f"{unique_id}.skymap_nside_{mmap_nside}.multiorder.fits.gz",
-        #     column_names=["PROBABILITY"],
-        #     extra_header=fits_header,
-        #     overwrite=True,
-        # )
-
-        if llh_map:
-            column_names = ['2DLLH']
-        else:
-            # avoid excessively heavy data format for the flattened map
-            equatorial_map[
-                equatorial_map < 1e-16
-            ] = np.mean(
-                equatorial_map[equatorial_map < 1e-16]
-            )
-            column_names = ["PROBABILITY"]
-
         # save flattened map
+        equatorial_map, column_names = prepare_flattened_map(
+            equatorial_map, llh_map
+        )
         if llh_map:
             type_map = "llh"
         else:
             type_map = "probability"
+        filename_main = f"{unique_id}.skymap_nside_{mmap_nside}_{type_map}"
         healpy.write_map(
-            f"{unique_id}.skymap_nside_{mmap_nside}_{type_map}.fits.gz",
+            self.output_dir / f"{filename_main}.fits.gz",
             equatorial_map,
             coord='C',
             column_names=column_names,
             extra_header=fits_header,
             overwrite=True
+        )
+        multiorder_map, column_names = prepare_multiorder_map(
+            grid_value, uniq_array, llh_map, column_names
+        )
+        multiorder_map.write_map(
+            self.output_dir / f"{filename_main}.multiorder.fits.gz",
+            column_names=column_names,
+            extra_header=fits_header,
+            overwrite=True,
         )
 
         # Save the figure
