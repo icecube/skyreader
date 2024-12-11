@@ -126,16 +126,13 @@ def extract_map(
             # convolute with a gaussian. angular_error_floor is the
             # sigma in deg.
             # nan values are a problem for the convolution and the contours
-            equatorial_map[np.isnan(equatorial_map)] = min_map
-            equatorial_map = healpy.smoothing(
-                equatorial_map,
+            equatorial_map = np.nan_to_num(healpy.smoothing(
+                np.nan_to_num(equatorial_map),
                 sigma=np.deg2rad(angular_error_floor),
-            )
+            ))
 
             # normalize map
-            min_map = np.nanmin(equatorial_map[equatorial_map > 0.0])
-            min_map = np.min([min_map, 1e-16])
-            equatorial_map[np.isnan(equatorial_map)] = min_map
+            min_map = np.min(equatorial_map[equatorial_map >= 0.])
             equatorial_map = equatorial_map.clip(min_map, None)
             normalization = np.nansum(equatorial_map)
             equatorial_map = equatorial_map / normalization
