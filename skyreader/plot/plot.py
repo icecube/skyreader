@@ -472,7 +472,7 @@ class SkyScanPlotter:
                         np.isnan(grid_values_for_contours),
                         grid_values_for_contours == 0.
                     )
-                ] = np.nanmin(equatorial_map)
+                ] = np.nanmin(equatorial_map[equatorial_map > 0.])
                 grid_values_for_contours = np.log(
                     grid_values_for_contours
                 )
