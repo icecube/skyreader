@@ -119,7 +119,7 @@ def extract_map(
         # if the probability is less than ~1e-300 this is set to 0
         # because of the float64 data format
         min_map = np.nanmin(equatorial_map[equatorial_map > 0.])
-        equatorial_map[equatorial_map == 0.] = min_map
+        # equatorial_map[equatorial_map == 0.] = min_map
 
         if angular_error_floor is not None:
             # convolute with a gaussian. angular_error_floor is the
