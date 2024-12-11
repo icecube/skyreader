@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.1 (2024-12-11)
+
+### Other
+
+* Multiorder maps ([#39](https://github.com/icecube/skyreader/issues/39)) ([`21ec1d6`](https://github.com/icecube/skyreader/commit/21ec1d6a6247ff944268cc43b8ad6593cb00eabc))
+
 ## v1.3.0 (2024-10-14)
 
 ### Other
