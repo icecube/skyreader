@@ -468,7 +468,10 @@ class SkyScanPlotter:
                 contour_levels_for_contours = contour_levels
             else:
                 grid_values_for_contours[
-                    np.isnan(grid_values_for_contours)
+                    np.logical_or(
+                        np.isnan(grid_values_for_contours),
+                        grid_values_for_contours == 0.
+                    )
                 ] = np.nanmin(equatorial_map)
                 grid_values_for_contours = np.log(
                     grid_values_for_contours
