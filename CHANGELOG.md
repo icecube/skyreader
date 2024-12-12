@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.2 (2024-12-12)
+
+### Other
+
+* Save contour files to specified output directory ([#40](https://github.com/icecube/skyreader/issues/40)) ([`55e9b2f`](https://github.com/icecube/skyreader/commit/55e9b2f25c6a6d82b455ecc9475fdd15c7ca836a))
+
 ## v1.3.1 (2024-12-11)
 
 ### Other
