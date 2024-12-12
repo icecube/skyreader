@@ -771,10 +771,10 @@ class SkyScanPlotter:
             ras = list(np.asarray(saving_contours[i][0]).T[0])
             decs = list(np.asarray(saving_contours[i][0]).T[1])
             tab = {"ra (rad)": ras, "dec (rad)": decs}
-            savename = unique_id + ".contour_" + val + ".txt"
+            savename = self.output_dir / f"{unique_id}.contour_{val}.txt"
             try:
                 LOGGER.info(f"Dumping to {savename}")
-                ascii.write(tab, self.output_dir / savename, overwrite=True)
+                ascii.write(tab, savename, overwrite=True)
             except OSError:
                 LOGGER.error(
                     "OS Error prevented contours from being written, "
