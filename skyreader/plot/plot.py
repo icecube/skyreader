@@ -773,8 +773,8 @@ class SkyScanPlotter:
             tab = {"ra (rad)": ras, "dec (rad)": decs}
             savename = unique_id + ".contour_" + val + ".txt"
             try:
-                LOGGER.info("Dumping to {savename}")
-                ascii.write(tab, savename, overwrite=True)
+                LOGGER.info(f"Dumping to {savename}")
+                ascii.write(tab, self.output_dir / savename, overwrite=True)
             except OSError:
                 LOGGER.error(
                     "OS Error prevented contours from being written, "
@@ -836,7 +836,7 @@ class SkyScanPlotter:
                 )
         plt.legend(fontsize=6, loc="lower left")
         # Dump the whole contour
-        path = unique_id + ".contour.pkl"
+        path = self.output_dir / f"{unique_id}.contour.pkl"
         print("Saving contour to", path)
         with open(path, "wb") as f:
             pickle.dump(saving_contours, f)
