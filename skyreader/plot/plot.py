@@ -626,8 +626,7 @@ class SkyScanPlotter:
             contour_colors,
             contours_by_level
         ):
-            contour_label = contour_label + ' - area: {0:.2f} sqdeg'.format(
-                contour_area_sqdeg)
+            contour_label = contour_label + f' - area: {contour_area_sqdeg:.2f} sqdeg'
             first = True
             for contour in contours:
                 theta, phi = contour.T
@@ -746,7 +745,7 @@ class SkyScanPlotter:
             # convert to square-degrees
             bounding_contour_area *= (180.*180.)/(np.pi*np.pi)
             contour_label = r'90% Bounding rectangle' + \
-                ' - area: {0:.2f} sqdeg'.format(bounding_contour_area)
+                f' - area: {bounding_contour_area:.2f} sqdeg'
             healpy.projplot(
                 bounding_theta,
                 bounding_phi,
