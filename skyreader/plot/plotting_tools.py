@@ -33,7 +33,7 @@ def format_fits_header(
         ('EVENTID', event_id),
         ('SENDER', 'IceCube Collaboration'),
         ('EventMJD', mjd),
-        ('I3TYPE', '%s'%event_type,'Alert Type'),
+        ('I3TYPE', f'{event_type}','Alert Type'),
         ('RA', np.round(ra,2),'Degree'),
         ('DEC', np.round(dec,2),'Degree'),
         ('RA_ERR_PLUS', np.round(uncertainty[0][1],2),
@@ -99,12 +99,12 @@ def hp_ticklabels(zoom=False, lonra=None, latra=None, rot=None, bounds=None):
     pe = [path_effects.Stroke(linewidth=1.5, foreground='white'),
           path_effects.Normal()]
     for _ in lats:
-        healpy.projtext(lon_offset, _, "{:.0f}$^\circ$".format(_),
+        healpy.projtext(lon_offset, _, f"{_:.0f}$^\\circ$",
                     lonlat=True, path_effects=pe, fontsize=10)
     if zoom:
         for _ in lons:
             healpy.projtext(_, lat_offset,
-                        "{:.0f}$^\circ$".format(_), lonlat=True,
+                        f"{_:.0f}$^\\circ$", lonlat=True,
                         path_effects=pe, fontsize=10)
     else:
         ax.annotate(r"$\bf{-180^\circ}$", xy=(1.7, 0.625), size="medium")

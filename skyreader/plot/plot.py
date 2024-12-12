@@ -626,8 +626,7 @@ class SkyScanPlotter:
             contour_colors,
             contours_by_level
         ):
-            contour_label = contour_label + ' - area: {0:.2f} sqdeg'.format(
-                contour_area_sqdeg)
+            contour_label = contour_label + f' - area: {contour_area_sqdeg:.2f} sqdeg'
             first = True
             for contour in contours:
                 theta, phi = contour.T
@@ -746,7 +745,7 @@ class SkyScanPlotter:
             # convert to square-degrees
             bounding_contour_area *= (180.*180.)/(np.pi*np.pi)
             contour_label = r'90% Bounding rectangle' + \
-                ' - area: {0:.2f} sqdeg'.format(bounding_contour_area)
+                f' - area: {bounding_contour_area:.2f} sqdeg'
             healpy.projplot(
                 bounding_theta,
                 bounding_phi,
@@ -755,30 +754,6 @@ class SkyScanPlotter:
                 linestyle='dashed',
                 label=contour_label
             )
-        # Output contours in RA, dec instead of theta, phi
-        saving_contours: list = []
-        for contours in contours_by_level:
-            saving_contours.append([])
-            for contour in contours:
-                saving_contours[-1].append([])
-                theta, phi = contour.T
-                ras = phi
-                decs = np.pi/2 - theta
-                for tmp_ra, tmp_dec in zip(ras, decs):
-                    saving_contours[-1][-1].append([tmp_ra, tmp_dec])
-        # Save the individual contours, send messages
-        for i, val in enumerate(["50", "90"]):
-            ras = list(np.asarray(saving_contours[i][0]).T[0])
-            decs = list(np.asarray(saving_contours[i][0]).T[1])
-            tab = {"ra (rad)": ras, "dec (rad)": decs}
-            savename = unique_id + ".contour_" + val + ".txt"
-            try:
-                LOGGER.info("Dumping to {savename}")
-                ascii.write(tab, savename, overwrite=True)
-            except OSError:
-                LOGGER.error(
-                    "OS Error prevented contours from being written, "
-                    "maybe a memory issue. Error is:\n{err}")
 
         uncertainty = [(ra_minus, ra_plus), (dec_minus, dec_plus)]
         fits_header = format_fits_header(
@@ -835,11 +810,6 @@ class SkyScanPlotter:
                     linestyle=cont_sty
                 )
         plt.legend(fontsize=6, loc="lower left")
-        # Dump the whole contour
-        path = unique_id + ".contour.pkl"
-        print("Saving contour to", path)
-        with open(path, "wb") as f:
-            pickle.dump(saving_contours, f)
 
         # save flattened map
         equatorial_map, column_names = prepare_flattened_map(
@@ -878,6 +848,40 @@ class SkyScanPlotter:
             bbox_inches='tight'
         )
 
+        self._save_contours(contours_by_level, unique_id)
         LOGGER.info("done.")
 
         plt.close()
+
+    def _save_contours(self, contours_by_level, unique_id) -> None:
+        # Output contours in RA, dec instead of theta, phi
+        saving_contours: list = []
+        for contours in contours_by_level:
+            saving_contours.append([])
+            for contour in contours:
+                saving_contours[-1].append([])
+                theta, phi = contour.T
+                ras = phi
+                decs = np.pi/2 - theta
+                for tmp_ra, tmp_dec in zip(ras, decs):
+                    saving_contours[-1][-1].append([tmp_ra, tmp_dec])
+
+        # Save the individual contours
+        for i, val in enumerate(["50", "90"]):
+            ras = list(np.asarray(saving_contours[i][0]).T[0])
+            decs = list(np.asarray(saving_contours[i][0]).T[1])
+            tab = {"ra (rad)": ras, "dec (rad)": decs}
+            savepath = self.output_dir / f"{unique_id}.contour_{val}.txt"
+            try:
+                LOGGER.info(f"Dumping to {savepath}")
+                ascii.write(tab, savepath, overwrite=True)
+            except OSError:
+                LOGGER.error(
+                    "OS Error prevented contours from being written, "
+                    "maybe a memory issue. Error is:\n{err}")
+
+        # Dump the whole contour
+        path = self.output_dir / f"{unique_id}.contour.pkl"
+        print("Saving contour to", path)
+        with open(path, "wb") as f:
+            pickle.dump(saving_contours, f)
