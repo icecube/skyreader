@@ -403,7 +403,7 @@ def prepare_multiorder_map(
                 max_nside, degrees=False,
             ),
             uniq_array,
-            unit = "sr-1"
+            unit="sr-1"
         )
         column_names = ["PROBDENSITY"]
     return multiorder_map, column_names
