@@ -400,8 +400,10 @@ def prepare_multiorder_map(
         max_nside = np.max(all_nsides)
         multiorder_map = mhealpy.HealpixMap(
             grid_value / healpy.nside2pixarea(
-                max_nside, degrees=True,
-            ), uniq_array
+                max_nside, degrees=False,
+            ),
+            uniq_array,
+            unit = "sr-1"
         )
-        column_names = [f"{column_names[0]} DENSITY [deg-2]"]
+        column_names = ["PROBDENSITY"]
     return multiorder_map, column_names
