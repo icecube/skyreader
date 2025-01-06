@@ -221,7 +221,7 @@ class SkyScanPlotter:
 
             leg_labels = []
             for i in range(len(contour_labels)):
-                vs = cs_collections[i].get_paths()[0].vertices
+                vs = cs_collections[i].vertices
                 # Compute area enclosed by vertices.
                 # Take absolute values to be independent of orientation of
                 # the boundary integral.
