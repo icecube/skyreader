@@ -384,7 +384,7 @@ def prepare_multiorder_map(
     grid_value: np.ndarray,
     uniq_array: np.ndarray,
     llh_map: bool,
-) -> Tuple[mhealpy.HealpixMap, List[str]]:
+) -> mhealpy.HealpixMap:
     """
     Create the mhealpix map that needs to be saved keeping
     into account if it is a probability or a llh map
