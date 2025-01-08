@@ -32,7 +32,8 @@ def format_fits_header(
         ('RUNID', run_id),
         ('EVENTID', event_id),
         ('SENDER', 'IceCube Collaboration'),
-        ('EventMJD', mjd),
+        # ('DATE-OBS', )
+        ('MJD-OBS', mjd, 'modified Julian date of observation'),
         ('I3TYPE', f'{event_type}','Alert Type'),
         ('RA', np.round(ra,2),'Degree'),
         ('DEC', np.round(dec,2),'Degree'),
