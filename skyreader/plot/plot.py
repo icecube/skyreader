@@ -756,7 +756,6 @@ class SkyScanPlotter:
             )
 
         uncertainty = [(ra_minus, ra_plus), (dec_minus, dec_plus)]
-        print(event_metadata)
         fits_header = format_fits_header(
             (
                 event_metadata.run_id,
