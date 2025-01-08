@@ -812,7 +812,7 @@ class SkyScanPlotter:
         plt.legend(fontsize=6, loc="lower left")
 
         # save flattened map
-        equatorial_map, column_names = prepare_flattened_map(
+        equatorial_map, column_names, column_units = prepare_flattened_map(
             equatorial_map, llh_map
         )
         if llh_map:
@@ -822,14 +822,17 @@ class SkyScanPlotter:
         filename_main = f"{unique_id}.skymap_nside_{mmap_nside}_{type_map}"
         healpy.write_map(
             self.output_dir / f"{filename_main}.fits.gz",
-            equatorial_map,
+            equatorial_map / healpy.nside2pixarea(
+                max_nside, degrees=False,
+            ),
             coord='C',
             column_names=column_names,
+            column_units=column_units,
             extra_header=fits_header,
             overwrite=True
         )
-        multiorder_map, column_names = prepare_multiorder_map(
-            grid_value, uniq_array, llh_map, column_names
+        multiorder_map = prepare_multiorder_map(
+            grid_value, uniq_array, llh_map,
         )
         multiorder_map.write_map(
             self.output_dir / f"{filename_main}.multiorder.fits.gz",

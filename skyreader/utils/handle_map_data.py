@@ -369,20 +369,21 @@ def prepare_flattened_map(
     """
     if llh_map:
         column_names = ['2DLLH']
+        column_units = None
     else:
         # avoid excessively heavy data format for the flattened map
         equatorial_map[equatorial_map < 1e-16] = np.nanmean(
             equatorial_map[equatorial_map < 1e-16]
         )
-        column_names = ["PROBABILITY"]
-    return equatorial_map, column_names
+        column_names = ["PROBDENSITY"]
+        column_units = ["sr-1"]
+    return equatorial_map, column_names, column_units
 
 
 def prepare_multiorder_map(
     grid_value: np.ndarray,
     uniq_array: np.ndarray,
     llh_map: bool,
-    column_names: List[str]
 ) -> Tuple[mhealpy.HealpixMap, List[str]]:
     """
     Create the mhealpix map that needs to be saved keeping
@@ -405,5 +406,4 @@ def prepare_multiorder_map(
             uniq_array,
             unit="sr-1"
         )
-        column_names = ["PROBDENSITY"]
-    return multiorder_map, column_names
+    return multiorder_map
