@@ -8,7 +8,7 @@ astropy==7.0.0
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
-astropy-iers-data==0.2025.1.6.0.33.42
+astropy-iers-data==0.2025.1.13.0.34.51
     # via astropy
 cachetools==5.5.0
     # via wipac-rest-tools
@@ -94,7 +94,7 @@ requests==2.32.3
     #   wipac-rest-tools
 requests-futures==1.0.2
     # via wipac-rest-tools
-scipy==1.15.0
+scipy==1.15.1
     # via icecube-skyreader (setup.py)
 six==1.17.0
     # via python-dateutil
@@ -108,7 +108,7 @@ urllib3==2.3.0
     # via
     #   requests
     #   wipac-rest-tools
-wipac-dev-tools==1.13.0
+wipac-dev-tools==1.15.0
     # via
     #   icecube-skyreader (setup.py)
     #   wipac-rest-tools
