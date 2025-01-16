@@ -21,7 +21,6 @@ from matplotlib.projections import projection_registry  # type: ignore[import]
 
 from .plotting_tools import (
     AstroMollweideAxes,
-    DecFormatter,
     format_fits_header,
     hp_ticklabels,
     plot_catalog
@@ -102,8 +101,6 @@ class SkyScanPlotter:
         grid_pix = healpy.ang2pix(max(nsides), np.pi/2. - DEC, RA)
         plotting_map = equatorial_map[grid_pix]
 
-        min_value = grid_value[0]  # for probability map, this is actually
-        # the max_value
         min_dec = grid_dec[0]
         min_ra = grid_ra[0]
 
