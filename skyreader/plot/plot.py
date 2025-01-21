@@ -132,10 +132,10 @@ class SkyScanPlotter:
                 plotting_map[plotting_map != 0.]
             )
             print(np.min(map_to_plot), np.nanmin(map_to_plot))
-            equatorial_map[
+            map_to_plot[
                 np.logical_or(
-                    np.isnan(equatorial_map),
-                    equatorial_map == 0.
+                    np.isnan(map_to_plot),
+                    map_to_plot == 0.
                 )
             ] = np.nanmin(equatorial_map[equatorial_map > 0.])
             print(np.min(equatorial_map), np.nanmin(equatorial_map))
