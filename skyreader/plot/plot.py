@@ -41,7 +41,7 @@ LOGGER = logging.getLogger("skyreader.plot")
 class SkyScanPlotter:
     PLOT_SIZE_Y_IN: float = 3.85
     PLOT_SIZE_X_IN: float = 6
-    PLOT_DPI_STANDARD = 150
+    PLOT_DPI_STANDARD = 300
     PLOT_DPI_ZOOMED = 1200
     PLOT_COLORMAP = matplotlib.colormaps['plasma_r']
 
