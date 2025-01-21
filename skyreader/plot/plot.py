@@ -133,7 +133,7 @@ class SkyScanPlotter:
             )
             print(np.min(map_to_plot), np.nanmin(map_to_plot))
             print(np.min(equatorial_map), np.nanmin(equatorial_map))
-            # map_to_plot[plotting_map == 0.] = np.nan
+            map_to_plot[plotting_map == 0.] = np.nan
             map_to_plot[
                 np.logical_or(
                     np.isnan(map_to_plot),
@@ -184,6 +184,7 @@ class SkyScanPlotter:
             contour_set = ax.contour(
                 ra, dec, map_to_plot, levels=[level], colors=[color]
             )
+            print(contour_set)
             cs_collections.append(contour_set.get_paths()[0])
             print(level, cs_collections)
             e, _ = contour_set.legend_elements()
