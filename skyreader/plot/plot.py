@@ -140,7 +140,7 @@ class SkyScanPlotter:
             ] = np.nanmin(equatorial_map[equatorial_map > 0.])
             print(np.min(equatorial_map), np.nanmin(equatorial_map))
             map_to_plot[plotting_map == 0.] = np.nan
-        equatorial_map = np.ma.masked_invalid(equatorial_map)
+        # equatorial_map = np.ma.masked_invalid(equatorial_map)
         map_to_plot = np.ma.masked_invalid(map_to_plot)
 
         LOGGER.info(f"Preparing plot: {plot_filename}...")
