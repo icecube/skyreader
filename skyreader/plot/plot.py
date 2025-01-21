@@ -140,7 +140,7 @@ class SkyScanPlotter:
             ] = np.nanmin(equatorial_map[equatorial_map > 0.])
             print(np.min(equatorial_map), np.nanmin(equatorial_map))
             map_to_plot[plotting_map == 0.] = np.nan
-        # equatorial_map = np.ma.masked_invalid(equatorial_map)
+        equatorial_map = np.ma.masked_invalid(equatorial_map)
         map_to_plot = np.ma.masked_invalid(map_to_plot)
 
         LOGGER.info(f"Preparing plot: {plot_filename}...")
@@ -185,6 +185,7 @@ class SkyScanPlotter:
                 ra, dec, map_to_plot, levels=[level], colors=[color]
             )
             cs_collections.append(contour_set.get_paths()[0])
+            print(cs_collections)
             e, _ = contour_set.legend_elements()
             leg_element.append(e[0])
 
