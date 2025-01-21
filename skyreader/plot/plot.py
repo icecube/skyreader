@@ -131,11 +131,7 @@ class SkyScanPlotter:
             map_to_plot[plotting_map != 0.] = np.log10(
                 plotting_map[plotting_map != 0.]
             )
-            print(f"max equatorial map: {np.nanmax(equatorial_map)}")
-            print(np.min(map_to_plot), np.nanmin(map_to_plot), np.nanmax(map_to_plot))
-            print(np.min(equatorial_map), np.nanmin(equatorial_map))
             map_to_plot[plotting_map == 0.] = np.nan
-            map_to_plot[np.isnan(map_to_plot)] = np.nanmin(map_to_plot)
         equatorial_map = np.ma.masked_invalid(equatorial_map)
         map_to_plot = np.ma.masked_invalid(map_to_plot)
 
@@ -180,9 +176,7 @@ class SkyScanPlotter:
             contour_set = ax.contour(
                 ra, dec, map_to_plot, levels=[level], colors=[color]
             )
-            print(contour_set.get_paths())
             cs_collections.append(contour_set.get_paths()[0])
-            print(level, cs_collections)
             e, _ = contour_set.legend_elements()
             leg_element.append(e[0])
 
