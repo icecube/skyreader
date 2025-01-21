@@ -185,7 +185,7 @@ class SkyScanPlotter:
                 ra, dec, map_to_plot, levels=[level], colors=[color]
             )
             cs_collections.append(contour_set.get_paths()[0])
-            print(cs_collections)
+            print(level, cs_collections)
             e, _ = contour_set.legend_elements()
             leg_element.append(e[0])
 
