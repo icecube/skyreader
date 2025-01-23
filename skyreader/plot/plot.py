@@ -699,6 +699,7 @@ class SkyScanPlotter:
         else:
             type_map = "probability"
         filename_main = f"{unique_id}.skymap_nside_{mmap_nside}_{type_map}"
+        print(equatorial_map)
         healpy.write_map(
             self.output_dir / f"{filename_main}.fits.gz",
             equatorial_map,
