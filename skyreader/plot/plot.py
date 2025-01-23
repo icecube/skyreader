@@ -699,7 +699,6 @@ class SkyScanPlotter:
         else:
             type_map = "probability"
         filename_main = f"{unique_id}.skymap_nside_{mmap_nside}_{type_map}"
-        print(equatorial_map)
         healpy.write_map(
             self.output_dir / f"{filename_main}.fits.gz",
             equatorial_map,
@@ -707,7 +706,6 @@ class SkyScanPlotter:
             column_names=column_names,
             extra_header=fits_header,
             overwrite=True,
-            #dtype='float32'
         )
         multiorder_map, column_names = prepare_multiorder_map(
             grid_value, uniq_array, llh_map, column_names
