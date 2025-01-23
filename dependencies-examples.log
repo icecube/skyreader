@@ -10,7 +10,7 @@ astropy==7.0.0
     #   icecube-skyreader (setup.py)
 astropy-iers-data==0.2025.1.20.0.32.27
     # via astropy
-cachetools==5.5.0
+cachetools==5.5.1
     # via wipac-rest-tools
 certifi==2024.12.14
     # via requests
@@ -24,7 +24,7 @@ cryptography==44.0.0
     # via pyjwt
 cycler==0.12.1
     # via matplotlib
-fonttools==4.55.4
+fonttools==4.55.5
     # via matplotlib
 healpy==1.18.0
     # via
@@ -91,7 +91,7 @@ tornado==6.4.2
     # via wipac-rest-tools
 typing-extensions==4.12.2
     # via wipac-dev-tools
-tzdata==2024.2
+tzdata==2025.1
     # via pandas
 urllib3==2.3.0
     # via
