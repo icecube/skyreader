@@ -374,7 +374,7 @@ def prepare_flattened_map(
         equatorial_map[equatorial_map < 1e-16] = np.nanmean(
             equatorial_map[equatorial_map < 1e-16]
         )
-        column_names = ["PROBABILITY"]
+        column_names = ["PROB"]
     return equatorial_map, column_names
 
 

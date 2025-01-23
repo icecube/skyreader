@@ -704,6 +704,7 @@ class SkyScanPlotter:
             equatorial_map,
             coord='C',
             column_names=column_names,
+            column_units=["pix-1"]
             extra_header=fits_header,
             overwrite=True,
         )
