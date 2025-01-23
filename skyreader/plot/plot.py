@@ -707,7 +707,7 @@ class SkyScanPlotter:
             column_names=column_names,
             extra_header=fits_header,
             overwrite=True,
-            dtype='float32'
+            #dtype='float32'
         )
         multiorder_map, column_names = prepare_multiorder_map(
             grid_value, uniq_array, llh_map, column_names
