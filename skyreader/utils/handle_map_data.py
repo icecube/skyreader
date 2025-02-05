@@ -362,7 +362,7 @@ def clean_data_multiorder_map(
 def prepare_flattened_map(
     equatorial_map: np.ndarray,
     llh_map: bool,
-) -> Tuple[np.ndarray, List[str], List[str]]:
+) -> Tuple[np.ndarray, List[str], Union[List[str], None]]:
     """
     Create the healpix map that needs to be saved keeping
     into account if it is a probability or a llh map
