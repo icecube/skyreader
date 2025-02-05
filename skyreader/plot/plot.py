@@ -168,15 +168,12 @@ class SkyScanPlotter:
             contour_levels, contour_labels, contour_colors
         ) = get_contour_levels(equatorial_map, llh_map, systematics)
 
-        leg_element = []
         for level, color in zip(contour_levels, contour_colors):
             if not llh_map:
                 level = np.log10(level)
-            contour_set = ax.contour(
+            ax.contour(
                 ra, dec, map_to_plot, levels=[level], colors=[color]
             )
-            e, _ = contour_set.legend_elements()
-            leg_element.append(e[0])
 
         # graticule
         if isinstance(ax, AstroMollweideAxes):
