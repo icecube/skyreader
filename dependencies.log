@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=dependencies.log
 #
-astropy==7.0.0
+astropy==7.0.1
     # via
     #   healpy
     #   icecube-skyreader (setup.py)
