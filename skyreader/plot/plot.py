@@ -21,7 +21,6 @@ from matplotlib.projections import projection_registry  # type: ignore[import]
 
 from .plotting_tools import (
     AstroMollweideAxes,
-    DecFormatter,
     format_fits_header,
     hp_ticklabels,
     plot_catalog
@@ -42,7 +41,7 @@ LOGGER = logging.getLogger("skyreader.plot")
 class SkyScanPlotter:
     PLOT_SIZE_Y_IN: float = 3.85
     PLOT_SIZE_X_IN: float = 6
-    PLOT_DPI_STANDARD = 150
+    PLOT_DPI_STANDARD = 300
     PLOT_DPI_ZOOMED = 1200
     PLOT_COLORMAP = matplotlib.colormaps['plasma_r']
 
@@ -55,7 +54,6 @@ class SkyScanPlotter:
     def create_plot(
         self,
         result: SkyScanResult,
-        dozoom: bool = False,
         systematics: bool = False,
         llh_map: bool = True,
         angular_error_floor: Union[None, float] = None,
@@ -65,7 +63,7 @@ class SkyScanPlotter:
         PLOT_DPI_STANDARD and PLOT_DPI_ZOOMED. Zoomed mode is very inefficient
         as the meshgrid is created for the full sky.
         """
-        dpi = self.PLOT_DPI_STANDARD if not dozoom else self.PLOT_DPI_ZOOMED
+        dpi = self.PLOT_DPI_STANDARD
 
         # number of  grid points along RA coordinate
         xsize = int(self.PLOT_SIZE_X_IN * dpi)
@@ -90,11 +88,7 @@ class SkyScanPlotter:
         mjd_str = f"MJD: {event_metadata.mjd}"
         plot_title = f"{run_str} {evt_str} {typ_str} {mjd_str}"
 
-        if dozoom:
-            addition_to_filename = 'plot_zoomed_legacy.'
-        else:
-            addition_to_filename = ''
-        plot_filename = f"{unique_id}.{addition_to_filename}pdf"
+        plot_filename = f"{unique_id}.pdf"
         LOGGER.info(f"saving plot to {plot_filename}")
 
         grid_value, grid_ra, grid_dec, equatorial_map, _ = extract_map(
@@ -107,8 +101,6 @@ class SkyScanPlotter:
         grid_pix = healpy.ang2pix(max(nsides), np.pi/2. - DEC, RA)
         plotting_map = equatorial_map[grid_pix]
 
-        min_value = grid_value[0]  # for probability map, this is actually
-        # the max_value
         min_dec = grid_dec[0]
         min_ra = grid_ra[0]
 
@@ -118,12 +110,6 @@ class SkyScanPlotter:
         LOGGER.info(f"min Dec: {min_dec * 180./np.pi} deg")
 
         # renormalize
-        if dozoom:
-            plotting_map = plotting_map - min_value
-            equatorial_map = equatorial_map - min_value
-            vmin = 0.
-            vmax = 50
-            map_to_plot = plotting_map
         if llh_map:
             cmap = self.PLOT_COLORMAP
             text_colorbar = r"$-2 \ln(L)$"
@@ -162,11 +148,8 @@ class SkyScanPlotter:
 
         ax = None
 
-        if dozoom:
-            ax = fig.add_subplot(111)  # ,projection='cartesian')
-        else:
-            cmap.set_over(alpha=0.)  # make underflows transparent
-            ax = fig.add_subplot(111, projection='astro mollweide')
+        cmap.set_over(alpha=0.)  # make underflows transparent
+        ax = fig.add_subplot(111, projection='astro mollweide')
 
         # rasterized makes the map bitmap while the labels remain vectorial
         # flip longitude to the astro convention
@@ -185,124 +168,26 @@ class SkyScanPlotter:
             contour_levels, contour_labels, contour_colors
         ) = get_contour_levels(equatorial_map, llh_map, systematics)
 
-        leg_element = []
-        cs_collections = []
         for level, color in zip(contour_levels, contour_colors):
             if not llh_map:
                 level = np.log10(level)
-            contour_set = ax.contour(
+            ax.contour(
                 ra, dec, map_to_plot, levels=[level], colors=[color]
             )
-            cs_collections.append(contour_set.collections[0])
-            e, _ = contour_set.legend_elements()
-            leg_element.append(e[0])
 
-        if not dozoom:
-            # graticule
-            if isinstance(ax, AstroMollweideAxes):
-                # mypy guard
-                ax.set_longitude_grid(30)
-                ax.set_latitude_grid(30)
-            cb = fig.colorbar(
-                image,
-                orientation='horizontal',
-                shrink=.6,
-                pad=0.05,
-                ticks=[vmin, vmax],
-            )
-            cb.ax.xaxis.set_label_text(text_colorbar)
-        else:
-            ax.set_xlabel('right ascension')
-            ax.set_ylabel('declination')
-            cb = fig.colorbar(
-                image, orientation='horizontal', shrink=.6, pad=0.13
-            )
-            cb.ax.xaxis.set_label_text(r"$-2 \Delta \ln (L)$")
-
-            leg_labels = []
-            for i in range(len(contour_labels)):
-                vs = cs_collections[i].get_paths()[0].vertices
-                # Compute area enclosed by vertices.
-                # Take absolute values to be independent of orientation of
-                # the boundary integral.
-                contour_area = abs(calculate_area(vs))  # in square-radians
-                # convert to square-degrees
-                contour_area_sqdeg = contour_area*(180.*180.)/(np.pi*np.pi)
-
-                area_string = f"area: {contour_area_sqdeg:.2f}sqdeg"
-                leg_labels.append(
-                    f'{contour_labels[i]} - {area_string}'
-                )
-
-            ax.scatter(
-                min_ra,
-                min_dec,
-                s=20,
-                marker='*',
-                color='black',
-                label=r'scan best-fit',
-                zorder=2
-            )
-            ax.legend(
-                leg_element,
-                leg_labels,
-                loc='lower right',
-                fontsize=8,
-                scatterpoints=1,
-                ncol=2
-            )
-
-            LOGGER.info(f"Contour Area (90%): {contour_area_sqdeg} "
-                        f"degrees (cartesian) "
-                        f"{contour_area_sqdeg * np.cos(min_dec)**2} "
-                        "degrees (scaled)")
-            x_width = 1.6 * np.sqrt(contour_area_sqdeg)
-            LOGGER.info(f"x width is {x_width}")
-            if np.isnan(x_width):
-                # this get called only when contour_area / x_width is
-                # NaN so possibly never invoked in typical situations
-                raise RuntimeError(
-                    "Estimated area / width is NaN and the fallback logic "
-                    "for this scenario is no longer supported. If you "
-                    "encounter this error raise an issue to SkyReader."
-                )
-                # mypy error: "QuadContourSet" has no attribute "allsegs"
-                # [attr-defined]. This attribute is likely deprecated but
-                # this scenario is rarely (if ever) hit original code is
-                # kept commented for the time being
-
-                # note: contour_set is re-assigned at every iteration of
-                # the loop on contour_levels, contour_colors, so this
-                # effectively corresponds to the last contour_set
-                # x_width = 1.6*(max(contour_set.allsegs[i][0][:,0]) -
-                # min(contour_set.allsegs[i][0][:,0]))
-
-            y_width = 0.5 * x_width
-
-            lower_x = max(min_ra - x_width*np.pi/180., 0.)
-            upper_x = min(min_ra + x_width*np.pi/180., 2 * np.pi)
-            lower_y = max(min_dec - y_width*np.pi/180., -np.pi/2.)
-            upper_y = min(min_dec + y_width*np.pi/180., np.pi/2.)
-
-            ax.set_xlim(upper_x, lower_x)
-            ax.set_ylim(lower_y, upper_y)
-
-            # why not RAFormatter?
-            ax.xaxis.set_major_formatter(DecFormatter())
-
-            ax.yaxis.set_major_formatter(DecFormatter())
-
-            factor = 0.25*(np.pi/180.)
-            while (upper_x - lower_x)/factor > 6:
-                factor *= 2.
-            tick_label_grid = factor
-
-            ax.xaxis.set_major_locator(
-                matplotlib.ticker.MultipleLocator(base=tick_label_grid)
-            )
-            ax.yaxis.set_major_locator(
-                matplotlib.ticker.MultipleLocator(base=tick_label_grid)
-            )
+        # graticule
+        if isinstance(ax, AstroMollweideAxes):
+            # mypy guard
+            ax.set_longitude_grid(30)
+            ax.set_latitude_grid(30)
+        cb = fig.colorbar(
+            image,
+            orientation='horizontal',
+            shrink=.6,
+            pad=0.05,
+            ticks=[vmin, vmax],
+        )
+        cb.ax.xaxis.set_label_text(text_colorbar)
 
         # cb.ax.xaxis.labelpad = -8
         # workaround for issue with viewers, see colorbar docstring
@@ -310,9 +195,6 @@ class SkyScanPlotter:
         # it is actually a valid object before accessing it
         if isinstance(cb.solids, matplotlib.collections.QuadMesh):
             cb.solids.set_edgecolor("face")
-
-        if dozoom:
-            ax.set_aspect('equal')
 
         ax.tick_params(axis='x', labelsize=10)
         ax.tick_params(axis='y', labelsize=10)
@@ -333,20 +215,12 @@ class SkyScanPlotter:
 
         # remove white space around figure
         spacing = 0.01
-        if not dozoom:
-            fig.subplots_adjust(
-                bottom=spacing,
-                top=1.-spacing,
-                left=spacing+0.04,
-                right=1.-spacing
-            )
-        else:
-            fig.subplots_adjust(
-                bottom=spacing,
-                top=0.92-spacing,
-                left=spacing+0.1,
-                right=1.-spacing
-            )
+        fig.subplots_adjust(
+            bottom=spacing,
+            top=1.-spacing,
+            left=spacing+0.04,
+            right=1.-spacing
+        )
 
         # set the title
         fig.suptitle(plot_title)
@@ -812,7 +686,7 @@ class SkyScanPlotter:
         plt.legend(fontsize=6, loc="lower left")
 
         # save flattened map
-        equatorial_map, column_names = prepare_flattened_map(
+        equatorial_map, column_names, column_units = prepare_flattened_map(
             equatorial_map, llh_map
         )
         if llh_map:
@@ -825,8 +699,9 @@ class SkyScanPlotter:
             equatorial_map,
             coord='C',
             column_names=column_names,
+            column_units=column_units,
             extra_header=fits_header,
-            overwrite=True
+            overwrite=True,
         )
         multiorder_map, column_names = prepare_multiorder_map(
             grid_value, uniq_array, llh_map, column_names

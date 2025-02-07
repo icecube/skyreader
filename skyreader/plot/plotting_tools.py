@@ -4,6 +4,7 @@
 # flake8: noqa
 
 import astropy.io.fits as pyfits  # type: ignore[import]
+from astropy.time import Time  # type: ignore[import]
 import healpy  # type: ignore[import]
 import matplotlib  # type: ignore[import]
 import matplotlib.patheffects as path_effects  # type: ignore[import]
@@ -28,11 +29,14 @@ def format_fits_header(
     else:
         uncertainty_comment = 'Highest posterior density 90% credible region'
 
+    t = Time(mjd, format="mjd")
+
     header = [
         ('RUNID', run_id),
         ('EVENTID', event_id),
         ('SENDER', 'IceCube Collaboration'),
-        ('EventMJD', mjd),
+        ('DATE-OBS', t.isot, 'UTC date of the observation'),
+        ('MJD-OBS', mjd, 'modified Julian date of the observation'),
         ('I3TYPE', f'{event_type}','Alert Type'),
         ('RA', np.round(ra,2),'Degree'),
         ('DEC', np.round(dec,2),'Degree'),

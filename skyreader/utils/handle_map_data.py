@@ -362,20 +362,22 @@ def clean_data_multiorder_map(
 def prepare_flattened_map(
     equatorial_map: np.ndarray,
     llh_map: bool,
-) -> Tuple[np.ndarray, List[str]]:
+) -> Tuple[np.ndarray, List[str], Union[List[str], None]]:
     """
     Create the healpix map that needs to be saved keeping
     into account if it is a probability or a llh map
     """
     if llh_map:
         column_names = ['2DLLH']
+        column_units = None
     else:
         # avoid excessively heavy data format for the flattened map
         equatorial_map[equatorial_map < 1e-16] = np.nanmean(
             equatorial_map[equatorial_map < 1e-16]
         )
-        column_names = ["PROBABILITY"]
-    return equatorial_map, column_names
+        column_names = ["PROB"]
+        column_units = ["pix-1"]
+    return equatorial_map, column_names, column_units
 
 
 def prepare_multiorder_map(
@@ -400,8 +402,10 @@ def prepare_multiorder_map(
         max_nside = np.max(all_nsides)
         multiorder_map = mhealpy.HealpixMap(
             grid_value / healpy.nside2pixarea(
-                max_nside, degrees=True,
-            ), uniq_array
+                max_nside, degrees=False,
+            ),
+            uniq_array,
+            unit="sr-1"
         )
-        column_names = [f"{column_names[0]} DENSITY [deg-2]"]
+        column_names = ["PROBDENSITY"]
     return multiorder_map, column_names
