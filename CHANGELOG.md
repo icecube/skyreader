@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.3 (2025-02-07)
+
+### Other
+
+* <bot> update dependencies*.log files(s) ([`3fccfa1`](https://github.com/icecube/skyreader/commit/3fccfa10c018839ec5e81e9c3bb110e4a2ae5610))
+* Compatibility with lvk ([#41](https://github.com/icecube/skyreader/issues/41)) ([`96c1751`](https://github.com/icecube/skyreader/commit/96c1751b9f8f70fdc2a2496c05cdc26e8f525e41))
+
 ## v1.3.2 (2024-12-12)
 
 ### Other
