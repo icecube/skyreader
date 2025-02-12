@@ -1,12 +1,27 @@
-# WIPACrepo/wipac-dev-py-setup-action@v4+ Migration Helper:
-
-# set these fields:
 [project]
-version = "0.0.0"
-dependencies = []  # leave empty if there are no dependencies
+version = "1.3.3"
+dependencies = [
+    "astropy",
+    "healpy",
+    "matplotlib",
+    "meander",
+    "mhealpy",
+    "numpy",
+    "pandas",
+    "scipy",
+    "wipac-dev-tools"
+]
 
-# optional sections:
-
-# [project.optional-dependencies]
-# foo = []
-# bar = []
+[project.optional-dependencies]
+tests = [
+    "pytest",
+    "pytest-mock"
+]
+examples = [
+    "wipac-rest-tools"
+]
+mypy = [
+    "pytest",
+    "pytest-mock",
+    "wipac-rest-tools"
+]
