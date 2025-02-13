@@ -156,6 +156,7 @@ jobs:
     concurrency: release  # prevent any possible race conditions
     permissions:
       id-token: write
+      contents: write  # to allow pushing to the repo
     steps:
       - uses: actions/checkout@v4
         with:
