@@ -2,6 +2,21 @@
 
 
 
+## v1.3.6 (2025-02-13)
+
+###  
+
+* Updates to CI and Packaging - 12 ([`dc05fbe`](https://github.com/icecube/skyreader/commit/dc05fbe80cff23620befe548cd6d1eb58a78cc63))
+
+* Updates to CI and Packaging - 11 ([`adb2a91`](https://github.com/icecube/skyreader/commit/adb2a91d65fc82389d882dff6e22c178538d8c34))
+
+* Updates to CI and Packaging - 10 ([`cf15978`](https://github.com/icecube/skyreader/commit/cf15978085671743b14bc7bf8a4ec4603b9b0712))
+
+* Merge remote-tracking branch &#39;origin/main&#39; ([`2439ca8`](https://github.com/icecube/skyreader/commit/2439ca8d0af300a6a73efffddb2c2cda1df1184a))
+
+* Updates to CI and Packaging - 9 ([`d305173`](https://github.com/icecube/skyreader/commit/d3051739273496fa5bc2529a143c682b5ef5ccb3))
+
+
 ## v1.3.5 (2025-02-13)
 
 ###  
