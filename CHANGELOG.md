@@ -2,6 +2,15 @@
 
 
 
+## v1.3.5 (2025-02-13)
+
+###  
+
+* Updates to CI and Packaging - 8 ([`0791bc2`](https://github.com/icecube/skyreader/commit/0791bc2a9481550d2d03539f8458953ebdcd9ea0))
+
+* Updates to CI and Packaging - 7 ([`d04eb9c`](https://github.com/icecube/skyreader/commit/d04eb9c642689902156e3a35ddcb1a20abdf8008))
+
+
 ## v1.3.4 (2025-02-13)
 
 ###  
