@@ -175,7 +175,7 @@ jobs:
         with:
           password: ${{ secrets.PYPI_TOKEN }}
       # GitHub Publish
-      - uses: python-semantic-release/python-semantic-release@v9.8.1
+      - uses: python-semantic-release/upload-to-gh-release@v9.8.1
         if: steps.release.outputs.released == 'true'
         with:
           github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # b/c 'main' push-protections
