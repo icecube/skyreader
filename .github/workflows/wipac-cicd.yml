@@ -154,6 +154,8 @@ jobs:
     needs: [ flake8, mypy, py-setup, py-dependencies, unit-tests ]
     runs-on: ubuntu-latest
     concurrency: release  # prevent any possible race conditions
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
