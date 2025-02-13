@@ -98,8 +98,8 @@ jobs:
           author: WIPAC Developers
           author_email: developers@icecube.wisc.edu
           keywords: IceCube "skymap scanner" skymap HEALPix neutrino reconstruction
-          git_committer_name: ${{ env.BOT_NAME }}
-          git_committer_email: ${{ env.BOT_EMAIL }}
+          git_committer_name: ${{ env.BOT_NAME }}  # b/c 'main' push-protections
+          git_committer_email: ${{ env.BOT_EMAIL }}  # b/c 'main' push-protections
 
   py-dependencies:
     needs: [ writable-branch-detect ]
@@ -155,21 +155,26 @@ jobs:
     runs-on: ubuntu-latest
     concurrency: release  # prevent any possible race conditions
     steps:
+      # see https://python-semantic-release.readthedocs.io/en/latest/automatic-releases/github-actions.html#common-workflow-example
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.sha }}
+      - run: git checkout -B ${{ github.ref_name }} ${{ github.sha }}
       # Python-Package Version Bump
       - uses: python-semantic-release/python-semantic-release@v9.19.1
-        id: psr-psr
+        id: release
         with:
-          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # b/c 'main' push-protections
+          git_committer_name: ${{ env.BOT_NAME }}  # b/c 'main' push-protections
+          git_committer_email: ${{ env.BOT_EMAIL }}  # b/c 'main' push-protections
       # PyPI Release
-      - uses: pypa/gh-action-pypi-publish@v1.8.14
-        if: steps.psr-psr.outputs.released == 'true'
+      - uses: pypa/gh-action-pypi-publish@v1.12.4
+        if: steps.release.outputs.released == 'true'
         with:
           password: ${{ secrets.PYPI_TOKEN }}
       # GitHub Release
       - uses: python-semantic-release/publish-action@v9.19.1
-        if: steps.psr-psr.outputs.released == 'true'
+        if: steps.release.outputs.released == 'true'
         with:
-          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # b/c 'main' push-protections
