@@ -154,13 +154,16 @@ jobs:
     needs: [ flake8, mypy, py-setup, py-dependencies, unit-tests ]
     runs-on: ubuntu-latest
     concurrency: release  # prevent any possible race conditions
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+      contents: write
     steps:
       # see https://python-semantic-release.readthedocs.io/en/latest/automatic-releases/github-actions.html#common-workflow-example
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.sha }}
-      - run: git checkout -B ${{ github.ref_name }} ${{ github.sha }}
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # b/c 'main' push-protections
       # Python-Package Version Bump
       - uses: python-semantic-release/python-semantic-release@v9.8.1
         id: release
