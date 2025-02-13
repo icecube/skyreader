@@ -168,12 +168,13 @@ jobs:
           github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # b/c 'main' push-protections
           git_committer_name: ${{ env.BOT_NAME }}  # b/c 'main' push-protections
           git_committer_email: ${{ env.BOT_EMAIL }}  # b/c 'main' push-protections
-      # PyPI Release
+          root_options: "-vv"
+      # PyPI Publish
       - uses: pypa/gh-action-pypi-publish@v1.12.4
         if: steps.release.outputs.released == 'true'
         with:
           password: ${{ secrets.PYPI_TOKEN }}
-      # GitHub Release
+      # GitHub Publish
       - uses: python-semantic-release/publish-action@v9.19.1
         if: steps.release.outputs.released == 'true'
         with:
