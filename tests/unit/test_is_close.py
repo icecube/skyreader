@@ -11,7 +11,7 @@ from skyreader.result import PyDictResult
 
 
 position_time_columns = ["X", "Y", "Z", "time"]
-dummy_position_time = [0, 0, 0, 0]
+dummy_position_time = [0., 0., 0., 0.]
 
 
 @pytest.fixture
