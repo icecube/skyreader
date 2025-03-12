@@ -80,7 +80,10 @@ class SkyScanResult:
     """
 
     PIXEL_TYPE = np.dtype(
-        [("index", int), ("llh", float), ("E_in", float), ("E_tot", float)]
+        [
+            ("index", int), ("llh", float), ("E_in", float), ("E_tot", float),
+            ("X", float), ("Y", float), ("Z", float), ("time", float)
+        ]
     )
     PIXEL_FIELDS: Tuple[str, ...] = PIXEL_TYPE.names  # type: ignore[assignment]
     ATOL = 1.0e-8  # 1.0e-8 is the default used by np.isclose()
