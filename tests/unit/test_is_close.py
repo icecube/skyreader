@@ -57,7 +57,12 @@ def test_001(json_diff: Path) -> None:
     beta_pydict: PyDictResult = {
         "nside-8": {
             "columns": COLUMNS + 'X Y Z T'.split(),
-            "metadata": {"nside": 8, "version": 1},
+            "metadata": {"nside": 8,
+                         "version": 1,
+                         "run_id": 0,
+                         "event_id": 0,
+                         "mjd": 1.,
+                         "event_type": ""},
             "data": [
                 [0, 496.5, 4643.5, 4736.5, 0., 0., 0., 0.],
             ],

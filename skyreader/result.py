@@ -155,6 +155,7 @@ class SkyScanResult:
             rdiff = (abs(s_val - o_val) - self.ATOL) / abs(o_val)  # used by np.isclose
         except ZeroDivisionError:
             rdiff = float("inf")
+
         return (
             rdiff,
             bool(
@@ -238,13 +239,14 @@ class SkyScanResult:
         """Get whether the two nside's pixels are all "close"."""
         # zip-iterate each pixel-data
         nside_diffs = []
+        common_fields = tuple(_ for _ in self.PIXEL_TYPES[1].names if _ in set(self.pixel_fields).intersection(other.pixel_fields))
         for sre_pix, ore_pix in it.zip_longest(
             self.result.get(nside, []),  # empty-list -> fillvalue
             other.result.get(nside, []),  # empty-list -> fillvalue
             fillvalue=np.full((len(self.pixel_fields),), np.nan),  # 1 vector
         ):
             diff_vals, test_vals = self.isclose_pixel(
-                sre_pix, ore_pix, equal_nan, rtol_per_field, tuple(set(self.pixel_fields).intersection(other.pixel_fields))
+                sre_pix, ore_pix, equal_nan, rtol_per_field, common_fields
             )
             pix_diff = (
                 tuple(sre_pix.tolist()),
@@ -258,12 +260,13 @@ class SkyScanResult:
 
         # aggregate test-truth values
         nside_equal = {
-            field: all(d[3][self.pixel_fields.index(field)] for d in nside_diffs)
-            for field in set(self.pixel_fields) - set(rtol_per_field)
+            field: all(d[3][common_fields.index(field)] for d in nside_diffs)
+            for field in set(common_fields) - set(rtol_per_field)
         }
+
         nside_close = {
-            field: all(d[3][self.pixel_fields.index(field)] for d in nside_diffs)
-            for field in rtol_per_field
+            field: all(d[3][common_fields.index(field)] for d in nside_diffs)
+            for field in common_fields
         }
 
         # log results (test-truth values)
@@ -301,7 +304,7 @@ class SkyScanResult:
         Returns:
             bool: True if `other` and `self` are close
         """
-        if not rtol_per_field:
+        if rtol_per_field is None:
             rtol_per_field = DEFAULT_RTOL_PER_FIELD
 
         close: Dict[str, bool] = {}  # one bool for each nside value
