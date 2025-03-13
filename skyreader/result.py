@@ -250,7 +250,7 @@ class SkyScanResult:
                                                ore[list(fields_to_compare)],
                                                fillvalue=fillarr):
             diff_vals, test_vals = self.isclose_pixel(
-                sre_pix, ore_pix, equal_nan, rtol_per_field, fields_to_compare
+                sre_pix, ore_pix, equal_nan, rtol_per_field, fields_to_compare # type: ignore[arg-type]
             )
             pix_diff = (
                 tuple(sre_pix.tolist()),
