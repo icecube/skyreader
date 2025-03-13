@@ -176,7 +176,7 @@ class SkyScanResult:
         ore_pix: np.ndarray,
         equal_nan: bool,
         rtol_per_field: Dict[str, float],
-        common_fields: Tuple[str, ...],
+        fields_to_compare: Tuple[str, ...],
     ) -> Tuple[List[float], List[bool]]:
         """Get the diff float-values and test truth-values for the 2 pixel-
         data.
@@ -186,7 +186,7 @@ class SkyScanResult:
         diff_vals = []
         test_vals = []
 
-        for s_val, o_val, field in zip(sre_pix, ore_pix, common_fields):
+        for s_val, o_val, field in zip(sre_pix, ore_pix, fields_to_compare):
             s_val, o_val = float(s_val), float(o_val)
 
             # CASE: a "require close" datapoint
@@ -240,15 +240,15 @@ class SkyScanResult:
         """Get whether the two nside's pixels are all "close"."""
         # zip-iterate each pixel-data
         nside_diffs = []
-        common_fields = tuple(set(self.pixel_fields).intersection(other.pixel_fields))
+        fields_to_compare = tuple(set(self.pixel_fields).intersection(other.pixel_fields))
 
         for sre_pix, ore_pix in it.zip_longest(
-            self.result.get(nside, [])[list(common_fields)],  # empty-list -> fillvalue
-            other.result.get(nside, [])[list(common_fields)],  # empty-list -> fillvalue
+            self.result.get(nside, [])[list(fields_to_compare)],  # empty-list -> fillvalue
+            other.result.get(nside, [])[list(fields_to_compare)],  # empty-list -> fillvalue
             fillvalue=np.full((len(self.pixel_fields),), np.nan),  # 1 vector
         ):
             diff_vals, test_vals = self.isclose_pixel(
-                sre_pix, ore_pix, equal_nan, rtol_per_field, common_fields
+                sre_pix, ore_pix, equal_nan, rtol_per_field, fields_to_compare
             )
             pix_diff = (
                 tuple(sre_pix.tolist()),
@@ -262,13 +262,13 @@ class SkyScanResult:
 
         # aggregate test-truth values
         nside_equal = {
-            field: all(d[3][common_fields.index(field)] for d in nside_diffs)
-            for field in set(common_fields) - set(rtol_per_field)
+            field: all(d[3][fields_to_compare.index(field)] for d in nside_diffs)
+            for field in set(fields_to_compare) - set(rtol_per_field)
         }
 
         nside_close = {
-            field: all(d[3][common_fields.index(field)] for d in nside_diffs)
-            for field in common_fields
+            field: all(d[3][fields_to_compare.index(field)] for d in nside_diffs)
+            for field in fields_to_compare
         }
 
         # log results (test-truth values)
@@ -306,7 +306,7 @@ class SkyScanResult:
         Returns:
             bool: True if `other` and `self` are close
         """
-        if rtol_per_field is None:
+        if not rtol_per_field:
             rtol_per_field = DEFAULT_RTOL_PER_FIELD
 
         close: Dict[str, bool] = {}  # one bool for each nside value
