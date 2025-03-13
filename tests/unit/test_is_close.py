@@ -10,7 +10,8 @@ from skyreader import SkyScanResult
 from skyreader.result import PyDictResult
 
 
-COLUMNS = ["index", "llh", "E_in", "E_tot"]
+COLUMNS_V0 = ["index", "llh", "E_in", "E_tot"]
+COLUMNS_V1 = ["index", "llh", "E_in", "E_tot", "X", "Y", "Z", "T"]
 
 
 @pytest.fixture
@@ -25,7 +26,7 @@ def test_000(json_diff: Path) -> None:
 
     alpha_pydict: PyDictResult = {
         "nside-8": {
-            "columns": COLUMNS,
+            "columns": COLUMNS_V0,
             "metadata": {"nside": 8},
             "data": [
                 [0, 496.5, 4643.5, 4736.5],
@@ -42,10 +43,36 @@ def test_000(json_diff: Path) -> None:
 
 
 def test_001(json_diff: Path) -> None:
+    """Compare same instances."""
+
+    alpha_pydict: PyDictResult = {
+        "nside-8": {
+            "columns": COLUMNS_V1,
+            "metadata": {"nside": 8,
+                         "version": 1,
+                         "run_id": 0,
+                         "event_id": 0,
+                         "mjd": 1.,
+                         "event_type": ""},
+            "data": [
+                [0, 496.5, 4643.5, 4736.5, 1., 2., 3., 4.],
+            ],
+        },
+    }
+    alpha = SkyScanResult.deserialize(alpha_pydict)
+
+    assert alpha.is_close(
+        alpha,
+        equal_nan=True,
+        dump_json_diff=json_diff,
+    )
+
+
+def test_002(json_diff: Path) -> None:
     """Compare v0 with v1 data format."""
     alpha_pydict: PyDictResult = {
         "nside-8": {
-            "columns": COLUMNS,
+            "columns": COLUMNS_V0,
             "metadata": {"nside": 8},
             "data": [
                 [0, 496.5, 4643.5, 4736.5],
@@ -56,7 +83,7 @@ def test_001(json_diff: Path) -> None:
 
     beta_pydict: PyDictResult = {
         "nside-8": {
-            "columns": COLUMNS + 'X Y Z T'.split(),
+            "columns": COLUMNS_V1,
             "metadata": {"nside": 8,
                          "version": 1,
                          "run_id": 0,
@@ -75,6 +102,11 @@ def test_001(json_diff: Path) -> None:
         equal_nan=True,
         dump_json_diff=json_diff,
     )
+    assert beta.is_close(
+        alpha,
+        equal_nan=True,
+        dump_json_diff=json_diff,
+    )
 
 
 def test_010(json_diff: Path) -> None:
@@ -83,7 +115,7 @@ def test_010(json_diff: Path) -> None:
 
     alpha_pydict: PyDictResult = {
         "nside-8": {
-            "columns": COLUMNS,
+            "columns": COLUMNS_V0,
             "metadata": {"nside": 8},
             "data": [
                 [0, 496.5, 4643.5, 4736.5],
@@ -94,7 +126,7 @@ def test_010(json_diff: Path) -> None:
 
     beta_pydict: PyDictResult = {
         "nside-8": {
-            "columns": COLUMNS,
+            "columns": COLUMNS_V0,
             "metadata": {"nside": 8},
             "data": [
                 [
@@ -138,7 +170,7 @@ def test_011__fail(fail_index: int, fail_field: str, json_diff: Path) -> None:
 
     alpha_pydict: PyDictResult = {
         "nside-8": {
-            "columns": COLUMNS,
+            "columns": COLUMNS_V0,
             "metadata": {"nside": 8},
             "data": [
                 [0, 496.5, 4643.5, 4736.5],
@@ -153,7 +185,7 @@ def test_011__fail(fail_index: int, fail_field: str, json_diff: Path) -> None:
     fail_scale = (1 / rtol_per_field[fail_field]) * 1.1  # > 1/rtol should fail
     bigger_pydict: PyDictResult = {
         "nside-8": {
-            "columns": COLUMNS,
+            "columns": COLUMNS_V0,
             "metadata": {"nside": 8},
             "data": [
                 [
@@ -180,7 +212,7 @@ def test_011__fail(fail_index: int, fail_field: str, json_diff: Path) -> None:
     fail_scale = 2.0  # >1 should fail
     bigger_pydict = {
         "nside-8": {
-            "columns": COLUMNS,
+            "columns": COLUMNS_V0,
             "metadata": {"nside": 8},
             "data": [
                 [
@@ -209,7 +241,7 @@ def test_020(json_diff: Path) -> None:
 
     alpha_pydict: PyDictResult = {
         "nside-8": {
-            "columns": COLUMNS,
+            "columns": COLUMNS_V0,
             "metadata": {"nside": 8},
             "data": [
                 [0, 496.5, 4643.5, 4736.5],
@@ -217,7 +249,7 @@ def test_020(json_diff: Path) -> None:
             ],
         },
         "nside-64": {
-            "columns": COLUMNS,
+            "columns": COLUMNS_V0,
             "metadata": {"nside": 64},
             "data": [
                 [0, 355.5, 4585.5, 7842.5],
@@ -230,7 +262,7 @@ def test_020(json_diff: Path) -> None:
 
     beta_pydict: PyDictResult = {
         "nside-8": {
-            "columns": COLUMNS,
+            "columns": COLUMNS_V0,
             "metadata": {"nside": 8},
             "data": [
                 [
@@ -243,7 +275,7 @@ def test_020(json_diff: Path) -> None:
             ],
         },
         "nside-64": {
-            "columns": COLUMNS,
+            "columns": COLUMNS_V0,
             "metadata": {"nside": 64},
             "data": [
                 [
@@ -278,7 +310,7 @@ def test_100(json_diff: Path) -> None:
 
     alpha_pydict: PyDictResult = {
         "nside-8": {
-            "columns": COLUMNS,
+            "columns": COLUMNS_V0,
             "metadata": {"nside": 8},
             "data": [
                 [0, np.nan, 4643.5, 4736.5],
@@ -289,7 +321,7 @@ def test_100(json_diff: Path) -> None:
 
     beta_pydict: PyDictResult = {
         "nside-8": {
-            "columns": COLUMNS,
+            "columns": COLUMNS_V0,
             "metadata": {"nside": 8},
             "data": [
                 [

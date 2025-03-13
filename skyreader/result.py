@@ -83,6 +83,7 @@ class SkyScanResult:
     dedicated field.
     """
 
+    # versioned dtypes
     PIXEL_TYPES = {0: np.dtype([("index", int), ("llh", float), ("E_in", float), ("E_tot", float),]),
                    1: np.dtype([("index", int), ("llh", float), ("E_in", float), ("E_tot", float),
                                 ("X", float), ("Y", float), ("Z", float), ("T", float),])}
@@ -95,7 +96,7 @@ class SkyScanResult:
         self.result = result
         self.nsides = sorted([self.parse_nside(key) for key in self.result])
         self.pixel_type = self.PIXEL_TYPES[self.get_event_metadata().version]
-        self.pixel_fields: Tuple[str, ...] = self.pixel_type.names
+        self.pixel_fields: Tuple[str, ...] = self.pixel_type.names if self.pixel_type.names is not None else tuple()
 
         # validate result data
         if not isinstance(result, dict):
@@ -239,10 +240,11 @@ class SkyScanResult:
         """Get whether the two nside's pixels are all "close"."""
         # zip-iterate each pixel-data
         nside_diffs = []
-        common_fields = tuple(_ for _ in self.PIXEL_TYPES[1].names if _ in set(self.pixel_fields).intersection(other.pixel_fields))
+        common_fields = tuple(set(self.pixel_fields).intersection(other.pixel_fields))
+
         for sre_pix, ore_pix in it.zip_longest(
-            self.result.get(nside, []),  # empty-list -> fillvalue
-            other.result.get(nside, []),  # empty-list -> fillvalue
+            self.result.get(nside, [])[list(common_fields)],  # empty-list -> fillvalue
+            other.result.get(nside, [])[list(common_fields)],  # empty-list -> fillvalue
             fillvalue=np.full((len(self.pixel_fields),), np.nan),  # 1 vector
         ):
             diff_vals, test_vals = self.isclose_pixel(
@@ -461,7 +463,7 @@ class SkyScanResult:
             metadata=pydict_nside_pixels['metadata']  # type: ignore[call-overload]
             data_version = metadata.get('version', 0)
             pixel_type = cls.PIXEL_TYPES[data_version]
-            pixel_fields: Tuple[str, ...] = pixel_type.names
+            pixel_fields: Tuple[str, ...] = pixel_type.names # type: ignore[assignment]
             # validate keys
             if set(pydict_nside_pixels.keys()) != {'columns', 'metadata', 'data'}:
                 raise ValueError(f"PyDictResult entry has extra/missing keys: {pydict_nside_pixels.keys()}")
