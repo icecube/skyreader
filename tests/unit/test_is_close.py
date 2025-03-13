@@ -10,8 +10,7 @@ from skyreader import SkyScanResult
 from skyreader.result import PyDictResult
 
 
-COLUMNS = ["index", "llh", "E_in", "E_tot", "X", "Y", "Z", "time"]
-DUMMY_POSITION_TIME = [0., 0., 0., 0.]
+COLUMNS = ["index", "llh", "E_in", "E_tot"]
 
 
 @pytest.fixture
@@ -29,7 +28,7 @@ def test_000(json_diff: Path) -> None:
             "columns": COLUMNS,
             "metadata": {"nside": 8},
             "data": [
-                [0, 496.5, 4643.5, 4736.5] + DUMMY_POSITION_TIME,
+                [0, 496.5, 4643.5, 4736.5],
             ],
         },
     }
@@ -37,6 +36,37 @@ def test_000(json_diff: Path) -> None:
 
     assert alpha.is_close(
         alpha,
+        equal_nan=True,
+        dump_json_diff=json_diff,
+    )
+
+
+def test_001(json_diff: Path) -> None:
+    """Compare v0 with v1 data format."""
+    alpha_pydict: PyDictResult = {
+        "nside-8": {
+            "columns": COLUMNS,
+            "metadata": {"nside": 8},
+            "data": [
+                [0, 496.5, 4643.5, 4736.5],
+            ],
+        },
+    }
+    alpha = SkyScanResult.deserialize(alpha_pydict)
+
+    beta_pydict: PyDictResult = {
+        "nside-8": {
+            "columns": COLUMNS + 'X Y Z T'.split(),
+            "metadata": {"nside": 8, "version": 1},
+            "data": [
+                [0, 496.5, 4643.5, 4736.5, 0., 0., 0., 0.],
+            ],
+        },
+    }
+    beta = SkyScanResult.deserialize(beta_pydict)
+
+    assert alpha.is_close(
+        beta,
         equal_nan=True,
         dump_json_diff=json_diff,
     )
@@ -51,7 +81,7 @@ def test_010(json_diff: Path) -> None:
             "columns": COLUMNS,
             "metadata": {"nside": 8},
             "data": [
-                [0, 496.5, 4643.5, 4736.5] + DUMMY_POSITION_TIME,
+                [0, 496.5, 4643.5, 4736.5],
             ],
         },
     }
@@ -67,7 +97,7 @@ def test_010(json_diff: Path) -> None:
                     r[1] * (1 + rtol_per_field["llh"]),
                     r[2] * (1 + rtol_per_field["E_in"]),
                     r[3] * (1 + rtol_per_field["E_tot"]),
-                ] + DUMMY_POSITION_TIME
+                ]
                 for r in alpha_pydict["nside-8"]["data"]
             ],
         },
@@ -106,8 +136,8 @@ def test_011__fail(fail_index: int, fail_field: str, json_diff: Path) -> None:
             "columns": COLUMNS,
             "metadata": {"nside": 8},
             "data": [
-                [0, 496.5, 4643.5, 4736.5] + DUMMY_POSITION_TIME,
-                [1, 586.5, 6845.5, 7546.5] + DUMMY_POSITION_TIME,
+                [0, 496.5, 4643.5, 4736.5],
+                [1, 586.5, 6845.5, 7546.5],
             ],
         },
     }
@@ -127,7 +157,7 @@ def test_011__fail(fail_index: int, fail_field: str, json_diff: Path) -> None:
                     r[2] * (1 + scale("E_in", i, fail_scale) * rtol_per_field["E_in"]),
                     r[3]
                     * (1 + scale("E_tot", i, fail_scale) * rtol_per_field["E_tot"]),
-                ] + DUMMY_POSITION_TIME
+                ]
                 for i, r in enumerate(alpha_pydict["nside-8"]["data"])
             ],
         },
@@ -154,7 +184,7 @@ def test_011__fail(fail_index: int, fail_field: str, json_diff: Path) -> None:
                     r[2] * (1 + scale("E_in", i, fail_scale) * rtol_per_field["E_in"]),
                     r[3]
                     * (1 + scale("E_tot", i, fail_scale) * rtol_per_field["E_tot"]),
-                ] + DUMMY_POSITION_TIME
+                ]
                 for i, r in enumerate(alpha_pydict["nside-8"]["data"])
             ],
         },
@@ -177,17 +207,17 @@ def test_020(json_diff: Path) -> None:
             "columns": COLUMNS,
             "metadata": {"nside": 8},
             "data": [
-                [0, 496.5, 4643.5, 4736.5] + DUMMY_POSITION_TIME,
-                [1, 586.5, 6845.5, 7546.5] + DUMMY_POSITION_TIME,
+                [0, 496.5, 4643.5, 4736.5],
+                [1, 586.5, 6845.5, 7546.5],
             ],
         },
         "nside-64": {
             "columns": COLUMNS,
             "metadata": {"nside": 64},
             "data": [
-                [0, 355.5, 4585.5, 7842.5] + DUMMY_POSITION_TIME,
-                [1, 454.5, 8421.5, 5152.5] + DUMMY_POSITION_TIME,
-                [2, 321.5, 7456.5, 2485.5] + DUMMY_POSITION_TIME,
+                [0, 355.5, 4585.5, 7842.5],
+                [1, 454.5, 8421.5, 5152.5],
+                [2, 321.5, 7456.5, 2485.5],
             ],
         },
     }
@@ -203,7 +233,7 @@ def test_020(json_diff: Path) -> None:
                     r[1] * (1 + rtol_per_field["llh"]),
                     r[2] * (1 + rtol_per_field["E_in"]),
                     r[3] * (1 + rtol_per_field["E_tot"]),
-                ] + DUMMY_POSITION_TIME
+                ]
                 for r in alpha_pydict["nside-8"]["data"]
             ],
         },
@@ -216,7 +246,7 @@ def test_020(json_diff: Path) -> None:
                     r[1] * (1 + rtol_per_field["llh"]),
                     r[2] * (1 + rtol_per_field["E_in"]),
                     r[3] * (1 + rtol_per_field["E_tot"]),
-                ] + DUMMY_POSITION_TIME
+                ]
                 for r in alpha_pydict["nside-64"]["data"]
             ],
         },
@@ -246,7 +276,7 @@ def test_100(json_diff: Path) -> None:
             "columns": COLUMNS,
             "metadata": {"nside": 8},
             "data": [
-                [0, np.nan, 4643.5, 4736.5] + DUMMY_POSITION_TIME,
+                [0, np.nan, 4643.5, 4736.5],
             ],
         },
     }
@@ -262,7 +292,7 @@ def test_100(json_diff: Path) -> None:
                     np.nan,
                     r[2] * (1 + rtol_per_field["E_in"]),
                     r[3] * (1 + rtol_per_field["E_tot"]),
-                ] + DUMMY_POSITION_TIME
+                ]
                 for r in alpha_pydict["nside-8"]["data"]
             ],
         },

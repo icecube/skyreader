@@ -34,6 +34,10 @@ DEFAULT_RTOL_PER_FIELD = {  # w/ rtol values
     "llh": 1e-4,
     "E_in": 1e-2,
     "E_tot": 1e-2,
+    "X": 1e-3,
+    "Y": 1e-3,
+    "Z": 1e-3,
+    "T": 1e-3,
 }
 ZERO_MAKES_FIELD_ALWAYS_ISCLOSE = [
     # if a pixel field's val is 0, then that datapoint is "isclose" to any value
@@ -79,19 +83,19 @@ class SkyScanResult:
     dedicated field.
     """
 
-    PIXEL_TYPE = np.dtype(
-        [
-            ("index", int), ("llh", float), ("E_in", float), ("E_tot", float),
-            ("X", float), ("Y", float), ("Z", float), ("time", float)
-        ]
-    )
-    PIXEL_FIELDS: Tuple[str, ...] = PIXEL_TYPE.names  # type: ignore[assignment]
+    PIXEL_TYPES = {0: np.dtype([("index", int), ("llh", float), ("E_in", float), ("E_tot", float),]),
+                   1: np.dtype([("index", int), ("llh", float), ("E_in", float), ("E_tot", float),
+                                ("X", float), ("Y", float), ("Z", float), ("T", float),])}
     ATOL = 1.0e-8  # 1.0e-8 is the default used by np.isclose()
 
     MINIMAL_METADATA_FIELDS: Final[List[str]] = "run_id event_id mjd event_type nside".split()
 
     def __init__(self, result: Dict[str, np.ndarray]):
         self.logger = logging.getLogger(__name__)
+        self.result = result
+        self.nsides = sorted([self.parse_nside(key) for key in self.result])
+        self.pixel_type = self.PIXEL_TYPES[self.get_event_metadata().version]
+        self.pixel_fields: Tuple[str, ...] = self.pixel_type.names
 
         # validate result data
         if not isinstance(result, dict):
@@ -103,13 +107,11 @@ class SkyScanResult:
                 raise ValueError(f"'result' has invalid nside key: {nside}") from e
             if not isinstance(result[nside], np.ndarray):
                 raise ValueError("'result' must be an instance of Dict[str, np.ndarray]")
-            if result[nside].dtype != self.PIXEL_TYPE:
+            if result[nside].dtype != self.pixel_type:
                 raise ValueError(
                     f"'result' has invalid dtype {result[nside].dtype} "
-                    f"should be {self.PIXEL_TYPE}"
+                    f"should be {self.pixel_type} "
                 )
-        self.result = result
-        self.nsides = sorted([self.parse_nside(key) for key in self.result])
 
         self.logger.debug(f"Metadata for this result: {[self.result[_].dtype.metadata for _ in self.result]}")
 
@@ -172,6 +174,7 @@ class SkyScanResult:
         ore_pix: np.ndarray,
         equal_nan: bool,
         rtol_per_field: Dict[str, float],
+        common_fields: Tuple[str, ...],
     ) -> Tuple[List[float], List[bool]]:
         """Get the diff float-values and test truth-values for the 2 pixel-
         data.
@@ -181,7 +184,7 @@ class SkyScanResult:
         diff_vals = []
         test_vals = []
 
-        for s_val, o_val, field in zip(sre_pix, ore_pix, self.PIXEL_FIELDS):
+        for s_val, o_val, field in zip(sre_pix, ore_pix, common_fields):
             s_val, o_val = float(s_val), float(o_val)
 
             # CASE: a "require close" datapoint
@@ -216,10 +219,11 @@ class SkyScanResult:
                 first_metadata['event_type'],
                 first_metadata['mjd'],
                 first_metadata.get('is_real_event', False),  # assume simulated event
+                first_metadata.get('version', 0),  # default data format version 0
             )
         else:
             self.logger.warning("Metadata doesn't seem to exist and will not be used for plotting.")
-            return EventMetadata(0, 0, '', 0, False)
+            return EventMetadata(0, 0, '', 0, False, 0)
         
     def get_results_per_nside(self, nside: int) -> np.ndarray:
         "get the results for the pixels at a given nside"
@@ -237,10 +241,10 @@ class SkyScanResult:
         for sre_pix, ore_pix in it.zip_longest(
             self.result.get(nside, []),  # empty-list -> fillvalue
             other.result.get(nside, []),  # empty-list -> fillvalue
-            fillvalue=np.full((len(self.PIXEL_FIELDS),), np.nan),  # 1 vector
+            fillvalue=np.full((len(self.pixel_fields),), np.nan),  # 1 vector
         ):
             diff_vals, test_vals = self.isclose_pixel(
-                sre_pix, ore_pix, equal_nan, rtol_per_field
+                sre_pix, ore_pix, equal_nan, rtol_per_field, tuple(set(self.pixel_fields).intersection(other.pixel_fields))
             )
             pix_diff = (
                 tuple(sre_pix.tolist()),
@@ -254,11 +258,11 @@ class SkyScanResult:
 
         # aggregate test-truth values
         nside_equal = {
-            field: all(d[3][self.PIXEL_FIELDS.index(field)] for d in nside_diffs)
-            for field in set(self.PIXEL_FIELDS) - set(rtol_per_field)
+            field: all(d[3][self.pixel_fields.index(field)] for d in nside_diffs)
+            for field in set(self.pixel_fields) - set(rtol_per_field)
         }
         nside_close = {
-            field: all(d[3][self.PIXEL_FIELDS.index(field)] for d in nside_diffs)
+            field: all(d[3][self.pixel_fields.index(field)] for d in nside_diffs)
             for field in rtol_per_field
         }
 
@@ -451,20 +455,24 @@ class SkyScanResult:
         result = dict()
 
         for nside, pydict_nside_pixels in pydict.items():
+            metadata=pydict_nside_pixels['metadata']  # type: ignore[call-overload]
+            data_version = metadata.get('version', 0)
+            pixel_type = cls.PIXEL_TYPES[data_version]
+            pixel_fields: Tuple[str, ...] = pixel_type.names
             # validate keys
             if set(pydict_nside_pixels.keys()) != {'columns', 'metadata', 'data'}:
                 raise ValueError(f"PyDictResult entry has extra/missing keys: {pydict_nside_pixels.keys()}")
 
             # check 'columns'
-            if pydict_nside_pixels['columns'] != list(cls.PIXEL_FIELDS):
+            if pydict_nside_pixels['columns'] != list(pixel_fields):
                 raise ValueError(
                     f"PyDictResult entry has invalid 'columns' entry "
-                    f"({pydict_nside_pixels['columns']}) should be {list(cls.PIXEL_FIELDS)}"
+                    f"({pydict_nside_pixels['columns']}) should be {list(pixel_fields)}"
                 )
 
             # check 'metadata'
             try:
-                if pydict_nside_pixels['metadata']['nside'] != cls.parse_nside(nside):
+                if metadata['nside'] != cls.parse_nside(nside):
                     raise ValueError(
                         f"PyDictResult entry has incorrect 'metadata'.'nside' value: "
                         f"{pydict_nside_pixels['metadata']['nside']} should be {cls.parse_nside(nside)}"
@@ -474,8 +482,7 @@ class SkyScanResult:
 
             # read/convert
             _dtype = np.dtype(
-                cls.PIXEL_TYPE,
-                metadata=pydict_nside_pixels['metadata'],  # type: ignore[call-overload]
+                pixel_type, metadata=metadata
             )
             result_nside_pixels = np.zeros(len(pydict_nside_pixels['data']), dtype=_dtype)
             for i, pix_4list in enumerate(sorted(pydict_nside_pixels['data'], key=lambda x: x[0])):
