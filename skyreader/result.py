@@ -242,11 +242,13 @@ class SkyScanResult:
         nside_diffs = []
         fields_to_compare = tuple(set(self.pixel_fields).intersection(other.pixel_fields))
 
-        for sre_pix, ore_pix in it.zip_longest(
-            self.result.get(nside, [])[list(fields_to_compare)],  # empty-list -> fillvalue
-            other.result.get(nside, [])[list(fields_to_compare)],  # empty-list -> fillvalue
-            fillvalue=np.full((len(self.pixel_fields),), np.nan),  # 1 vector
-        ):
+        sre = self.result.get(nside, np.asarray([], dtype=[(_, float) for _ in fields_to_compare]))
+        ore = other.result.get(nside, np.asarray([], dtype=[(_, float) for _ in fields_to_compare]))
+        for sre_pix, ore_pix in it.zip_longest(sre[list(fields_to_compare)],
+                                               ore[list(fields_to_compare)],
+                                               fillvalue=np.full(
+                                                   (len(fields_to_compare),), np.nan,
+                                                   dtype=[(_, float) for _ in fields_to_compare])):
             diff_vals, test_vals = self.isclose_pixel(
                 sre_pix, ore_pix, equal_nan, rtol_per_field, fields_to_compare
             )
