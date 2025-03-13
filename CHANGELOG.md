@@ -2,6 +2,29 @@
 
 
 
+## v1.4.0 (2025-03-13)
+
+###  
+
+* commit to update wipac-dev-tools ([`7cd5efc`](https://github.com/icecube/skyreader/commit/7cd5efcf616c525364805a3afccc7d7a056ab4cd))
+
+### [minor]
+
+* [minor] Write reconstructed position and time (#47)
+
+Add x, y and z position from the reco `I3Position` and the corresponding
+time to the result file for each scanned pixel. This allows to display
+the reconstructed track later for visualization. I will make a
+corresponding PR in `skymap_scanner` as well.
+
+Adds a data format version flag to allow backwards compatibility with reading existing results using the previous version.
+
+---------
+
+Co-authored-by: github-actions &lt;github-actions@github.com&gt;
+Co-authored-by: Tianlu Yuan &lt;5412915+tianluyuan@users.noreply.github.com&gt; ([`06918f3`](https://github.com/icecube/skyreader/commit/06918f3932f6a91d54a81334eccaef674bbf8827))
+
+
 ## v1.3.6 (2025-02-13)
 
 ###  
