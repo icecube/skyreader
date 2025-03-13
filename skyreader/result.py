@@ -306,7 +306,7 @@ class SkyScanResult:
         Returns:
             bool: True if `other` and `self` are close
         """
-        if not rtol_per_field:
+        if rtol_per_field is None:
             rtol_per_field = DEFAULT_RTOL_PER_FIELD
 
         close: Dict[str, bool] = {}  # one bool for each nside value

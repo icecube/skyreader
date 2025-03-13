@@ -40,6 +40,12 @@ def test_000(json_diff: Path) -> None:
         equal_nan=True,
         dump_json_diff=json_diff,
     )
+    assert alpha.is_close(
+        alpha,
+        equal_nan=True,
+        dump_json_diff=json_diff,
+        rtol_per_field={}
+    )
 
 
 def test_001(json_diff: Path) -> None:
