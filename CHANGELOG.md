@@ -2,6 +2,13 @@
 
 
 
+## v1.4.1 (2025-03-14)
+
+###  
+
+* Default to version 1 (#48) ([`ed2bf9c`](https://github.com/icecube/skyreader/commit/ed2bf9c1d9da95cc83578975c07c4dc9393c04d4))
+
+
 ## v1.4.0 (2025-03-13)
 
 ###  
