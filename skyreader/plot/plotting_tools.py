@@ -192,8 +192,8 @@ class DecFormatter(Formatter):
 class AstroMollweideAxes(MollweideAxes):
     name = 'astro mollweide'
 
-    def cla(self):
-        super(AstroMollweideAxes, self).cla()
+    def clear(self):
+        super(AstroMollweideAxes, self).clear()
         self.set_xlim(0, 2*np.pi)
 
     def set_xlim(self, *args, **kwargs):
