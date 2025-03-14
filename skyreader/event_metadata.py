@@ -15,7 +15,7 @@ class EventMetadata:
     event_type: str
     mjd: float  # required but meaningless for simulated events
     is_real_event: bool  # as opposed to simulation
-    version: int
+    version: int = 1
 
     def __post_init__(self) -> None:
         if self.is_real_event and not (

@@ -221,7 +221,7 @@ class SkyScanResult:
                 first_metadata['event_type'],
                 first_metadata['mjd'],
                 first_metadata.get('is_real_event', False),  # assume simulated event
-                first_metadata.get('version', 0),  # default data format version 0
+                first_metadata.get('version', 0),  # fallback to version 0 if not set
             )
         else:
             self.logger.warning("Metadata doesn't seem to exist and will not be used for plotting.")
