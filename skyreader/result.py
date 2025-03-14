@@ -203,6 +203,9 @@ class SkyScanResult:
 
     def has_minimal_metadata(self) -> bool:
         """Check that the minimum metadata is set."""
+        if len(self.result) == 0:
+            return False
+
         for mk in self.MINIMAL_METADATA_FIELDS:
             for k in self.result:
                 if self.result[k].dtype.metadata is None:
