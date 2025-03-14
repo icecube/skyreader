@@ -2,6 +2,13 @@
 
 
 
+## v1.4.2 (2025-03-14)
+
+###  
+
+* Patch has_minimal_metadata and fix deprecation (#49) ([`49f26f5`](https://github.com/icecube/skyreader/commit/49f26f5075750f95f7128e84f540483920b47c41))
+
+
 ## v1.4.1 (2025-03-14)
 
 ###  
