@@ -572,8 +572,7 @@ class SkyScanPlotter:
             print(contain_txt)
             # This is actually an output and not a logging info.
             # TODO: we should wrap this in an object, return and log at
-            # the higher level.   
-
+            # the higher level.
         print(
             f"Contour Area (50%): {contour_areas[0]}",
             "square degrees (scaled)"
