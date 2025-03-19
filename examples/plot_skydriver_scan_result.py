@@ -44,7 +44,7 @@ def main() -> None:
     result = SkyScanResult.deserialize(serialized)
 
     plotter.create_plot(result)
-    output_reco_txt, area50, area90 = plotter.create_plot_zoomed(result, plot_bounding_box=True)
+    ra, dec, rect_errors, area50, area90 = plotter.create_plot_zoomed(result, plot_bounding_box=True)
 
 
 if __name__ == "__main__":
