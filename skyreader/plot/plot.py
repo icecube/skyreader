@@ -549,23 +549,27 @@ class SkyScanPlotter:
         # Approximate contours as rectangles
         ra = min_ra * 180./np.pi
         dec = min_dec * 180./np.pi
+        rectangular_errors = {}
         percentages = ["50", "90"]
         for l_index, contours in enumerate(contours_by_level[:2]):
             ra_plus = None
             theta, phi = np.concatenate(contours).T
-            ra_plus, ra_minus, dec_plus, dec_minus = bounding_box(
-                ra, dec, theta, phi
-            )
-            contain_txt = "Approximating the " + percentages[l_index] + \
-                "% error region as a rectangle, we get:" + " \n" + \
-                          "\t RA = {0:.2f} + {1:.2f} - {2:.2f}".format(
-                              ra, ra_plus, np.abs(ra_minus)) + " \n" + \
-                          "\t Dec = {0:.2f} + {1:.2f} - {2:.2f}".format(
-                              dec, dec_plus, np.abs(dec_minus))
+            ra_plus, ra_minus, dec_plus, dec_minus = bounding_box(ra, dec, theta, phi)
+            # Save the results in the dictionary for each percentage level
+            rectangular_errors[percentages[l_index]] = {
+                "ra_plus": ra_plus,
+                "ra_minus": ra_minus,
+                "dec_plus": dec_plus,
+                "dec_minus": dec_minus
+            }
+            # Optional: Print or log the results if needed
+            contain_txt = f"Approximating the {percentages[l_index]}% error region as a rectangle, we get:\n" + \
+            f"\t RA = {ra:.2f} + {ra_plus:.2f} - {abs(ra_minus):.2f}\n" + \
+            f"\t Dec = {dec:.2f} + {dec_plus:.2f} - {abs(dec_minus):.2f}"
+            print(contain_txt)
             # This is actually an output and not a logging info.
             # TODO: we should wrap this in an object, return and log at
-            # the higher level.
-            print(contain_txt)
+            # the higher level.   
 
         print(
             f"Contour Area (50%): {contour_areas[0]}",
@@ -726,7 +730,7 @@ class SkyScanPlotter:
         self._save_contours(contours_by_level, unique_id)
         LOGGER.info("done.")
         plt.close()
-        return contain_txt, contour_areas[0], contour_areas[1]
+        return ra, dec, rectangular_errors, contour_areas[0], contour_areas[1]
 
     def _save_contours(self, contours_by_level, unique_id) -> None:
         # Output contours in RA, dec instead of theta, phi
