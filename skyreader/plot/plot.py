@@ -725,9 +725,7 @@ class SkyScanPlotter:
 
         self._save_contours(contours_by_level, unique_id)
         LOGGER.info("done.")
-
         plt.close()
-        
         return contain_txt, contour_areas[0], contour_areas[1]
 
     def _save_contours(self, contours_by_level, unique_id) -> None:
