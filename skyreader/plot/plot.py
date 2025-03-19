@@ -563,9 +563,12 @@ class SkyScanPlotter:
                 "dec_minus": dec_minus
             }
             # Optional: Print or log the results if needed
-            contain_txt = f"Approximating the {percentages[l_index]}% error region as a rectangle, we get:\n" + \
-            f"\t RA = {ra:.2f} + {ra_plus:.2f} - {abs(ra_minus):.2f}\n" + \
-            f"\t Dec = {dec:.2f} + {dec_plus:.2f} - {abs(dec_minus):.2f}"
+            contain_txt = "Approximating the " + percentages[l_index] + \
+                "% error region as a rectangle, we get:" + " \n" + \
+                          "\t RA = {0:.2f} + {1:.2f} - {2:.2f}".format(
+                              ra, ra_plus, np.abs(ra_minus)) + " \n" + \
+                          "\t Dec = {0:.2f} + {1:.2f} - {2:.2f}".format(
+                              dec, dec_plus, np.abs(dec_minus))
             print(contain_txt)
             # This is actually an output and not a logging info.
             # TODO: we should wrap this in an object, return and log at
