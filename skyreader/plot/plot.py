@@ -551,6 +551,7 @@ class SkyScanPlotter:
         dec = min_dec * 180./np.pi
         rectangular_errors = {}
         percentages = ["50", "90"]
+        uncertainties = []
         for l_index, contours in enumerate(contours_by_level[:2]):
             ra_plus = None
             theta, phi = np.concatenate(contours).T
@@ -570,6 +571,8 @@ class SkyScanPlotter:
                           "\t Dec = {0:.2f} + {1:.2f} - {2:.2f}".format(
                               dec, dec_plus, np.abs(dec_minus))
             print(contain_txt)
+            uncertainty = [(ra_minus, ra_plus), (dec_minus, dec_plus)]
+            uncertainties.append(uncertainty)
             # This is actually an output and not a logging info.
             # TODO: we should wrap this in an object, return and log at
             # the higher level.
@@ -634,8 +637,7 @@ class SkyScanPlotter:
                 linestyle='dashed',
                 label=contour_label
             )
-
-        uncertainty = [(ra_minus, ra_plus), (dec_minus, dec_plus)]
+            
         fits_header = format_fits_header(
             (
                 event_metadata.run_id,
@@ -645,7 +647,8 @@ class SkyScanPlotter:
             event_metadata.mjd,
             np.degrees(min_ra),
             np.degrees(min_dec),
-            uncertainty,
+            uncertainties,
+            contour_areas,
             llh_map,
         )
         mmap_nside = healpy.get_nside(equatorial_map)
