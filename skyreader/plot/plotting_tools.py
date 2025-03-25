@@ -17,6 +17,9 @@ from matplotlib.transforms import Affine2D  # type: ignore[import]
 
 matplotlib.use('agg')
 
+## LAT 14-year Source Catalog (4FGL-DR4 in FITS format) ; https://fermi.gsfc.nasa.gov/ssc/data/access/lat/14yr_catalog/
+from constants import CATALOG_PATH
+
 def format_fits_header(
     event_id_tuple, mjd, ra, dec, uncertainty, llh_map,
 ):
@@ -121,7 +124,7 @@ def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec,
         cmap_min=0., cmap_max=250.):
     """"Plots the 4FGL catalog in a color that contrasts with the background
     healpix map."""
-    hdu = pyfits.open('/cvmfs/icecube.opensciencegrid.org/users/azegarelli/realtime/catalogs/gll_psc_v35.fit') ## LAT 14-year Source Catalog (4FGL-DR4 in FITS format) ; https://fermi.gsfc.nasa.gov/ssc/data/access/lat/14yr_catalog/')
+    hdu = pyfits.open(CATALOG_PATH)  # LAT 14-year
     fgl = hdu[1]
     pe = [path_effects.Stroke(linewidth=0.5, foreground=cmap(0.0)),
         path_effects.Normal()]
