@@ -637,7 +637,7 @@ class SkyScanPlotter:
                 linestyle='dashed',
                 label=contour_label
             )
-            
+
         fits_header = format_fits_header(
             (
                 event_metadata.run_id,

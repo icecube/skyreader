@@ -46,5 +46,6 @@ def main() -> None:
     plotter.create_plot(result)
     plotter.create_plot_zoomed(result, plot_bounding_box=True)
 
+
 if __name__ == "__main__":
     main()
