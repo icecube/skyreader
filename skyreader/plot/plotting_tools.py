@@ -235,28 +235,25 @@ class AstroMollweideAxes(MollweideAxes):
         # This is the transform for latitude ticks.
         yaxis_stretch = Affine2D().scale(np.pi * 2.0, 1.0)
         yaxis_space = Affine2D().scale(-1.0, 1.1)
-        self._yaxis_transform = \
-            yaxis_stretch + \
-            self.transData
-        # mypy error: "AstroMollweideAxes" has no attribute "transProjection"  [attr-defined]
-        # mypy error: "AstroMollweideAxes" has no attribute "transAffine"  [attr-defined]
-        yaxis_text_base = \
-            yaxis_stretch + \
-            self.transProjection + \
-            (yaxis_space + \
-             self.transAffine + \
-             self.transAxes)
-        self._yaxis_text1_transform = \
-            yaxis_text_base + \
-            Affine2D().translate(-8.0, 0.0)
-        self._yaxis_text2_transform = \
-            yaxis_text_base + \
-            Affine2D().translate(8.0, 0.0)
+        self._yaxis_transform = yaxis_stretch + self.transData
 
+        # mypy error: "AstroMollweideAxes" has no attribute "transProjection" [attr-defined]
+        # mypy error: "AstroMollweideAxes" has no attribute "transAffine" [attr-defined]
+        yaxis_text_base = (
+            yaxis_stretch
+            + self.transProjection
+            + (yaxis_space + self.transAffine + self.transAxes)
+        )
+
+        self._yaxis_text1_transform = yaxis_text_base + Affine2D().translate(-8.0, 0.0)
+        self._yaxis_text2_transform = yaxis_text_base + Affine2D().translate(8.0, 0.0)
+        
     def _get_affine_transform(self):
         transform = self._get_core_transform(1)
         xscale, _ = transform.transform_point((0, 0))
         _, yscale = transform.transform_point((0, np.pi / 2.0))
-        return Affine2D() \
-            .scale(0.5 / xscale, 0.5 / yscale) \
+        return (
+            Affine2D()
+            .scale(0.5 / xscale, 0.5 / yscale)
             .translate(0.5, 0.5)
+        )
