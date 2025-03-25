@@ -1,5 +1,5 @@
 import skyreader
-from skyreader.plots.constants import CATALOG_PATH
+from skyreader.plot import CATALOG_PATH
 
 
 def test_skyreader_imports() -> None:
