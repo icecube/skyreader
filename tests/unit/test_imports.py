@@ -1,4 +1,4 @@
-from constants import CATALOG_PATH, CATALOG_NAME
+from skyreader.plots.constants import CATALOG_PATH
 
 import skyreader
 
@@ -14,4 +14,3 @@ def test_skyreader_imports() -> None:
         "catalogs/gll_psc_v35.fit"
     )
     assert CATALOG_PATH == expected_catalog_path
-    assert CATALOG_NAME == "gll_psc_v35.fit"
