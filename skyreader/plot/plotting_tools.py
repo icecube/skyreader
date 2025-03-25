@@ -18,7 +18,7 @@ from matplotlib.transforms import Affine2D  # type: ignore[import]
 matplotlib.use('agg')
 
 def format_fits_header(
-    event_id_tuple, mjd, ra, dec, uncertainty, llh_map,
+        event_id_tuple, mjd, ra, dec, uncertainties, contour_areas, llh_map,
 ):
     """Prepare some of the relevant event information for a fits file
     header."""
@@ -27,7 +27,7 @@ def format_fits_header(
     if llh_map:
         uncertainty_comment = 'Change in 2LLH based on Wilks theorem'
     else:
-        uncertainty_comment = 'Highest posterior density 90% credible region'
+        uncertainty_comment = 'Highest posterior density 50% and 90% credible region'
 
     t = Time(mjd, format="mjd")
 
@@ -40,19 +40,29 @@ def format_fits_header(
         ('I3TYPE', f'{event_type}','Alert Type'),
         ('RA', np.round(ra,2),'Degree'),
         ('DEC', np.round(dec,2),'Degree'),
-        ('RA_ERR_PLUS', np.round(uncertainty[0][1],2),
-            '90% containment error high'),
-        ('RA_ERR_MINUS', np.round(np.abs(uncertainty[0][0]),2),
-            '90% containment error low'),
-        ('DEC_ERR_PLUS', np.round(uncertainty[1][1],2),
-            '90% containment error high'),
-        ('DEC_ERR_MINUS', np.round(np.abs(uncertainty[1][0]),2),
-            '90% containment error low'),
-        ('COMMENTS', '90% uncertainty location' \
-            + ' => ' + uncertainty_comment),
+        ('RA_ERR_PLUS_50', np.round(uncertainties[0][0][1],2),
+         '50% containment error high'),
+        ('RA_ERR_MINUS_50', np.round(np.abs(uncertainties[0][0][0]),2),
+         '50% containment error low'),
+        ('DEC_ERR_PLUS_50', np.round(uncertainties[0][1][1],2),
+         '50% containment error high'),
+        ('DEC_ERR_MINUS_50', np.round(np.abs(uncertainties[0][1][0]),2),
+         '50% containment error low'),
+        ('RA_ERR_PLUS_90', np.round(uncertainties[1][0][1],2),
+         '90% containment error high'),
+        ('RA_ERR_MINUS_90', np.round(np.abs(uncertainties[1][0][0]),2),
+         '90% containment error low'),
+        ('DEC_ERR_PLUS_90', np.round(uncertainties[1][1][1],2),
+         '90% containment error high'),
+        ('DEC_ERR_MINUS_90', np.round(np.abs(uncertainties[1][1][0]),2),
+         '90% containment error low'),
+        ('CONTOUR_AREA_50', np.round(contour_areas[0],2), '50% contour area (sqdeg)'),
+        ('CONTOUR_AREA_90', np.round(contour_areas[1],2), '90% contour area (sqdeg)'),
+        ('COMMENTS', '50% and 90% uncertainty location' \
+         + ' => ' + uncertainty_comment),
         ('NOTE', 'Please ignore pixels with infinite or NaN values.' \
-            + ' They are rare cases of the minimizer failing to converge')
-        ]
+         + ' They are rare cases of the minimizer failing to converge')
+    ]
     return header
 
 
