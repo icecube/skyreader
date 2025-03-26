@@ -18,7 +18,7 @@ from matplotlib.transforms import Affine2D  # type: ignore[import]
 matplotlib.use('agg')
 
 ## LAT 14-year Source Catalog (4FGL-DR4 in FITS format) ; https://fermi.gsfc.nasa.gov/ssc/data/access/lat/14yr_catalog/
-from .constants import CATALOG_PATH
+from skyreader.constants import CATALOG_PATH
 
 def format_fits_header(
     event_id_tuple, mjd, ra, dec, uncertainty, llh_map,
