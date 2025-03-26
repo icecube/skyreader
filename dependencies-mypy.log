@@ -100,7 +100,7 @@ six==1.17.0
     # via python-dateutil
 tornado==6.4.2
     # via wipac-rest-tools
-typing-extensions==4.12.2
+typing-extensions==4.13.0
     # via wipac-dev-tools
 tzdata==2025.2
     # via pandas
