@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+version = "1.4.2"
+dependencies = ["astropy", "healpy", "matplotlib", "meander", "mhealpy", "numpy", "pandas", "scipy", "wipac-dev-tools"]
+name = "icecube-skyreader"
+description = "An API for Results Produced by SkyDriver & the Skymap Scanner"
+readme = "README.md"
+keywords = ["IceCube", "skymap scanner", "skymap", "HEALPix", "neutrino", "reconstruction"]
+classifiers = ["Development Status :: 5 - Production/Stable", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13"]
+requires-python = ">=3.9, <3.14"
+
+[[project.authors]]
+name = "WIPAC Developers"
+email = "developers@icecube.wisc.edu"
+
+[project.license]
+file = "LICENSE"
+
+[project.optional-dependencies]
+tests = ["pytest", "pytest-mock"]
+examples = ["wipac-rest-tools"]
+mypy = ["pytest", "pytest-mock", "wipac-rest-tools"]
+
+[project.urls]
+Homepage = "https://pypi.org/project/icecube-skyreader/"
+Tracker = "https://github.com/icecube/skyreader/issues"
+Source = "https://github.com/icecube/skyreader"
+
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+version_variables = ["skyreader/__init__.py:__version__"]
+commit_parser = "emoji"
+build_command = "pip install build && python -m build"
+
+[tool.semantic_release.commit_parser_options]
+major_tags = ["[major]"]
+minor_tags = ["[minor]", "[feature]"]
+patch_tags = ["[patch]", "[fix]", " ", "!", "#", "$", "%", "&", "'", "(", ")", "*", "+", "-", ".", "/", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ":", ";", "<", "=", ">", "?", "@", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "[", "]", "^", "_", "`", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "{", "|", "}", "~"]
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+
+[tool.setuptools.packages.find]
+namespaces = false
+exclude = ["test", "tests", "doc", "docs", "resource", "resources", "example", "examples"]
