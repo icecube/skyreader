@@ -3,11 +3,13 @@
 from . import plot  # noqa: F401
 from .event_metadata import EventMetadata  # noqa: F401
 from .result import SkyScanResult  # noqa: F401
+from .constants import CATALOG_PATH
 
 __all__ = [
     "EventMetadata",
     "plot",
     "SkyScanResult",
+    "CATALOG_PATH",
 ]
 
 # version is a human-readable version number.
