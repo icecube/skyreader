@@ -19,7 +19,7 @@ __all__ = [
 # is zero for an official release, positive for a development branch,
 # or negative for a release candidate or beta (after the base version
 # number has been incremented)
-__version__ = "1.4.3"
+__version__ = "1.4.4"
 version_info = (
     int(__version__.split(".")[0]),
     int(__version__.split(".")[1]),

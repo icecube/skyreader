@@ -2,6 +2,13 @@
 
 
 
+## v1.4.4 (2025-04-15)
+
+###  
+
+* Use `pypa/gh-action-pypi-publish@v1.12.4` ([`82f14e6`](https://github.com/icecube/skyreader/commit/82f14e6af4b318c1ea38911d97fc5e9e13f35107))
+
+
 ## v1.4.3 (2025-03-27)
 
 ###  
