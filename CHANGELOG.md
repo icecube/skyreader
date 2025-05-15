@@ -2,6 +2,32 @@
 
 
 
+## v1.4.5 (2025-05-15)
+
+###  
+
+* Add information to the header of the reco fits file (rectangular errors at 50% + contour areas at 50% and 90%) (#50)
+
+Hi,
+
+I propose a slight modification to the function that generates zoomed
+plots from reconstructions.
+The modification would allow it to save RA and Dec, as well as the
+corresponding 50% and 90% rectangular and circular areas.
+
+https://github.com/icecube/skyreader/blob/40a75068b486225fa02c433caf6cdd76720ddf1e/skyreader/plot/plot.py#L729
+
+This change would make it easier to manage reconstruction outputs in
+general, and is necessary for posting reconstruction results on Slack
+channels as part of the automation I am currently working on.
+
+---------
+
+Co-authored-by: github-actions &lt;github-actions@github.com&gt;
+Co-authored-by: Angela &lt;angela@mobile-222.shadow2.airub.net&gt;
+Co-authored-by: ric-evans &lt;emejqz@gmail.com&gt; ([`6aec865`](https://github.com/icecube/skyreader/commit/6aec865588c80171190ed7c2911c7867bf3cc8f6))
+
+
 ## v1.4.4 (2025-04-15)
 
 ###  
