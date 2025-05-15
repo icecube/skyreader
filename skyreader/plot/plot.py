@@ -549,24 +549,33 @@ class SkyScanPlotter:
         # Approximate contours as rectangles
         ra = min_ra * 180./np.pi
         dec = min_dec * 180./np.pi
+        rectangular_errors = {}
         percentages = ["50", "90"]
+        uncertainties = []
         for l_index, contours in enumerate(contours_by_level[:2]):
             ra_plus = None
             theta, phi = np.concatenate(contours).T
-            ra_plus, ra_minus, dec_plus, dec_minus = bounding_box(
-                ra, dec, theta, phi
-            )
+            ra_plus, ra_minus, dec_plus, dec_minus = bounding_box(ra, dec, theta, phi)
+            # Save the results in the dictionary for each percentage level
+            rectangular_errors[percentages[l_index]] = {
+                "ra_plus": ra_plus,
+                "ra_minus": ra_minus,
+                "dec_plus": dec_plus,
+                "dec_minus": dec_minus
+            }
+            # Optional: Print or log the results if needed
             contain_txt = "Approximating the " + percentages[l_index] + \
                 "% error region as a rectangle, we get:" + " \n" + \
                           "\t RA = {0:.2f} + {1:.2f} - {2:.2f}".format(
                               ra, ra_plus, np.abs(ra_minus)) + " \n" + \
                           "\t Dec = {0:.2f} + {1:.2f} - {2:.2f}".format(
                               dec, dec_plus, np.abs(dec_minus))
+            print(contain_txt)
+            uncertainty = [(ra_minus, ra_plus), (dec_minus, dec_plus)]
+            uncertainties.append(uncertainty)
             # This is actually an output and not a logging info.
             # TODO: we should wrap this in an object, return and log at
             # the higher level.
-            print(contain_txt)
-
         print(
             f"Contour Area (50%): {contour_areas[0]}",
             "square degrees (scaled)"
@@ -629,7 +638,6 @@ class SkyScanPlotter:
                 label=contour_label
             )
 
-        uncertainty = [(ra_minus, ra_plus), (dec_minus, dec_plus)]
         fits_header = format_fits_header(
             (
                 event_metadata.run_id,
@@ -639,7 +647,8 @@ class SkyScanPlotter:
             event_metadata.mjd,
             np.degrees(min_ra),
             np.degrees(min_dec),
-            uncertainty,
+            uncertainties,
+            contour_areas,
             llh_map,
         )
         mmap_nside = healpy.get_nside(equatorial_map)
@@ -725,7 +734,6 @@ class SkyScanPlotter:
 
         self._save_contours(contours_by_level, unique_id)
         LOGGER.info("done.")
-
         plt.close()
 
     def _save_contours(self, contours_by_level, unique_id) -> None:

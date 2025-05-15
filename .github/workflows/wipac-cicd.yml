@@ -110,7 +110,7 @@ jobs:
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       - if: needs.writable-branch-detect.outputs.OKAY == 'true'
-        uses: WIPACrepo/wipac-dev-py-dependencies-action@v2.1
+        uses: WIPACrepo/wipac-dev-py-dependencies-action@v2.3
 
 
   #############################################################################

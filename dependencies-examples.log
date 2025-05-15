@@ -6,26 +6,26 @@
 ########################################################################
 #  pip freeze
 ########################################################################
-astropy==7.0.1
-astropy-iers-data==0.2025.3.24.0.35.32
+astropy==7.0.2
+astropy-iers-data==0.2025.5.12.0.38.29
 cachetools==5.5.2
-certifi==2025.1.31
+certifi==2025.4.26
 cffi==1.17.1
-charset-normalizer==3.4.1
-contourpy==1.3.1
-cryptography==44.0.2
+charset-normalizer==3.4.2
+contourpy==1.3.2
+cryptography==44.0.3
 cycler==0.12.1
-fonttools==4.56.0
+fonttools==4.58.0
 healpy==1.18.1
 idna==3.10
 kiwisolver==1.4.8
-matplotlib==3.10.1
+matplotlib==3.10.3
 meander==0.0.3
-mhealpy==0.3.4
-numpy==2.2.4
-packaging==24.2
+mhealpy==0.3.5
+numpy==2.2.5
+packaging==25.0
 pandas==2.2.3
-pillow==11.1.0
+pillow==11.2.1
 pycparser==2.22
 pyerfa==2.0.1.5
 PyJWT==2.10.1
@@ -33,103 +33,123 @@ pyparsing==3.2.3
 python-dateutil==2.9.0.post0
 pytz==2025.2
 PyYAML==6.0.2
-qrcode==8.0
+qrcode==8.2
 requests==2.32.3
 requests-futures==1.0.2
-scipy==1.15.2
+scipy==1.15.3
 six==1.17.0
 tornado==6.4.2
-typing_extensions==4.13.0
+typing_extensions==4.13.2
 tzdata==2025.2
-urllib3==2.3.0
-wipac-dev-tools==1.15.6
-wipac-rest-tools==1.8.6
+urllib3==2.4.0
+wipac-dev-tools==1.16.10
+wipac-rest-tools==1.8.7
 ########################################################################
 #  pipdeptree
 ########################################################################
-cryptography==44.0.2
+cryptography==44.0.3
 └── cffi [required: >=1.12, installed: 1.17.1]
     └── pycparser [required: Any, installed: 2.22]
 icecube-skyreader
-├── astropy [required: Any, installed: 7.0.1]
-│   ├── numpy [required: >=1.23.2, installed: 2.2.4]
+├── astropy [required: Any, installed: 7.0.2]
+│   ├── numpy [required: >=1.23.2, installed: 2.2.5]
 │   ├── pyerfa [required: >=2.0.1.1, installed: 2.0.1.5]
-│   │   └── numpy [required: >=1.19.3, installed: 2.2.4]
-│   ├── astropy-iers-data [required: >=0.2025.1.31.12.41.4, installed: 0.2025.3.24.0.35.32]
+│   │   └── numpy [required: >=1.19.3, installed: 2.2.5]
+│   ├── astropy-iers-data [required: >=0.2025.4.28.0.37.27, installed: 0.2025.5.12.0.38.29]
 │   ├── PyYAML [required: >=6.0.0, installed: 6.0.2]
-│   └── packaging [required: >=22.0.0, installed: 24.2]
+│   └── packaging [required: >=22.0.0, installed: 25.0]
 ├── healpy [required: Any, installed: 1.18.1]
-│   ├── numpy [required: >=1.19, installed: 2.2.4]
-│   └── astropy [required: Any, installed: 7.0.1]
-│       ├── numpy [required: >=1.23.2, installed: 2.2.4]
+│   ├── numpy [required: >=1.19, installed: 2.2.5]
+│   └── astropy [required: Any, installed: 7.0.2]
+│       ├── numpy [required: >=1.23.2, installed: 2.2.5]
 │       ├── pyerfa [required: >=2.0.1.1, installed: 2.0.1.5]
-│       │   └── numpy [required: >=1.19.3, installed: 2.2.4]
-│       ├── astropy-iers-data [required: >=0.2025.1.31.12.41.4, installed: 0.2025.3.24.0.35.32]
+│       │   └── numpy [required: >=1.19.3, installed: 2.2.5]
+│       ├── astropy-iers-data [required: >=0.2025.4.28.0.37.27, installed: 0.2025.5.12.0.38.29]
 │       ├── PyYAML [required: >=6.0.0, installed: 6.0.2]
-│       └── packaging [required: >=22.0.0, installed: 24.2]
-├── matplotlib [required: Any, installed: 3.10.1]
-│   ├── contourpy [required: >=1.0.1, installed: 1.3.1]
-│   │   └── numpy [required: >=1.23, installed: 2.2.4]
+│       └── packaging [required: >=22.0.0, installed: 25.0]
+├── matplotlib [required: Any, installed: 3.10.3]
+│   ├── contourpy [required: >=1.0.1, installed: 1.3.2]
+│   │   └── numpy [required: >=1.23, installed: 2.2.5]
 │   ├── cycler [required: >=0.10, installed: 0.12.1]
-│   ├── fonttools [required: >=4.22.0, installed: 4.56.0]
+│   ├── fonttools [required: >=4.22.0, installed: 4.58.0]
 │   ├── kiwisolver [required: >=1.3.1, installed: 1.4.8]
-│   ├── numpy [required: >=1.23, installed: 2.2.4]
-│   ├── packaging [required: >=20.0, installed: 24.2]
-│   ├── pillow [required: >=8, installed: 11.1.0]
+│   ├── numpy [required: >=1.23, installed: 2.2.5]
+│   ├── packaging [required: >=20.0, installed: 25.0]
+│   ├── pillow [required: >=8, installed: 11.2.1]
 │   ├── pyparsing [required: >=2.3.1, installed: 3.2.3]
 │   └── python-dateutil [required: >=2.7, installed: 2.9.0.post0]
 │       └── six [required: >=1.5, installed: 1.17.0]
 ├── meander [required: Any, installed: 0.0.3]
-├── mhealpy [required: Any, installed: 0.3.4]
-│   └── healpy [required: Any, installed: 1.18.1]
-│       ├── numpy [required: >=1.19, installed: 2.2.4]
-│       └── astropy [required: Any, installed: 7.0.1]
-│           ├── numpy [required: >=1.23.2, installed: 2.2.4]
-│           ├── pyerfa [required: >=2.0.1.1, installed: 2.0.1.5]
-│           │   └── numpy [required: >=1.19.3, installed: 2.2.4]
-│           ├── astropy-iers-data [required: >=0.2025.1.31.12.41.4, installed: 0.2025.3.24.0.35.32]
-│           ├── PyYAML [required: >=6.0.0, installed: 6.0.2]
-│           └── packaging [required: >=22.0.0, installed: 24.2]
-├── numpy [required: Any, installed: 2.2.4]
+├── mhealpy [required: Any, installed: 0.3.5]
+│   ├── healpy [required: Any, installed: 1.18.1]
+│   │   ├── numpy [required: >=1.19, installed: 2.2.5]
+│   │   └── astropy [required: Any, installed: 7.0.2]
+│   │       ├── numpy [required: >=1.23.2, installed: 2.2.5]
+│   │       ├── pyerfa [required: >=2.0.1.1, installed: 2.0.1.5]
+│   │       │   └── numpy [required: >=1.19.3, installed: 2.2.5]
+│   │       ├── astropy-iers-data [required: >=0.2025.4.28.0.37.27, installed: 0.2025.5.12.0.38.29]
+│   │       ├── PyYAML [required: >=6.0.0, installed: 6.0.2]
+│   │       └── packaging [required: >=22.0.0, installed: 25.0]
+│   └── matplotlib [required: Any, installed: 3.10.3]
+│       ├── contourpy [required: >=1.0.1, installed: 1.3.2]
+│       │   └── numpy [required: >=1.23, installed: 2.2.5]
+│       ├── cycler [required: >=0.10, installed: 0.12.1]
+│       ├── fonttools [required: >=4.22.0, installed: 4.58.0]
+│       ├── kiwisolver [required: >=1.3.1, installed: 1.4.8]
+│       ├── numpy [required: >=1.23, installed: 2.2.5]
+│       ├── packaging [required: >=20.0, installed: 25.0]
+│       ├── pillow [required: >=8, installed: 11.2.1]
+│       ├── pyparsing [required: >=2.3.1, installed: 3.2.3]
+│       └── python-dateutil [required: >=2.7, installed: 2.9.0.post0]
+│           └── six [required: >=1.5, installed: 1.17.0]
+├── numpy [required: Any, installed: 2.2.5]
 ├── pandas [required: Any, installed: 2.2.3]
-│   ├── numpy [required: >=1.26.0, installed: 2.2.4]
+│   ├── numpy [required: >=1.26.0, installed: 2.2.5]
 │   ├── python-dateutil [required: >=2.8.2, installed: 2.9.0.post0]
 │   │   └── six [required: >=1.5, installed: 1.17.0]
 │   ├── pytz [required: >=2020.1, installed: 2025.2]
 │   └── tzdata [required: >=2022.7, installed: 2025.2]
-├── scipy [required: Any, installed: 1.15.2]
-│   └── numpy [required: >=1.23.5,<2.5, installed: 2.2.4]
-└── wipac-dev-tools [required: Any, installed: 1.15.6]
-    ├── typing_extensions [required: Any, installed: 4.13.0]
-    └── requests [required: Any, installed: 2.32.3]
-        ├── charset-normalizer [required: >=2,<4, installed: 3.4.1]
-        ├── idna [required: >=2.5,<4, installed: 3.10]
-        ├── urllib3 [required: >=1.21.1,<3, installed: 2.3.0]
-        └── certifi [required: >=2017.4.17, installed: 2025.1.31]
-pipdeptree==2.26.0
-├── packaging [required: >=24.1, installed: 24.2]
-└── pip [required: >=24.2, installed: 25.0.1]
-wipac-rest-tools==1.8.6
+├── scipy [required: Any, installed: 1.15.3]
+│   └── numpy [required: >=1.23.5,<2.5, installed: 2.2.5]
+└── wipac-dev-tools [required: Any, installed: 1.16.10]
+    ├── python-dateutil [required: Any, installed: 2.9.0.post0]
+    │   └── six [required: >=1.5, installed: 1.17.0]
+    ├── python-dateutil [required: Any, installed: 2.9.0.post0]
+    │   └── six [required: >=1.5, installed: 1.17.0]
+    ├── requests [required: Any, installed: 2.32.3]
+    │   ├── charset-normalizer [required: >=2,<4, installed: 3.4.2]
+    │   ├── idna [required: >=2.5,<4, installed: 3.10]
+    │   ├── urllib3 [required: >=1.21.1,<3, installed: 2.4.0]
+    │   └── certifi [required: >=2017.4.17, installed: 2025.4.26]
+    └── typing_extensions [required: Any, installed: 4.13.2]
+pipdeptree==2.26.1
+├── packaging [required: >=24.1, installed: 25.0]
+└── pip [required: >=24.2, installed: 25.1.1]
+wipac-rest-tools==1.8.7
 ├── cachetools [required: Any, installed: 5.5.2]
 ├── PyJWT [required: !=2.6.0, installed: 2.10.1]
-├── qrcode [required: Any, installed: 8.0]
+├── qrcode [required: Any, installed: 8.2]
 ├── requests [required: Any, installed: 2.32.3]
-│   ├── charset-normalizer [required: >=2,<4, installed: 3.4.1]
+│   ├── charset-normalizer [required: >=2,<4, installed: 3.4.2]
 │   ├── idna [required: >=2.5,<4, installed: 3.10]
-│   ├── urllib3 [required: >=1.21.1,<3, installed: 2.3.0]
-│   └── certifi [required: >=2017.4.17, installed: 2025.1.31]
+│   ├── urllib3 [required: >=1.21.1,<3, installed: 2.4.0]
+│   └── certifi [required: >=2017.4.17, installed: 2025.4.26]
 ├── requests-futures [required: Any, installed: 1.0.2]
 │   └── requests [required: >=1.2.0, installed: 2.32.3]
-│       ├── charset-normalizer [required: >=2,<4, installed: 3.4.1]
+│       ├── charset-normalizer [required: >=2,<4, installed: 3.4.2]
 │       ├── idna [required: >=2.5,<4, installed: 3.10]
-│       ├── urllib3 [required: >=1.21.1,<3, installed: 2.3.0]
-│       └── certifi [required: >=2017.4.17, installed: 2025.1.31]
+│       ├── urllib3 [required: >=1.21.1,<3, installed: 2.4.0]
+│       └── certifi [required: >=2017.4.17, installed: 2025.4.26]
 ├── tornado [required: Any, installed: 6.4.2]
-├── urllib3 [required: >=2.0.4, installed: 2.3.0]
-└── wipac-dev-tools [required: Any, installed: 1.15.6]
-    ├── typing_extensions [required: Any, installed: 4.13.0]
-    └── requests [required: Any, installed: 2.32.3]
-        ├── charset-normalizer [required: >=2,<4, installed: 3.4.1]
-        ├── idna [required: >=2.5,<4, installed: 3.10]
-        ├── urllib3 [required: >=1.21.1,<3, installed: 2.3.0]
-        └── certifi [required: >=2017.4.17, installed: 2025.1.31]
+├── urllib3 [required: >=2.0.4, installed: 2.4.0]
+└── wipac-dev-tools [required: Any, installed: 1.16.10]
+    ├── python-dateutil [required: Any, installed: 2.9.0.post0]
+    │   └── six [required: >=1.5, installed: 1.17.0]
+    ├── python-dateutil [required: Any, installed: 2.9.0.post0]
+    │   └── six [required: >=1.5, installed: 1.17.0]
+    ├── requests [required: Any, installed: 2.32.3]
+    │   ├── charset-normalizer [required: >=2,<4, installed: 3.4.2]
+    │   ├── idna [required: >=2.5,<4, installed: 3.10]
+    │   ├── urllib3 [required: >=1.21.1,<3, installed: 2.4.0]
+    │   └── certifi [required: >=2017.4.17, installed: 2025.4.26]
+    └── typing_extensions [required: Any, installed: 4.13.2]
