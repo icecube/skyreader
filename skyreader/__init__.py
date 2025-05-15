@@ -3,11 +3,13 @@
 from . import plot  # noqa: F401
 from .event_metadata import EventMetadata  # noqa: F401
 from .result import SkyScanResult  # noqa: F401
+from .constants import CATALOG_PATH
 
 __all__ = [
     "EventMetadata",
     "plot",
     "SkyScanResult",
+    "CATALOG_PATH",
 ]
 
 # version is a human-readable version number.
@@ -17,7 +19,7 @@ __all__ = [
 # is zero for an official release, positive for a development branch,
 # or negative for a release candidate or beta (after the base version
 # number has been incremented)
-__version__ = "1.4.2"
+__version__ = "1.4.4"
 version_info = (
     int(__version__.split(".")[0]),
     int(__version__.split(".")[1]),

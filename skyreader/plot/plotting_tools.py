@@ -17,6 +17,9 @@ from matplotlib.transforms import Affine2D  # type: ignore[import]
 
 matplotlib.use('agg')
 
+## LAT 14-year Source Catalog (4FGL-DR4 in FITS format) ; https://fermi.gsfc.nasa.gov/ssc/data/access/lat/14yr_catalog/
+from skyreader.constants import CATALOG_PATH
+
 def format_fits_header(
         event_id_tuple, mjd, ra, dec, uncertainties, contour_areas, llh_map,
 ):
@@ -131,7 +134,7 @@ def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec,
         cmap_min=0., cmap_max=250.):
     """"Plots the 4FGL catalog in a color that contrasts with the background
     healpix map."""
-    hdu = pyfits.open('/cvmfs/icecube.opensciencegrid.org/users/azegarelli/realtime/catalogs/gll_psc_v34.fit') ## LAT 14-year Source Catalog (4FGL-DR4 in FITS format) ; https://fermi.gsfc.nasa.gov/ssc/data/access/lat/14yr_catalog/')
+    hdu = pyfits.open(CATALOG_PATH)  # LAT 14-year
     fgl = hdu[1]
     pe = [path_effects.Stroke(linewidth=0.5, foreground=cmap(0.0)),
         path_effects.Normal()]
@@ -202,8 +205,8 @@ class DecFormatter(Formatter):
 class AstroMollweideAxes(MollweideAxes):
     name = 'astro mollweide'
 
-    def clear(self):
-        super(AstroMollweideAxes, self).clear()
+    def cla(self):
+        super(AstroMollweideAxes, self).cla()
         self.set_xlim(0, 2*np.pi)
 
     def set_xlim(self, *args, **kwargs):
@@ -245,28 +248,25 @@ class AstroMollweideAxes(MollweideAxes):
         # This is the transform for latitude ticks.
         yaxis_stretch = Affine2D().scale(np.pi * 2.0, 1.0)
         yaxis_space = Affine2D().scale(-1.0, 1.1)
-        self._yaxis_transform = \
-            yaxis_stretch + \
-            self.transData
-        # mypy error: "AstroMollweideAxes" has no attribute "transProjection"  [attr-defined]
-        # mypy error: "AstroMollweideAxes" has no attribute "transAffine"  [attr-defined]
-        yaxis_text_base = \
-            yaxis_stretch + \
-            self.transProjection + \
-            (yaxis_space + \
-             self.transAffine + \
-             self.transAxes)
-        self._yaxis_text1_transform = \
-            yaxis_text_base + \
-            Affine2D().translate(-8.0, 0.0)
-        self._yaxis_text2_transform = \
-            yaxis_text_base + \
-            Affine2D().translate(8.0, 0.0)
+        self._yaxis_transform = yaxis_stretch + self.transData
 
+        # mypy error: "AstroMollweideAxes" has no attribute "transProjection" [attr-defined]
+        # mypy error: "AstroMollweideAxes" has no attribute "transAffine" [attr-defined]
+        yaxis_text_base = (
+            yaxis_stretch
+            + self.transProjection
+            + (yaxis_space + self.transAffine + self.transAxes)
+        )
+
+        self._yaxis_text1_transform = yaxis_text_base + Affine2D().translate(-8.0, 0.0)
+        self._yaxis_text2_transform = yaxis_text_base + Affine2D().translate(8.0, 0.0)
+        
     def _get_affine_transform(self):
         transform = self._get_core_transform(1)
         xscale, _ = transform.transform_point((0, 0))
         _, yscale = transform.transform_point((0, np.pi / 2.0))
-        return Affine2D() \
-            .scale(0.5 / xscale, 0.5 / yscale) \
+        return (
+            Affine2D()
+            .scale(0.5 / xscale, 0.5 / yscale)
             .translate(0.5, 0.5)
+        )

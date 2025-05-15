@@ -2,6 +2,23 @@
 
 
 
+## v1.4.4 (2025-04-15)
+
+###  
+
+* Use `pypa/gh-action-pypi-publish@v1.12.4` ([`82f14e6`](https://github.com/icecube/skyreader/commit/82f14e6af4b318c1ea38911d97fc5e9e13f35107))
+
+
+## v1.4.3 (2025-03-27)
+
+###  
+
+* Update Fermi catalog: new branch analogous to the other but that don&#39;t produce conflicts (shift from using setup.cfg to pyproject.toml) (#51)
+
+Co-authored-by: github-actions &lt;github-actions@github.com&gt;
+Co-authored-by: Angela &lt;angela@mobile-222.shadow2.airub.net&gt; ([`729b2ff`](https://github.com/icecube/skyreader/commit/729b2ffd9beda13b4281599a8015b96d7ddd5ae4))
+
+
 ## v1.4.2 (2025-03-14)
 
 ###  
