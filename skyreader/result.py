@@ -226,7 +226,7 @@ class SkyScanResult:
             for k in self.result:
                 if self.result[k].dtype.metadata is None:
                     return False
-                if mk not in self.result[k].dtype.metadata:
+                if mk not in self.result[k].dtype.metadata:  # type: ignore[operator]
                     return False
         return True
 
@@ -434,6 +434,8 @@ class SkyScanResult:
             return Path(filename)
 
         try:
+            if not first.dtype.metadata:
+                raise ValueError(f"nside entry has missing dtype: {first}")
             metadata_dtype = np.dtype(
                 [
                     (k, type(v)) if not isinstance(v, str) else (k, f"U{len(v)}")
@@ -444,6 +446,7 @@ class SkyScanResult:
                 [
                     tuple(self.result[k].dtype.metadata[mk] for mk in metadata_dtype.fields)  # type: ignore[union-attr]
                     for k in self.result
+                    if self.result[k].dtype.metadata
                 ],
                 dtype=metadata_dtype,
             )
@@ -570,11 +573,13 @@ class SkyScanResult:
         pydict: PyDictResult = {}
         for nside in self.result:
             nside_data: np.ndarray = self.result[nside]
+            if not nside_data.dtype:
+                raise ValueError(f"nside entry has missing dtype: {nside}")
             df = pd.DataFrame(
                 nside_data,
                 columns=list(nside_data.dtype.names),
             )
-            df = df.applymap(_nan_to_json_friendly)  # convert np.nan to "nan" in data
+            df = df.applymap(_nan_to_json_friendly)  # type: ignore[operator]
 
             pydict[nside] = {k:v for k,v in df.to_dict(orient='split').items() if k != 'index'}  # type: ignore[assignment]
             pydict[nside]['metadata'] = dict()
@@ -590,7 +595,7 @@ class SkyScanResult:
                     # numpy type, non serializable
                     # convert to python built-in by calling item()
                     val = val.item()
-                pydict[nside]['metadata'][key] = _nan_to_json_friendly(val)  # convert np.nan in metadata
+                pydict[nside]['metadata'][key] = _nan_to_json_friendly(val)
         return pydict
 
     """
