@@ -232,8 +232,13 @@ class SkyScanResult:
 
     def get_event_metadata(self) -> EventMetadata:
         """Get the EventMetadata portion of the result's metadata."""
+        default_metadata = EventMetadata(0, 0, '', 0, False, 0)
+
         if self.has_minimal_metadata():
             first_metadata = self.result[list(self.result.keys())[0]].dtype.metadata
+            if not first_metadata:  # None check
+                self.logger.warning("Metadata missing; returning default EventMetadata.")
+                return default_metadata
             return EventMetadata(
                 first_metadata['run_id'],
                 first_metadata['event_id'],
@@ -244,7 +249,7 @@ class SkyScanResult:
             )
         else:
             self.logger.warning("Metadata doesn't seem to exist and will not be used for plotting.")
-            return EventMetadata(0, 0, '', 0, False, 0)
+            return default_metadata
 
     def get_results_per_nside(self, nside: int) -> np.ndarray:
         "get the results for the pixels at a given nside"
