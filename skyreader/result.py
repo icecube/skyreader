@@ -45,6 +45,20 @@ ZERO_MAKES_FIELD_ALWAYS_ISCLOSE = [
     "E_tot",
 ]
 
+###############################################################################
+# UTILS
+
+def _nan_to_json_friendly(val: Any) -> Any:
+    """Convert np.nan to the string 'nan' for JSON compatibility."""
+    if isinstance(val, float) and np.isnan(val):
+        return "nan"
+    return val
+
+def _json_friendly_to_nan(val: Any) -> Any:
+    """Convert the string 'nan' to np.nan when reading from JSON."""
+    if isinstance(val, str) and val == "nan":
+        return np.nan
+    return val
 
 ###############################################################################
 # DATA TYPES
@@ -229,7 +243,7 @@ class SkyScanResult:
         else:
             self.logger.warning("Metadata doesn't seem to exist and will not be used for plotting.")
             return EventMetadata(0, 0, '', 0, False, 0)
-        
+
     def get_results_per_nside(self, nside: int) -> np.ndarray:
         "get the results for the pixels at a given nside"
         return self.result[f"nside-{nside}"]
@@ -537,6 +551,7 @@ class SkyScanResult:
             ...
         }
         """
+
         pydict: PyDictResult = {}
         for nside in self.result:
             nside_data: np.ndarray = self.result[nside]
@@ -544,6 +559,8 @@ class SkyScanResult:
                 nside_data,
                 columns=list(nside_data.dtype.names),
             )
+            df = df.applymap(_nan_to_json_friendly)  # convert np.nan to "nan" in data
+
             pydict[nside] = {k:v for k,v in df.to_dict(orient='split').items() if k != 'index'}  # type: ignore[assignment]
             pydict[nside]['metadata'] = dict()
 
@@ -554,10 +571,8 @@ class SkyScanResult:
                 if isinstance(val, np.generic):
                     # numpy type, non serializable
                     # convert to python built-in by calling item()
-                    pydict[nside]['metadata'][key] = nside_data.dtype.metadata[key].item()
-                else:
-                    # likely a natively serializable python built-in 
-                    pydict[nside]['metadata'][key] = val
+                    val = val.item()
+                pydict[nside]['metadata'][key] = _nan_to_json_friendly(val)  # convert np.nan in metadata
         return pydict
 
     """
