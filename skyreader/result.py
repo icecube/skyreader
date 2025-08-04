@@ -48,15 +48,17 @@ ZERO_MAKES_FIELD_ALWAYS_ISCLOSE = [
 ###############################################################################
 # UTILS
 
+NAN_SENTINEL = "<NaN>"
+
 def _nan_to_json_friendly(val: Any) -> Any:
     """Convert np.nan to the string 'nan' for JSON compatibility."""
     if isinstance(val, float) and np.isnan(val):
-        return "nan"
+        return NAN_SENTINEL
     return val
 
 def _json_friendly_to_nan(val: Any) -> Any:
     """Convert the string 'nan' to np.nan when reading from JSON."""
-    if isinstance(val, str) and val == "nan":
+    if isinstance(val, str) and val == NAN_SENTINEL:
         return np.nan
     return val
 
