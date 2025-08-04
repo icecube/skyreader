@@ -48,7 +48,7 @@ ZERO_MAKES_FIELD_ALWAYS_ISCLOSE = [
 ###############################################################################
 # UTILS
 
-NAN_SENTINEL = "<NaN>"
+NAN_SENTINEL = "<skyreader.nan>"
 
 def _nan_to_json_friendly(val: Any) -> Any:
     """Convert np.nan to the string 'nan' for JSON compatibility."""
