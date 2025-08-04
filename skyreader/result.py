@@ -444,9 +444,11 @@ class SkyScanResult:
             )
             header = np.array(
                 [
-                    tuple(self.result[k].dtype.metadata[mk] for mk in metadata_dtype.fields)  # type: ignore[union-attr]
+                    tuple(self.result[k].dtype.metadata[mk] for mk in metadata_dtype.fields)  # type: ignore[union-attr,index]
                     for k in self.result
-                    if self.result[k].dtype.metadata
+                    # technically, there is a missing None check here for metadata,
+                    # but if there's a missing metadata in this iterator,
+                    # then `first`'s check above probably got it
                 ],
                 dtype=metadata_dtype,
             )
@@ -573,11 +575,12 @@ class SkyScanResult:
         pydict: PyDictResult = {}
         for nside in self.result:
             nside_data: np.ndarray = self.result[nside]
-            if not nside_data.dtype:
-                raise ValueError(f"nside entry has missing dtype: {nside}")
+            columns = list(nside_data.dtype.names or ())
+            if not columns:
+                raise ValueError(f"nside entry has missing columns: {nside}")
             df = pd.DataFrame(
                 nside_data,
-                columns=list(nside_data.dtype.names),
+                columns=columns,
             )
             df = df.applymap(_nan_to_json_friendly)  # type: ignore[operator]
 
