@@ -499,17 +499,25 @@ class SkyScanResult:
                 if metadata['nside'] != cls.parse_nside(nside):
                     raise ValueError(
                         f"PyDictResult entry has incorrect 'metadata'.'nside' value: "
-                        f"{pydict_nside_pixels['metadata']['nside']} should be {cls.parse_nside(nside)}"
+                        f"{metadata['nside']} should be {cls.parse_nside(nside)}"
                     )
             except (KeyError, TypeError) as e:
                 raise ValueError("PyDictResult entry has missing key 'nside'") from e
 
+            #
             # read/convert
+            #
+
+            # convert "nan" in metadata back to np.nan
+            metadata = {k: _json_friendly_to_nan(v) for k, v in metadata.items()}
+
             _dtype = np.dtype(
                 pixel_type, metadata=metadata
             )
             result_nside_pixels = np.zeros(len(pydict_nside_pixels['data']), dtype=_dtype)
+
             for i, pix_4list in enumerate(sorted(pydict_nside_pixels['data'], key=lambda x: x[0])):
+                pix_4list = [_json_friendly_to_nan(v) for v in pix_4list]  # convert "nan" in data
                 result_nside_pixels[i] = tuple(pix_4list)
 
             result[nside] = result_nside_pixels
