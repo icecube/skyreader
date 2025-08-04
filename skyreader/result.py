@@ -579,10 +579,13 @@ class SkyScanResult:
             pydict[nside] = {k:v for k,v in df.to_dict(orient='split').items() if k != 'index'}  # type: ignore[assignment]
             pydict[nside]['metadata'] = dict()
 
-            for key in nside_data.dtype.metadata:
+            metadata = nside_data.dtype.metadata
+            if not metadata:
+                continue
+
+            for key, val in metadata.items():
                 # dtype.metadata is a mappingproxy (dict-like) containing numpy-typed values
                 # convert numpy types to python bultins to be JSON-friendly
-                val = nside_data.dtype.metadata[key]
                 if isinstance(val, np.generic):
                     # numpy type, non serializable
                     # convert to python built-in by calling item()
@@ -619,6 +622,9 @@ class SkyScanResult:
 
     @property
     def best_dir(self):
-        minCoDec, minRA = healpy.pix2ang(self.best_fit.dtype.metadata['nside'], self.best_fit['index'])
+        metadata = self.best_fit.dtype.metadata
+        if not metadata:
+            raise ValueError("Best fit metadata is missing")
+        minCoDec, minRA = healpy.pix2ang(metadata['nside'], self.best_fit['index'])
         minDec = np.pi/2 - minCoDec
         return minRA, minDec
