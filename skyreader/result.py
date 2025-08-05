@@ -45,6 +45,22 @@ ZERO_MAKES_FIELD_ALWAYS_ISCLOSE = [
     "E_tot",
 ]
 
+###############################################################################
+# UTILS
+
+NAN_SENTINEL = "<skyreader.nan>"  # a unique string so an original value doesn't overlap
+
+def _nan_to_json_friendly(val: Any) -> Any:
+    """Convert np.nan to the string 'nan' for JSON compatibility."""
+    if isinstance(val, float) and np.isnan(val):
+        return NAN_SENTINEL
+    return val
+
+def _json_friendly_to_nan(val: Any) -> Any:
+    """Convert the string 'nan' to np.nan when reading from JSON."""
+    if isinstance(val, str) and val == NAN_SENTINEL:
+        return np.nan
+    return val
 
 ###############################################################################
 # DATA TYPES
@@ -210,14 +226,19 @@ class SkyScanResult:
             for k in self.result:
                 if self.result[k].dtype.metadata is None:
                     return False
-                if mk not in self.result[k].dtype.metadata:
+                if mk not in self.result[k].dtype.metadata:  # type: ignore[operator]
                     return False
         return True
 
     def get_event_metadata(self) -> EventMetadata:
         """Get the EventMetadata portion of the result's metadata."""
+        default_metadata = EventMetadata(0, 0, '', 0, False, 0)
+
         if self.has_minimal_metadata():
             first_metadata = self.result[list(self.result.keys())[0]].dtype.metadata
+            if not first_metadata:  # None check
+                self.logger.warning("Metadata missing; returning default EventMetadata.")
+                return default_metadata
             return EventMetadata(
                 first_metadata['run_id'],
                 first_metadata['event_id'],
@@ -228,8 +249,8 @@ class SkyScanResult:
             )
         else:
             self.logger.warning("Metadata doesn't seem to exist and will not be used for plotting.")
-            return EventMetadata(0, 0, '', 0, False, 0)
-        
+            return default_metadata
+
     def get_results_per_nside(self, nside: int) -> np.ndarray:
         "get the results for the pixels at a given nside"
         return self.result[f"nside-{nside}"]
@@ -413,6 +434,8 @@ class SkyScanResult:
             return Path(filename)
 
         try:
+            if not first.dtype.metadata:
+                raise ValueError(f"nside entry has missing dtype: {first}")
             metadata_dtype = np.dtype(
                 [
                     (k, type(v)) if not isinstance(v, str) else (k, f"U{len(v)}")
@@ -421,8 +444,11 @@ class SkyScanResult:
             )
             header = np.array(
                 [
-                    tuple(self.result[k].dtype.metadata[mk] for mk in metadata_dtype.fields)  # type: ignore[union-attr]
+                    tuple(self.result[k].dtype.metadata[mk] for mk in metadata_dtype.fields)  # type: ignore[union-attr,index]
                     for k in self.result
+                    # technically, there is a missing None check here for metadata,
+                    # but if there's a missing metadata in this iterator,
+                    # then `first`'s check above probably got it
                 ],
                 dtype=metadata_dtype,
             )
@@ -485,17 +511,25 @@ class SkyScanResult:
                 if metadata['nside'] != cls.parse_nside(nside):
                     raise ValueError(
                         f"PyDictResult entry has incorrect 'metadata'.'nside' value: "
-                        f"{pydict_nside_pixels['metadata']['nside']} should be {cls.parse_nside(nside)}"
+                        f"{metadata['nside']} should be {cls.parse_nside(nside)}"
                     )
             except (KeyError, TypeError) as e:
                 raise ValueError("PyDictResult entry has missing key 'nside'") from e
 
+            #
             # read/convert
+            #
+
+            # convert "nan" in metadata back to np.nan
+            metadata = {k: _json_friendly_to_nan(v) for k, v in metadata.items()}
+
             _dtype = np.dtype(
                 pixel_type, metadata=metadata
             )
             result_nside_pixels = np.zeros(len(pydict_nside_pixels['data']), dtype=_dtype)
+
             for i, pix_4list in enumerate(sorted(pydict_nside_pixels['data'], key=lambda x: x[0])):
+                pix_4list = [_json_friendly_to_nan(v) for v in pix_4list]  # convert "nan" in data
                 result_nside_pixels[i] = tuple(pix_4list)
 
             result[nside] = result_nside_pixels
@@ -538,26 +572,35 @@ class SkyScanResult:
         }
         """
         pydict: PyDictResult = {}
+
         for nside in self.result:
+
             nside_data: np.ndarray = self.result[nside]
+            columns = list(nside_data.dtype.names or ())
+            if not columns:
+                raise ValueError(f"nside entry has missing columns: {nside}")
+
             df = pd.DataFrame(
                 nside_data,
-                columns=list(nside_data.dtype.names),
+                columns=columns,
             )
+            df = df.applymap(_nan_to_json_friendly)  # type: ignore[operator]
+
             pydict[nside] = {k:v for k,v in df.to_dict(orient='split').items() if k != 'index'}  # type: ignore[assignment]
             pydict[nside]['metadata'] = dict()
 
-            for key in nside_data.dtype.metadata:
+            metadata = nside_data.dtype.metadata
+            if not metadata:
+                raise ValueError(f"nside entry has missing metadata: {nside}")
+
+            for key, val in metadata.items():
                 # dtype.metadata is a mappingproxy (dict-like) containing numpy-typed values
                 # convert numpy types to python bultins to be JSON-friendly
-                val = nside_data.dtype.metadata[key]
                 if isinstance(val, np.generic):
                     # numpy type, non serializable
                     # convert to python built-in by calling item()
-                    pydict[nside]['metadata'][key] = nside_data.dtype.metadata[key].item()
-                else:
-                    # likely a natively serializable python built-in 
-                    pydict[nside]['metadata'][key] = val
+                    val = val.item()
+                pydict[nside]['metadata'][key] = _nan_to_json_friendly(val)
         return pydict
 
     """
@@ -589,6 +632,9 @@ class SkyScanResult:
 
     @property
     def best_dir(self):
-        minCoDec, minRA = healpy.pix2ang(self.best_fit.dtype.metadata['nside'], self.best_fit['index'])
+        metadata = self.best_fit.dtype.metadata
+        if not metadata:
+            raise ValueError("Best fit metadata is missing")
+        minCoDec, minRA = healpy.pix2ang(metadata['nside'], self.best_fit['index'])
         minDec = np.pi/2 - minCoDec
         return minRA, minDec
