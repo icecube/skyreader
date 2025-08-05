@@ -48,7 +48,7 @@ ZERO_MAKES_FIELD_ALWAYS_ISCLOSE = [
 ###############################################################################
 # UTILS
 
-NAN_SENTINEL = "<skyreader.nan>"
+NAN_SENTINEL = "<skyreader.nan>"  # a unique string so an original value doesn't overlap
 
 def _nan_to_json_friendly(val: Any) -> Any:
     """Convert np.nan to the string 'nan' for JSON compatibility."""
@@ -571,13 +571,15 @@ class SkyScanResult:
             ...
         }
         """
-
         pydict: PyDictResult = {}
+
         for nside in self.result:
+
             nside_data: np.ndarray = self.result[nside]
             columns = list(nside_data.dtype.names or ())
             if not columns:
                 raise ValueError(f"nside entry has missing columns: {nside}")
+
             df = pd.DataFrame(
                 nside_data,
                 columns=columns,
@@ -589,7 +591,7 @@ class SkyScanResult:
 
             metadata = nside_data.dtype.metadata
             if not metadata:
-                continue
+                raise ValueError(f"nside entry has missing metadata: {nside}")
 
             for key, val in metadata.items():
                 # dtype.metadata is a mappingproxy (dict-like) containing numpy-typed values
