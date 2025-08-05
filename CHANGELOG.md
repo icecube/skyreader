@@ -2,6 +2,20 @@
 
 
 
+## v1.4.6 (2025-08-05)
+
+###  
+
+* Serialize/Deserialize `nan` for JSON (#52)
+
+`nan` is a valid Python value, but it is not a valid JSON value. Build
+out serialization for this.
+
+---------
+
+Co-authored-by: github-actions &lt;github-actions@github.com&gt; ([`39e7977`](https://github.com/icecube/skyreader/commit/39e79777299d5d1c71c355985dde3a39830e9b88))
+
+
 ## v1.4.5 (2025-05-15)
 
 ###  
