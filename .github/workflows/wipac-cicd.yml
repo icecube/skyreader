@@ -156,4 +156,4 @@ jobs:
         py-dependencies-logs
       publish-to-pypi: true
     secrets:
-      PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+      PYPI_TOKEN: ${{ secrets.WIPAC_PYPI_TOKEN }}
