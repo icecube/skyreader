@@ -131,10 +131,13 @@ def hp_ticklabels(zoom=False, lonra=None, latra=None, rot=None, bounds=None):
 
 
 def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec,
-        cmap_min=0., cmap_max=250.):
+        cmap_min=0., cmap_max=250., catalog_path=None):
     """"Plots the 4FGL catalog in a color that contrasts with the background
     healpix map."""
-    hdu = pyfits.open(CATALOG_PATH)  # LAT 14-year
+    # Use default if not provided
+    if catalog_path is None:
+        catalog_path = CATALOG_PATH
+    hdu = pyfits.open(catalog_path)  # LAT 14-year from skyreader.constants or user-specified
     fgl = hdu[1]
     pe = [path_effects.Stroke(linewidth=0.5, foreground=cmap(0.0)),
         path_effects.Normal()]
