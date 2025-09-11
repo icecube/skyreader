@@ -127,8 +127,8 @@ def hp_ticklabels(zoom=False, lonra=None, latra=None, rot=None, bounds=None):
                 size="medium", xycoords="axes fraction")
 
 
-def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec,
-        cmap_min=0., cmap_max=250., catalog_path):
+def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec, catalog_path,
+        cmap_min=0., cmap_max=250.):
     """"Plots the 4FGL catalog in a color that contrasts with the background
     healpix map."""
     hdu = pyfits.open(catalog_path)  # LAT 14-year from skyreader.constants or user-specified in create_plot_zoomed function in plot.py
