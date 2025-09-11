@@ -26,6 +26,9 @@ from .plotting_tools import (
     plot_catalog
 )
 
+# LAT 14-year Source Catalog (4FGL-DR4 in FITS format) ; https://fermi.gsfc.nasa.gov/ssc/data/access/lat/14yr_catalog/
+from skyreader.constants import CATALOG_PATH
+
 from ..utils.areas import calculate_area, get_contour_areas
 from ..utils.handle_map_data import (
     extract_map,
@@ -279,7 +282,8 @@ class SkyScanPlotter:
         circular_err90=0.7,
         angular_error_floor=None,  # if not None, sigma of the
         # gaussian to convolute the map with in deg.
-        llh_map=True
+        llh_map=True,
+        catalog_path=CATALOG_PATH
     ):
         """Uses healpy to plot a map."""
 
@@ -543,7 +547,7 @@ class SkyScanPlotter:
         if plot_4fgl:
             # Overlay 4FGL sources
             plot_catalog(
-                equatorial_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec
+                equatorial_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec, catalog_path
             )
 
         # Approximate contours as rectangles
