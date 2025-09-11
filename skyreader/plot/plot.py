@@ -26,6 +26,7 @@ from .plotting_tools import (
     plot_catalog
 )
 
+## LAT 14-year Source Catalog (4FGL-DR4 in FITS format) ; https://fermi.gsfc.nasa.gov/ssc/data/access/lat/14yr_catalog/
 from skyreader.constants import CATALOG_PATH
 
 from ..utils.areas import calculate_area, get_contour_areas
