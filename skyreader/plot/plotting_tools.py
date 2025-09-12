@@ -17,9 +17,6 @@ from matplotlib.transforms import Affine2D  # type: ignore[import]
 
 matplotlib.use('agg')
 
-## LAT 14-year Source Catalog (4FGL-DR4 in FITS format) ; https://fermi.gsfc.nasa.gov/ssc/data/access/lat/14yr_catalog/
-from skyreader.constants import CATALOG_PATH
-
 def format_fits_header(
         event_id_tuple, mjd, ra, dec, uncertainties, contour_areas, llh_map,
 ):
@@ -130,8 +127,7 @@ def hp_ticklabels(zoom=False, lonra=None, latra=None, rot=None, bounds=None):
                 size="medium", xycoords="axes fraction")
 
 
-def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec,
-        cmap_min=0., cmap_max=250., catalog_path=CATALOG_PATH):
+def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec, catalog_path, cmap_min=0., cmap_max=250.):
     """"Plots the 4FGL catalog in a color that contrasts with the background
     healpix map."""
     hdu = pyfits.open(catalog_path)  # LAT 14-year from skyreader.constants or user-specified
