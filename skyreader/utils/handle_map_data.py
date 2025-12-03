@@ -90,13 +90,7 @@ def extract_map(
     grid_value: np.ndarray = np.asarray(grid_value_list)
     uniq_array: np.ndarray = np.asarray(uniq_list)
 
-    sorting_indices = np.argsort(grid_value)
-    grid_value = grid_value[sorting_indices]
-    grid_dec = grid_dec[sorting_indices]
-    grid_ra = grid_ra[sorting_indices]
-    uniq_array = uniq_array[sorting_indices]
-
-    min_value = grid_value[0]
+    min_value = np.min(grid_value)
 
     if remove_min_val or (not llh_map):
         # renormalize
@@ -111,6 +105,7 @@ def extract_map(
         # show 2 * delta_LLH
         grid_value = grid_value * 2.
         equatorial_map *= 2.
+        sorting_indices = np.argsort(grid_value)
     else:
         # Convert to probability
         equatorial_map = np.exp(-1. * equatorial_map)
@@ -137,12 +132,12 @@ def extract_map(
             equatorial_map, np.pi/2 - grid_dec, grid_ra
         )
         grid_value = grid_value.clip(min_map, None)
-
         sorting_indices = np.argsort(-grid_value)
-        grid_value = grid_value[sorting_indices]
-        grid_dec = grid_dec[sorting_indices]
-        grid_ra = grid_ra[sorting_indices]
-        uniq_array = uniq_array[sorting_indices]
+
+    grid_value = grid_value[sorting_indices]
+    grid_dec = grid_dec[sorting_indices]
+    grid_ra = grid_ra[sorting_indices]
+    uniq_array = uniq_array[sorting_indices]
 
     return grid_value, grid_ra, grid_dec, equatorial_map, uniq_array
 
