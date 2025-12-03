@@ -138,6 +138,12 @@ def extract_map(
         )
         grid_value = grid_value.clip(min_map, None)
 
+        sorting_indices = np.argsort(-grid_value)
+        grid_value = grid_value[sorting_indices]
+        grid_dec = grid_dec[sorting_indices]
+        grid_ra = grid_ra[sorting_indices]
+        uniq_array = uniq_array[sorting_indices]
+
     return grid_value, grid_ra, grid_dec, equatorial_map, uniq_array
 
 
