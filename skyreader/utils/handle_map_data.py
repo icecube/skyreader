@@ -90,7 +90,7 @@ def extract_map(
     grid_value: np.ndarray = np.asarray(grid_value_list)
     uniq_array: np.ndarray = np.asarray(uniq_list)
 
-    min_value = np.min(grid_value)
+    min_value = np.nanmin(grid_value)
 
     if remove_min_val or (not llh_map):
         # renormalize
