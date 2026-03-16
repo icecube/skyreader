@@ -44,7 +44,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.py3 }}
-      - uses: WIPACrepo/wipac-dev-flake8-action@v1.3
+      - uses: WIPACrepo/wipac-dev-flake8-action@v2.0
         with:
           max-function-length: 400
           max-complexity: 25  # ideal is ~10-15
