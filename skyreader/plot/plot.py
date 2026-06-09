@@ -26,7 +26,7 @@ from .plotting_tools import (
     plot_catalog
 )
 
-# LAT 14-year Source Catalog (4FGL-DR4 in FITS format) ; https://fermi.gsfc.nasa.gov/ssc/data/access/lat/14yr_catalog/
+# Fermi catalog
 from skyreader.constants import CATALOG_PATH
 
 from ..utils.areas import calculate_area, get_contour_areas
@@ -276,7 +276,7 @@ class SkyScanPlotter:
         extra_radius=np.nan,
         systematics=False,
         plot_bounding_box=False,
-        plot_4fgl=False,
+        plot_fermi_sources=False,
         circular=False,
         circular_err50=0.2,
         circular_err90=0.7,
@@ -544,8 +544,8 @@ class SkyScanPlotter:
             rot=(lon, lat, 0),
             bounds=(lower_lon, upper_lon, lower_lat, upper_lat)
         )
-        if plot_4fgl:
-            # Overlay 4FGL sources
+        if plot_fermi_sources:
+            # Overlay Fermi sources
             plot_catalog(
                 equatorial_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec, catalog_path
             )
