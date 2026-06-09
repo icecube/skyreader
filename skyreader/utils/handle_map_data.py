@@ -331,9 +331,9 @@ def find_filled_pixels(uniqs: np.ndarray):
             nside, next_nside, uniqs
         )
         already_filled_uniqs.append(already_filled_uniqs_nside)
-    already_filled_uniqs = np.concatenate(already_filled_uniqs)
+    already_filled_uniqs_array = np.concatenate(already_filled_uniqs)
     already_filled_indeces = np.array(
-        [np.where(uniqs == uni)[0][0] for uni in already_filled_uniqs]
+        [np.where(uniqs == uni)[0][0] for uni in already_filled_uniqs_array]
     )
     return already_filled_indeces
 
