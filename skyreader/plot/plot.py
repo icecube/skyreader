@@ -52,7 +52,7 @@ class SkyScanPlotter:
     PLOT_COLORMAP = matplotlib.colormaps['plasma_r']
 
     def __init__(self, output_dir: Path = Path(".")):
-        # Set here plotting parameters and things tha
+        # Set here plotting parameters and things that
         # do not depend on the individual scan.
         self.output_dir = output_dir
         projection_registry.register(AstroMollweideAxes)
@@ -66,7 +66,7 @@ class SkyScanPlotter:
     ) -> None:
         """Creates a full-sky plot using a meshgrid at fixed resolution.
         Optionally creates a zoomed-in plot. Resolutions are defined in
-        PLOT_DPI_STANDARD and PLOT_DPI_ZOOMED. Zoomed mode is very inefficien
+        PLOT_DPI_STANDARD and PLOT_DPI_ZOOMED. Zoomed mode is very inefficient
         as the meshgrid is created for the full sky.
         """
         dpi = self.PLOT_DPI_STANDARD
@@ -144,7 +144,7 @@ class SkyScanPlotter:
         LOGGER.info(f"Preparing plot: {plot_filename}...")
 
         # features of the color map to use
-        cmap.set_under(alpha=0.)  # make underflows transparen
+        cmap.set_under(alpha=0.)  # make underflows transparent
         cmap.set_bad(alpha=1., color=(1., 0., 0.))  # make NaNs bright red
 
         # prepare the figure canvas
@@ -154,7 +154,7 @@ class SkyScanPlotter:
 
         ax = None
 
-        cmap.set_over(alpha=0.)  # make underflows transparen
+        cmap.set_over(alpha=0.)  # make underflows transparent
         ax = fig.add_subplot(111, projection='astro mollweide')
 
         # rasterized makes the map bitmap while the labels remain vectorial
@@ -197,7 +197,7 @@ class SkyScanPlotter:
 
         # cb.ax.xaxis.labelpad = -8
         # workaround for issue with viewers, see colorbar docstring
-        # mypy compliance: since cb.solids could be None, we check tha
+        # mypy compliance: since cb.solids could be None, we check that
         # it is actually a valid object before accessing i
         if isinstance(cb.solids, matplotlib.collections.QuadMesh):
             cb.solids.set_edgecolor("face")
@@ -209,7 +209,7 @@ class SkyScanPlotter:
         ax.grid(True, color='k', alpha=0.5)
 
         # Otherwise, add the path effects.
-        # mypy requires set_path_effects() to take a list of AbstractPathEffec
+        # mypy requires set_path_effects() to take a list of AbstractPathEffect
         effects: List[patheffects.AbstractPathEffect] = [
             patheffects.withStroke(linewidth=1.1, foreground='w')
         ]
