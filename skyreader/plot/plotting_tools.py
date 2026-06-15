@@ -169,6 +169,8 @@ def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec, cat
                 path_effects=pe)
     del fgl
 
+    return flon_i[fgl_mask]*180./np.pi, flat_i[fgl_mask]*180./np.pi, fname_i[fgl_mask]
+
 ##
 # Mollweide axes with phi axis flipped and in hours from 24 to 0 instead of
 #         in degrees from -180 to 180.
