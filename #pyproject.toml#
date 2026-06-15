@@ -9,15 +9,16 @@ requires = ["setuptools>=78.1", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-dependencies = [
-    'PyAstronomy',
-    'astropy',
-    'healpy',
-    'matplotlib',
-    'meander',
-    'mhealpy',
-    'numpy',
-    'pandas',
+dependencies =
+[
+	'PyAstronomy',
+'astropy',   
+    'healpy',	
+    'matplotlib'	,
+    'meander',		
+    'mhealpy',		
+    'numpy',		
+    'pandas',		
     'scipy',
     'wipac-dev-tools',
 ]
