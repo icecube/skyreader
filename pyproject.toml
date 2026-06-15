@@ -10,6 +10,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 dependencies = [
+    'PyAstronomy',
     'astropy',
     'healpy',
     'matplotlib',

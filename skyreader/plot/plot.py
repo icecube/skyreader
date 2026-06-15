@@ -26,7 +26,10 @@ from .plotting_tools import (
     plot_catalog
 )
 
-# LAT 14-year Source Catalog (4FGL-DR4 in FITS format) ; https://fermi.gsfc.nasa.gov/ssc/data/access/lat/14yr_catalog/
+
+from PyAstronomy import pyasl  # type: ignore[import]
+
+# Fermi catalog
 from skyreader.constants import CATALOG_PATH
 
 from ..utils.areas import calculate_area, get_contour_areas
@@ -195,7 +198,7 @@ class SkyScanPlotter:
         # cb.ax.xaxis.labelpad = -8
         # workaround for issue with viewers, see colorbar docstring
         # mypy compliance: since cb.solids could be None, we check that
-        # it is actually a valid object before accessing it
+        # it is actually a valid object before accessing i
         if isinstance(cb.solids, matplotlib.collections.QuadMesh):
             cb.solids.set_edgecolor("face")
 
@@ -276,7 +279,7 @@ class SkyScanPlotter:
         extra_radius=np.nan,
         systematics=False,
         plot_bounding_box=False,
-        plot_4fgl=False,
+        plot_fermi_sources=False,
         circular=False,
         circular_err50=0.2,
         circular_err90=0.7,
@@ -286,10 +289,8 @@ class SkyScanPlotter:
         catalog_path=CATALOG_PATH
     ):
         """Uses healpy to plot a map."""
-
         def bounding_box(ra, dec, theta, phi):
             shift = ra-180
-
             ra_plus = np.max((np.degrees(phi)-shift) % 360) - 180
             ra_minus = np.min((np.degrees(phi)-shift) % 360) - 180
             dec_plus = (np.pi/2-np.min(theta))*180./np.pi - dec
@@ -391,7 +392,7 @@ class SkyScanPlotter:
                     contour.T[1]
                 )
 
-        # Find the rough extent of the contours to bound the plot
+        # Find the rough extent of the contours to bound the plo
         contours = contours_by_level[-1]
         ra = min_ra * 180./np.pi
         dec = min_dec * 180./np.pi
@@ -544,9 +545,8 @@ class SkyScanPlotter:
             rot=(lon, lat, 0),
             bounds=(lower_lon, upper_lon, lower_lat, upper_lat)
         )
-        if plot_4fgl:
-            # Overlay 4FGL sources
-            plot_catalog(
+        if plot_fermi_sources:
+            ra_fermi_sources, dec_fermi_sources, name_fermi_sources = plot_catalog(
                 equatorial_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec, catalog_path
             )
 
@@ -568,17 +568,16 @@ class SkyScanPlotter:
                 "dec_minus": dec_minus
             }
             # Optional: Print or log the results if needed
-            contain_txt = "Approximating the " + percentages[l_index] + \
-                "% error region as a rectangle, we get:" + " \n" + \
-                          "\t RA = {0:.2f} + {1:.2f} - {2:.2f}".format(
-                              ra, ra_plus, np.abs(ra_minus)) + " \n" + \
-                          "\t Dec = {0:.2f} + {1:.2f} - {2:.2f}".format(
-                              dec, dec_plus, np.abs(dec_minus))
+            contain_txt = (
+                f"Approximating the {percentages[l_index]}% error region as a rectangle, we get:\n"
+                f"\t RA = {ra:.2f} + {ra_plus:.2f} - {abs(ra_minus):.2f}\n"
+                f"\t Dec = {dec:.2f} + {dec_plus:.2f} - {dec_minus:.2f}"
+            )
             print(contain_txt)
             uncertainty = [(ra_minus, ra_plus), (dec_minus, dec_plus)]
             uncertainties.append(uncertainty)
             # This is actually an output and not a logging info.
-            # TODO: we should wrap this in an object, return and log at
+            # TODO: we should wrap this in an object, return and log a
             # the higher level.
         print(
             f"Contour Area (50%): {contour_areas[0]}",
@@ -588,6 +587,9 @@ class SkyScanPlotter:
             f"Contour Area (90%): {contour_areas[1]}",
             "square degrees (scaled)"
         )
+
+        if plot_fermi_sources:
+            sources_in_90 = self._save_sources_inside_90_box(ra, dec, ra_fermi_sources, dec_fermi_sources, name_fermi_sources, rectangular_errors["90"])
 
         if plot_bounding_box:
             bounding_ras_list, bounding_decs_list = [], []
@@ -739,6 +741,74 @@ class SkyScanPlotter:
         self._save_contours(contours_by_level, unique_id)
         LOGGER.info("done.")
         plt.close()
+        if plot_fermi_sources:
+            return sources_in_90
+
+    def _sources_inside_90_box(self, ra_best_fit, dec_best_fit, ra_src, dec_src, name_src, rectangular_errors):
+        ra_min = ra_best_fit + rectangular_errors["ra_minus"]
+        ra_max = ra_best_fit + rectangular_errors["ra_plus"]
+        dec_min = dec_best_fit + rectangular_errors["dec_minus"]
+        dec_max = dec_best_fit + rectangular_errors["dec_plus"]
+        name_src = np.asarray(name_src)
+        ra_src = np.asarray(ra_src, dtype=float)
+        dec_src = np.asarray(dec_src, dtype=float)
+        # Dec
+        dec_ok = (dec_src >= dec_min) & (dec_src <= dec_max)
+        # RA (gestione wrap-around)
+        ra_min %= 360.
+        ra_max %= 360.
+        ra_src = ra_src % 360.
+        if ra_min <= ra_max:
+            ra_ok = (ra_src >= ra_min) & (ra_src <= ra_max)
+        else:
+            ra_ok = (ra_src >= ra_min) | (ra_src <= ra_max)
+        mask = ra_ok & dec_ok
+        return name_src[mask], ra_src[mask], dec_src[mask]
+
+    def _save_sources_inside_90_box(self, ra_best_fit, dec_best_fit, ra_src, dec_src, name_src, rectangular_errors):
+        src_inside_90_name, src_inside_90_ra, src_inside_90_dec = self._sources_inside_90_box(
+            ra_best_fit,
+            dec_best_fit,
+            ra_src,
+            dec_src,
+            name_src,
+            rectangular_errors
+        )
+        ang_dist = np.zeros(len(src_inside_90_name), dtype=float)
+        for i in range(len(src_inside_90_name)):
+            ang_dist[i] = pyasl.getAngDist(
+                ra_best_fit,
+                dec_best_fit,
+                src_inside_90_ra[i],
+                src_inside_90_dec[i]
+            )
+        sources_in_90 = [
+            {
+                "name": name,
+                "ra": ra_src,
+                "dec": dec_src,
+                "ang_dist": dist
+            }
+            for name, ra_src, dec_src, dist in zip(
+                src_inside_90_name,
+                src_inside_90_ra,
+                src_inside_90_dec,
+                ang_dist
+            )
+        ]
+        sources_in_90_sorted = sorted(
+            sources_in_90,
+            key=lambda s: s["ang_dist"]
+        )
+        print("\nFermi sources inside 90% rectangular error box:\n")
+        for s in sources_in_90_sorted:
+            print(
+                f"- {s['name'].strip()}\n"
+                f"  RA: {s['ra']:.3f} deg\n"
+                f"  Dec: {s['dec']:.3f} deg\n"
+                f"  ang_dist: {s['ang_dist']:.3f} deg\n"
+            )
+        return sources_in_90
 
     def _save_contours(self, contours_by_level, unique_id) -> None:
         # Output contours in RA, dec instead of theta, phi

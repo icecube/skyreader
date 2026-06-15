@@ -128,9 +128,9 @@ def hp_ticklabels(zoom=False, lonra=None, latra=None, rot=None, bounds=None):
 
 
 def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec, catalog_path, cmap_min=0., cmap_max=250.):
-    """"Plots the 4FGL catalog in a color that contrasts with the background
+    """"Plots the Fermi catalog in a color that contrasts with the background
     healpix map."""
-    hdu = pyfits.open(catalog_path)  # LAT 14-year from skyreader.constants or user-specified
+    hdu = pyfits.open(catalog_path)  # Fermi catalog defined in skyreader.constants 
     fgl = hdu[1]
     pe = [path_effects.Stroke(linewidth=0.5, foreground=cmap(0.0)),
         path_effects.Normal()]
@@ -168,6 +168,8 @@ def plot_catalog(master_map, cmap, lower_ra, upper_ra, lower_dec, upper_dec, cat
                 fontsize=6,
                 path_effects=pe)
     del fgl
+
+    return flon_i[fgl_mask]*180./np.pi, flat_i[fgl_mask]*180./np.pi, fname_i[fgl_mask]
 
 ##
 # Mollweide axes with phi axis flipped and in hours from 24 to 0 instead of
