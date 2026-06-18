@@ -589,7 +589,8 @@ class SkyScanPlotter:
         )
 
         if plot_fermi_sources:
-            sources_in_90 = self._save_sources_inside_90_box(ra, dec, ra_fermi_sources, dec_fermi_sources, name_fermi_sources, rectangular_errors["90"])
+            #sources_in_90 = self._save_sources_inside_90_box(ra, dec, ra_fermi_sources, dec_fermi_sources, name_fermi_sources, rectangular_errors["90"])
+            sources_in_90 = self._save_sources_inside_90_contour(ra, dec, ra_fermi_sources, dec_fermi_sources, name_fermi_sources, contours_by_levels[1])
 
         if plot_bounding_box:
             bounding_ras_list, bounding_decs_list = [], []
@@ -743,6 +744,32 @@ class SkyScanPlotter:
         plt.close()
         if plot_fermi_sources:
             return sources_in_90
+            
+    def _sources_inside_90_contour(self, ra_src, dec_src, name_src, contours):
+        # Convert inputs to numpy arrays
+        name_src = np.asarray(name_src)
+        ra_src = np.asarray(ra_src, dtype=float) % 360.0
+        dec_src = np.asarray(dec_src, dtype=float)
+        # Convert (RA, Dec) → spherical coordinates used by healpy
+        # theta = colatitude (0 = North pole, pi = South pole)
+        # phi   = longitude
+        src_theta = np.pi/2 - np.deg2rad(dec_src)
+        src_phi = np.deg2rad(ra_src)
+        # Combine coordinates into point array: (theta, phi)
+        points = np.column_stack([src_theta, src_phi])
+        # Initialize mask: False for all sources initially
+        inside_mask = np.zeros(len(points), dtype=bool)
+        for contour in contours:
+            # contour is (theta, phi)
+            contour_theta = contour[:, 0]
+            contour_phi = contour[:, 1]
+            # Build polygon in (theta, phi) space
+            poly = np.column_stack([contour_theta, contour_phi])
+            # Create a 2D path object for point-in-polygon test
+            path = Path(poly)
+            # Update mask: mark sources inside this contour as True
+            inside_mask |= path.contains_points(points)
+        return name_src[inside_mask], ra_src[inside_mask], dec_src[inside_mask]
 
     def _sources_inside_90_box(self, ra_best_fit, dec_best_fit, ra_src, dec_src, name_src, rectangular_errors):
         ra_min = ra_best_fit + rectangular_errors["ra_minus"]
@@ -764,6 +791,50 @@ class SkyScanPlotter:
             ra_ok = (ra_src >= ra_min) | (ra_src <= ra_max)
         mask = ra_ok & dec_ok
         return name_src[mask], ra_src[mask], dec_src[mask]
+
+    def _save_sources_inside_90_contour(self, ra_best_fit, dec_best_fit, ra_src, dec_src, name_src, contour):
+        src_inside_90_name, src_inside_90_ra, src_inside_90_dec = self._sources_inside_90_contour(
+            ra_src,
+            dec_src,
+            name_src,
+            contour
+        )
+        ang_dist = np.zeros(len(src_inside_90_name), dtype=float)
+        for i in range(len(src_inside_90_name)):
+            ang_dist[i] = pyasl.getAngDist(
+                ra_best_fit,
+                dec_best_fit,
+                src_inside_90_ra[i],
+                src_inside_90_dec[i]
+            )
+        sources_in_90 = [
+            {
+                "name": name,
+                "ra": ra_src,
+                "dec": dec_src,
+                "ang_dist": dist
+            }
+            for name, ra_src, dec_src, dist in zip(
+                src_inside_90_name,
+                src_inside_90_ra,
+                src_inside_90_dec,
+                ang_dist
+            )
+        ]
+        sources_in_90_sorted = sorted(
+            sources_in_90,
+            key=lambda s: s["ang_dist"]
+        )
+        print("\nFermi sources inside 90% contour:\n")
+        for s in sources_in_90_sorted:
+            print(
+                f"- {s['name'].strip()}\n"
+                f"  RA: {s['ra']:.3f} deg\n"
+                f"  Dec: {s['dec']:.3f} deg\n"
+                f"  ang_dist: {s['ang_dist']:.3f} deg\n"
+            )
+        return sources_in_90
+        
 
     def _save_sources_inside_90_box(self, ra_best_fit, dec_best_fit, ra_src, dec_src, name_src, rectangular_errors):
         src_inside_90_name, src_inside_90_ra, src_inside_90_dec = self._sources_inside_90_box(
