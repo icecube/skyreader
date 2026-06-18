@@ -818,7 +818,7 @@ class SkyScanPlotter:
                 src_inside_90_name,
                 src_inside_90_ra,
                 src_inside_90_dec,
-                ang_dis
+                ang_dist
             )
         ]
         sources_in_90_sorted = sorted(
