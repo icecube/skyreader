@@ -17,6 +17,7 @@ from astropy.io import ascii  # type: ignore[import]
 from matplotlib import patheffects
 from matplotlib import pyplot as plt
 from matplotlib import text
+from matplotlib.path import Path as PolyPath
 from matplotlib.projections import projection_registry  # type: ignore[import]
 
 from .plotting_tools import (
@@ -766,7 +767,7 @@ class SkyScanPlotter:
             # Build polygon in (theta, phi) space
             poly = np.column_stack([contour_theta, contour_phi])
             # Create a 2D path object for point-in-polygon test
-            path = Path(poly)
+            path = PolyPath(poly)
             # Update mask: mark sources inside this contour as True
             inside_mask |= path.contains_points(points)
         return name_src[inside_mask], ra_src[inside_mask], dec_src[inside_mask]
