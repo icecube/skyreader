@@ -281,6 +281,7 @@ class SkyScanPlotter:
         systematics=False,
         plot_bounding_box=False,
         plot_fermi_sources=False,
+        check_fermi_sources_box=False,
         circular=False,
         circular_err50=0.2,
         circular_err90=0.7,
@@ -590,8 +591,10 @@ class SkyScanPlotter:
         )
 
         if plot_fermi_sources:
-            # sources_in_90 = self._save_sources_inside_90_box(ra, dec, ra_fermi_sources, dec_fermi_sources, name_fermi_sources, rectangular_errors["90"])
-            sources_in_90 = self._save_sources_inside_90_contour(ra, dec, ra_fermi_sources, dec_fermi_sources, name_fermi_sources, contours_by_level[1])
+            if check_fermi_sources_box:
+                sources_in_90 = self._save_sources_inside_90_box(ra, dec, ra_fermi_sources, dec_fermi_sources, name_fermi_sources, rectangular_errors["90"])
+            else:
+                sources_in_90 = self._save_sources_inside_90_contour(ra, dec, ra_fermi_sources, dec_fermi_sources, name_fermi_sources, contours_by_level[1])
 
         if plot_bounding_box:
             bounding_ras_list, bounding_decs_list = [], []
