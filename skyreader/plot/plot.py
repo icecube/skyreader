@@ -15,8 +15,8 @@ import meander  # type: ignore[import]
 import numpy as np
 from astropy.io import ascii  # type: ignore[import]
 from matplotlib import patheffects
-from matplotlib import pyplot as plt
-from matplotlib import text
+from matplotlib import pyplot as pl
+from matplotlib import tex
 from matplotlib.projections import projection_registry  # type: ignore[import]
 
 from .plotting_tools import (
@@ -39,7 +39,7 @@ from ..utils.handle_map_data import (
     prepare_flattened_map,
     prepare_multiorder_map,
 )
-from ..result import SkyScanResult
+from ..result import SkyScanResul
 
 LOGGER = logging.getLogger("skyreader.plot")
 
@@ -52,7 +52,7 @@ class SkyScanPlotter:
     PLOT_COLORMAP = matplotlib.colormaps['plasma_r']
 
     def __init__(self, output_dir: Path = Path(".")):
-        # Set here plotting parameters and things that
+        # Set here plotting parameters and things tha
         # do not depend on the individual scan.
         self.output_dir = output_dir
         projection_registry.register(AstroMollweideAxes)
@@ -66,7 +66,7 @@ class SkyScanPlotter:
     ) -> None:
         """Creates a full-sky plot using a meshgrid at fixed resolution.
         Optionally creates a zoomed-in plot. Resolutions are defined in
-        PLOT_DPI_STANDARD and PLOT_DPI_ZOOMED. Zoomed mode is very inefficient
+        PLOT_DPI_STANDARD and PLOT_DPI_ZOOMED. Zoomed mode is very inefficien
         as the meshgrid is created for the full sky.
         """
         dpi = self.PLOT_DPI_STANDARD
@@ -144,7 +144,7 @@ class SkyScanPlotter:
         LOGGER.info(f"Preparing plot: {plot_filename}...")
 
         # features of the color map to use
-        cmap.set_under(alpha=0.)  # make underflows transparent
+        cmap.set_under(alpha=0.)  # make underflows transparen
         cmap.set_bad(alpha=1., color=(1., 0., 0.))  # make NaNs bright red
 
         # prepare the figure canvas
@@ -154,7 +154,7 @@ class SkyScanPlotter:
 
         ax = None
 
-        cmap.set_over(alpha=0.)  # make underflows transparent
+        cmap.set_over(alpha=0.)  # make underflows transparen
         ax = fig.add_subplot(111, projection='astro mollweide')
 
         # rasterized makes the map bitmap while the labels remain vectorial
@@ -197,7 +197,7 @@ class SkyScanPlotter:
 
         # cb.ax.xaxis.labelpad = -8
         # workaround for issue with viewers, see colorbar docstring
-        # mypy compliance: since cb.solids could be None, we check that
+        # mypy compliance: since cb.solids could be None, we check tha
         # it is actually a valid object before accessing i
         if isinstance(cb.solids, matplotlib.collections.QuadMesh):
             cb.solids.set_edgecolor("face")
@@ -209,7 +209,7 @@ class SkyScanPlotter:
         ax.grid(True, color='k', alpha=0.5)
 
         # Otherwise, add the path effects.
-        # mypy requires set_path_effects() to take a list of AbstractPathEffect
+        # mypy requires set_path_effects() to take a list of AbstractPathEffec
         effects: List[patheffects.AbstractPathEffect] = [
             patheffects.withStroke(linewidth=1.1, foreground='w')
         ]
@@ -477,7 +477,7 @@ class SkyScanPlotter:
             orientation='horizontal',
             aspect=50,
             ticks=ticks,
-            format=format
+            format=forma
         )
         cb.ax.xaxis.set_label_text(cb_label)
 
@@ -634,7 +634,7 @@ class SkyScanPlotter:
             bounding_contour_area = abs(calculate_area(bounding_contour.T))
             # convert to square-degrees
             bounding_contour_area *= (180.*180.)/(np.pi*np.pi)
-            contour_label = r'90% Bounding rectangle' + \
+            contour_label = r'90% Bounding rectangle' +
                 f' - area: {bounding_contour_area:.2f} sqdeg'
             healpy.projplot(
                 bounding_theta,
@@ -744,7 +744,7 @@ class SkyScanPlotter:
         plt.close()
         if plot_fermi_sources:
             return sources_in_90
-            
+
     def _sources_inside_90_contour(self, ra_src, dec_src, name_src, contours):
         # Convert inputs to numpy arrays
         name_src = np.asarray(name_src)
@@ -765,7 +765,7 @@ class SkyScanPlotter:
             contour_phi = contour[:, 1]
             # Build polygon in (theta, phi) space
             poly = np.column_stack([contour_theta, contour_phi])
-            # Create a 2D path object for point-in-polygon test
+            # Create a 2D path object for point-in-polygon tes
             path = Path(poly)
             # Update mask: mark sources inside this contour as True
             inside_mask |= path.contains_points(points)
@@ -812,13 +812,13 @@ class SkyScanPlotter:
                 "name": name,
                 "ra": ra_src,
                 "dec": dec_src,
-                "ang_dist": dist
+                "ang_dist": dis
             }
             for name, ra_src, dec_src, dist in zip(
                 src_inside_90_name,
                 src_inside_90_ra,
                 src_inside_90_dec,
-                ang_dist
+                ang_dis
             )
         ]
         sources_in_90_sorted = sorted(
@@ -834,7 +834,7 @@ class SkyScanPlotter:
                 f"  ang_dist: {s['ang_dist']:.3f} deg\n"
             )
         return sources_in_90
-        
+
     def _save_sources_inside_90_box(self, ra_best_fit, dec_best_fit, ra_src, dec_src, name_src, rectangular_errors):
         src_inside_90_name, src_inside_90_ra, src_inside_90_dec = self._sources_inside_90_box(
             ra_best_fit,
@@ -857,13 +857,13 @@ class SkyScanPlotter:
                 "name": name,
                 "ra": ra_src,
                 "dec": dec_src,
-                "ang_dist": dist
+                "ang_dist": dis
             }
             for name, ra_src, dec_src, dist in zip(
                 src_inside_90_name,
                 src_inside_90_ra,
                 src_inside_90_dec,
-                ang_dist
+                ang_dis
             )
         ]
         sources_in_90_sorted = sorted(
