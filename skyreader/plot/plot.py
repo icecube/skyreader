@@ -589,8 +589,8 @@ class SkyScanPlotter:
         )
 
         if plot_fermi_sources:
-            #sources_in_90 = self._save_sources_inside_90_box(ra, dec, ra_fermi_sources, dec_fermi_sources, name_fermi_sources, rectangular_errors["90"])
-            sources_in_90 = self._save_sources_inside_90_contour(ra, dec, ra_fermi_sources, dec_fermi_sources, name_fermi_sources, contours_by_levels[1])
+            # sources_in_90 = self._save_sources_inside_90_box(ra, dec, ra_fermi_sources, dec_fermi_sources, name_fermi_sources, rectangular_errors["90"])
+            sources_in_90 = self._save_sources_inside_90_contour(ra, dec, ra_fermi_sources, dec_fermi_sources, name_fermi_sources, contours_by_level[1])
 
         if plot_bounding_box:
             bounding_ras_list, bounding_decs_list = [], []
@@ -835,7 +835,6 @@ class SkyScanPlotter:
             )
         return sources_in_90
         
-
     def _save_sources_inside_90_box(self, ra_best_fit, dec_best_fit, ra_src, dec_src, name_src, rectangular_errors):
         src_inside_90_name, src_inside_90_ra, src_inside_90_dec = self._sources_inside_90_box(
             ra_best_fit,
